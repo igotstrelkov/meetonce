@@ -1,6 +1,6 @@
 
 import ConvexClientProvider from '@/components/ConvexClientProvider';
-import { Header } from '@/components/Header';
+import { NavBar } from '@/components/NavBar';
 import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Outfit } from "next/font/google";
@@ -35,7 +35,7 @@ export default function RootLayout({
       >
         <ClerkProvider afterSignOutUrl="/">
           <ConvexClientProvider>
-            <Header />         
+            <NavBar />         
             {children}
           </ConvexClientProvider>
         </ClerkProvider>
