@@ -14,13 +14,14 @@ MeetOnce is an AI-powered dating platform that eliminates endless swiping by del
 - **Manual Curation**: Every photo and profile reviewed before going live
 
 ### Key User Flow
-1. User creates profile with single photo + detailed bio (500-1000 words)
-2. Admin manually reviews and rates photo (1-10 scale) + approves/rejects
-3. Sunday 11pm: Weekly batch matching runs (6-stage AI pipeline)
-4. Monday 9am: Users receive one curated match via email
-5. Users respond "Interested" or "Pass" by Friday 11:59pm
-6. If mutual match: Receive conversation starters + suggested venue + schedule date
-7. Post-date feedback (8 questions) determines algorithm success
+1. User signs up via Clerk authentication → Redirected to `/onboarding`
+2. User completes 4-step onboarding wizard (Profile → Bio → Interests → Photo) → User created in Convex → Redirected to `/dashboard`
+3. Admin manually reviews and rates photo (1-10 scale) + approves/rejects
+4. Sunday 11pm: Weekly batch matching runs (6-stage AI pipeline)
+5. Monday 9am: Users receive one curated match via email
+6. Users respond "Interested" or "Pass" by Friday 11:59pm
+7. If mutual match: Receive conversation starters + suggested venue + schedule date
+8. Post-date feedback (8 questions) determines algorithm success
 
 ### Success Metrics (Primary KPI)
 - **Mutual Interest Rate**: ≥30% (both users want second date after meeting)
@@ -52,7 +53,7 @@ npx convex docs      # Launch Convex documentation
 - **Authentication**: Clerk (session-based, OAuth support)
 - **Backend/Database**: Convex (serverless DB + functions + scheduled jobs + file storage)
 - **Email**: Resend with React Email templates
-- **AI**: OpenAI (text-embedding-3-small for matching, GPT-4o for analysis)
+- **AI**: OpenRouter API (proxies OpenAI text-embedding-3-small for embeddings, GPT-4o for analysis)
 - **Photo Tools**: face-api.js (browser-based face detection) + browser-image-compression
 - **UI Components**: shadcn/ui with base-maia style preset
 - **Styling**: Tailwind CSS v4
@@ -70,18 +71,28 @@ ClerkProvider
 ```
 
 **Authentication Flow**:
-- Clerk handles user authentication on the frontend
+- Clerk middleware protects routes in `proxy.ts` (`/onboarding`, `/dashboard`)
+- Unauthenticated users trying to access protected routes are redirected to Clerk sign-in
 - ConvexClientProvider bridges Clerk auth with Convex backend
 - Convex functions access user identity via `ctx.auth.getUserIdentity()`
 - JWT issuer domain configured in `convex/auth.config.ts`
 
+**Route Structure**:
+- `/` - Public landing page (shows LandingPage component, redirects authenticated users to `/dashboard`)
+- `/dashboard` - Protected dashboard (requires authentication via Clerk middleware)
+- `/onboarding` - Protected onboarding wizard (requires authentication, redirects to `/dashboard` after completion)
+- Route protection handled by Clerk middleware, not Convex wrappers
+
 **Convex Functions**:
-- **Queries**: Read-only database operations (e.g., `convex/messages.tsx`)
-- **Mutations**: Write operations to database
+- **Queries**: Read-only database operations (e.g., `api.users.getCurrentUser`)
+- **Mutations**: Write operations to database (e.g., `api.users.generateUploadUrl`)
+- **Actions**: Can use external APIs via `fetch()` (e.g., `api.users.createUser` calls OpenRouter for embeddings)
+- **Internal Mutations/Queries**: Private functions called only by actions (e.g., `internal.users.internalCreateUser`)
 - **Scheduled Functions**: Cron jobs (e.g., Sunday 11pm weekly matching batch)
 - All functions must export from `convex/_generated/server`
 - Use validators from `convex/values` for type-safe arguments
-- Access in components via `useQuery(api.file.function)` and `useMutation(api.file.function)`
+- Access in components via `useQuery(api.file.function)`, `useMutation(api.file.function)`, and `useAction(api.file.function)`
+- **Important**: Mutations/Queries cannot use `fetch()` - use actions instead
 
 **Weekly Matching Algorithm** (Sunday 11pm scheduled function):
 Critical constraint: **One match per week per user** enforced via in-memory Set tracking.
@@ -103,9 +114,20 @@ Critical constraint: **One match per week per user** enforced via in-memory Set 
 
 ```
 app/
-  ├─ layout.tsx        # Root layout with providers
-  ├─ page.tsx          # Landing page
-  └─ globals.css       # Global styles
+  ├─ layout.tsx              # Root layout with providers
+  ├─ page.tsx                # Public landing page
+  ├─ dashboard/
+  │   └─ page.tsx            # Protected dashboard for authenticated users
+  ├─ (auth)/
+  │   ├─ layout.tsx          # Auth layout wrapper
+  │   └─ onboarding/
+  │       ├─ page.tsx        # Onboarding orchestrator
+  │       ├─ ProfileStep.tsx # Step 1: Basic info
+  │       ├─ BioStep.tsx     # Step 2: Bio and looking for
+  │       ├─ InterestsStep.tsx # Step 3: Interest selection
+  │       ├─ PhotoStep.tsx   # Step 4: Photo upload
+  │       └─ StepWrapper.tsx # Reusable step wrapper
+  └─ globals.css             # Global styles
 
 components/
   ├─ ConvexClientProvider.tsx  # Convex + Clerk integration
@@ -115,12 +137,18 @@ components/
 
 convex/
   ├─ auth.config.ts     # Clerk JWT configuration
-  ├─ messages.tsx       # Example query functions
+  ├─ schema.ts          # Database schema (4 tables, 18 indexes)
+  ├─ users.ts           # User CRUD operations
+  ├─ lib/
+  │   ├─ openrouter.ts  # OpenRouter API integration
+  │   └─ cosine.ts      # Vector similarity calculations
   └─ _generated/        # Auto-generated Convex types
 
 lib/
   ├─ utils.ts          # Utility functions (cn, date helpers)
   └─ constants.ts      # App constants (INTERESTS, PASS_REASONS, etc.)
+
+proxy.ts                # Clerk middleware for route protection
 ```
 
 ### Import Aliases
@@ -162,7 +190,8 @@ NEXT_PUBLIC_CONVEX_URL=                 # Public Convex URL
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=      # Clerk public key
 CLERK_SECRET_KEY=                       # Clerk secret key
 CLERK_JWT_ISSUER_DOMAIN=                # Clerk JWT issuer for Convex
-OPENAI_API_KEY=                         # OpenAI API key (for embeddings + GPT-4)
+OPENROUTER_API_KEY=                     # OpenRouter API key (for embeddings + GPT-4)
+EMBEDDING_MODEL=                        # Optional: OpenAI embedding model (default: openai/text-embedding-3-small)
 RESEND_API_KEY=                         # Resend email API key
 GOOGLE_PLACES_API_KEY=                  # Google Places API (venue selection)
 ```
@@ -246,5 +275,7 @@ Protected route (Clerk authentication required). Four tabs with auto-refresh eve
 - Convex functions are server-side only and type-safe
 - Clerk authentication state is managed globally via providers
 - shadcn/ui components are customizable and located in `components/ui/`
-- **Cost per user per week**: ~$0.03 (OpenAI embeddings + GPT-4 + Google Places)
+- **Route Protection**: Handled by Clerk middleware in `proxy.ts`, not Convex auth wrappers
+- **User Creation**: Uses Convex actions (not mutations) because embedding generation requires `fetch()` to OpenRouter API
+- **Cost per user per week**: ~$0.03 (OpenRouter embeddings + GPT-4 + Google Places)
 - **Target metrics**: 30%+ mutual interest rate (both want second date), 80%+ date completion rate
