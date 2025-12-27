@@ -8,8 +8,9 @@
  * @module
  */
 
-import type * as messages from "../messages.js";
-import type * as tasks from "../tasks.js";
+import type * as lib_cosine from "../lib/cosine.js";
+import type * as lib_openrouter from "../lib/openrouter.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -18,8 +19,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  messages: typeof messages;
-  tasks: typeof tasks;
+  "lib/cosine": typeof lib_cosine;
+  "lib/openrouter": typeof lib_openrouter;
+  users: typeof users;
 }>;
 
 /**

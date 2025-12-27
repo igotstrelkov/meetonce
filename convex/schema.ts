@@ -1,0 +1,176 @@
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export default defineSchema({
+  users: defineTable({
+    // Authentication
+    clerkId: v.string(),
+    email: v.string(),
+
+    // Profile
+    name: v.string(),
+    age: v.number(),
+    gender: v.union(
+      v.literal("male"),
+      v.literal("female"),
+      v.literal("non-binary")
+    ),
+    location: v.string(),
+    bio: v.string(),
+    lookingFor: v.string(),
+    interests: v.array(v.string()),
+
+    // Photo & Review
+    photoUrl: v.optional(v.string()),
+    photoStatus: v.union(
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("rejected")
+    ),
+    attractivenessRating: v.optional(v.number()),
+    photoRejectionReason: v.optional(v.string()),
+    photoResubmissionCount: v.number(),
+
+    // AI Matching
+    embedding: v.optional(v.array(v.number())),
+
+    // Status
+    vacationMode: v.boolean(),
+    vacationUntil: v.optional(v.number()),
+
+    // Admin
+    isAdmin: v.boolean(),
+
+    // Timestamps
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_clerk_id", ["clerkId"])
+    .index("by_email", ["email"])
+    .index("by_photo_status", ["photoStatus"])
+    .index("by_vacation", ["vacationMode"]),
+
+  weeklyMatches: defineTable({
+    // Match Participants
+    userId: v.id("users"),
+    matchUserId: v.id("users"),
+    weekOf: v.string(),
+
+    // AI Analysis
+    compatibilityScore: v.number(),
+    explanation: v.string(),
+    conversationStarters: v.array(v.string()),
+
+    // Venue
+    suggestedVenue: v.object({
+      name: v.string(),
+      address: v.string(),
+      placeId: v.string(),
+      description: v.string(),
+    }),
+
+    // Responses
+    userResponse: v.union(
+      v.literal("pending"),
+      v.literal("interested"),
+      v.literal("passed")
+    ),
+    matchResponse: v.union(
+      v.literal("pending"),
+      v.literal("interested"),
+      v.literal("passed")
+    ),
+    userRespondedAt: v.optional(v.number()),
+    matchRespondedAt: v.optional(v.number()),
+
+    // Status
+    mutualMatch: v.boolean(),
+    status: v.union(
+      v.literal("sent"),
+      v.literal("expired"),
+      v.literal("completed")
+    ),
+
+    // Scheduling
+    dateScheduled: v.boolean(),
+    dateScheduledFor: v.optional(v.number()),
+
+    // Timestamps
+    sentAt: v.number(),
+    expiresAt: v.number(),
+  })
+    .index("by_user_and_match", ["userId", "matchUserId"])
+    .index("by_match_and_user", ["matchUserId", "userId"])
+    .index("by_user", ["userId"])
+    .index("by_week", ["weekOf"])
+    .index("by_user_and_week", ["userId", "weekOf"])
+    .index("by_match_user_and_week", ["matchUserId", "weekOf"]),
+
+  passReasons: defineTable({
+    userId: v.id("users"),
+    matchId: v.id("weeklyMatches"),
+    matchUserId: v.id("users"),
+    weekOf: v.string(),
+    reason: v.union(
+      v.literal("too_far"),
+      v.literal("lifestyle"),
+      v.literal("attraction"),
+      v.literal("profile"),
+      v.literal("dealbreaker"),
+      v.literal("no_chemistry"),
+      v.literal("skipped")
+    ),
+    providedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_match", ["matchId"])
+    .index("by_reason", ["reason"]),
+
+  dateOutcomes: defineTable({
+    matchId: v.id("weeklyMatches"),
+    userId: v.id("users"),
+    matchUserId: v.id("users"),
+    weekOf: v.string(),
+
+    // Core Feedback
+    dateHappened: v.union(
+      v.literal("yes"),
+      v.literal("cancelled_by_them"),
+      v.literal("cancelled_by_me"),
+      v.literal("rescheduled")
+    ),
+    overallRating: v.optional(v.number()),
+    wouldMeetAgain: v.optional(v.union(
+      v.literal("yes"),
+      v.literal("maybe"),
+      v.literal("no")
+    )),
+
+    // Details
+    wentWell: v.optional(v.array(v.string())),
+    wentPoorly: v.optional(v.array(v.string())),
+
+    // Feature Feedback
+    conversationStartersHelpful: v.optional(v.union(
+      v.literal("very"),
+      v.literal("somewhat"),
+      v.literal("not_used"),
+      v.literal("not_helpful")
+    )),
+    venueRating: v.optional(v.union(
+      v.literal("perfect"),
+      v.literal("good"),
+      v.literal("okay"),
+      v.literal("not_good"),
+      v.literal("went_elsewhere")
+    )),
+
+    additionalThoughts: v.optional(v.string()),
+    providedAt: v.number(),
+    feedbackProvided: v.boolean(),
+  })
+    .index("by_match", ["matchId"])
+    .index("by_user", ["userId"])
+    .index("by_date_happened", ["dateHappened"])
+    .index("by_would_meet_again", ["wouldMeetAgain"]),
+});

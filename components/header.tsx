@@ -1,27 +1,20 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { Menu } from "lucide-react";
 
 export function Header() {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-background/80 backdrop-blur-md border-b border-border/40">
+    <header className="flex items-center justify-between px-6 py-4 bg-background/80 backdrop-blur-md border-b border-border/40 mb-5">
       <div className="flex items-center gap-2">
         <span className="text-2xl font-bold tracking-tighter">MeetOnce</span>
       </div>
-      <nav className="hidden md:flex items-center gap-6">
+      <nav className="flex items-center gap-6">
         <SignedOut>
-            <SignInButton mode="modal">
+            <SignInButton mode="modal" forceRedirectUrl="/dashboard">
                 <button className="text-sm font-medium hover:text-primary transition-colors">Log In</button>
             </SignInButton>
-            <SignUpButton mode="modal">
+            <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
             <Button variant="default" className="rounded-full px-6">Sign Up</Button>
             </SignUpButton>
         </SignedOut>
@@ -31,7 +24,7 @@ export function Header() {
       </nav>
       
       {/* Mobile Menu */}
-      <div className="md:hidden">
+      {/* <div className="md:hidden">
         <DropdownMenu>
           <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9">
               <Menu className="w-6 h-6" />
@@ -54,7 +47,7 @@ export function Header() {
             </SignedIn>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+      </div> */}
     </header>
   );
 }

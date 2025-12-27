@@ -5,12 +5,9 @@ import { ArrowRight, Ban, Check, Coffee, Heart, Instagram, Lightbulb, Linkedin, 
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
-      {/* Header */}
-
-
-      <main className="pt-24">
+      <main>
         {/* Hero Section */}
-        <section className="relative px-6 py-16 md:py-32 max-w-7xl mx-auto flex flex-col items-center text-center">
+        <section className="relative px-4 md:py-12 max-w-7xl mx-auto flex flex-col items-center text-center">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-background to-background blur-3xl opacity-50" />
           
           <h1 className="text-4xl md:text-7xl font-bold tracking-tight mb-8 max-w-4xl leading-[1.1]">
@@ -54,7 +51,7 @@ export function LandingPage() {
 
         {/* How It Works */}
         <section className="py-16 md:py-20 bg-muted/30">
-          <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-6xl mx-auto px-4">
             <div className="text-center mb-12 md:mb-16">
               <h2 className="text-3xl md:text-5xl font-bold mb-4">How It Works</h2>
               <p className="text-lg md:text-xl text-muted-foreground">From text to date in 3 simple steps</p>
@@ -99,7 +96,7 @@ export function LandingPage() {
 
         {/* Stats / Social Proof */}
         <section className="py-16 md:py-20 bg-foreground text-background">
-          <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
               { label: "Dates Arranged", value: "9,000+" },
               { label: "Success Rate", value: "69%" },
@@ -115,7 +112,7 @@ export function LandingPage() {
         </section>
 
         {/* Comparison Section */}
-        <section className="py-16 md:py-24 px-6">
+        <section className="py-16 md:py-24 px-4">
           <div className="max-w-5xl mx-auto relative grid md:grid-cols-2 gap-8 items-center">
             {/* VS Badge */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-12 h-12 bg-background rounded-full border border-border shadow-sm font-black text-muted-foreground text-xs">
@@ -174,7 +171,7 @@ export function LandingPage() {
 
         {/* Safety Measures Section */}
         <section className="py-16 md:py-20 bg-muted/30">
-          <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-6xl mx-auto px-4">
             <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-4">Our Safety Measures</h2>
             <p className="text-lg md:text-xl text-muted-foreground">
@@ -207,7 +204,7 @@ export function LandingPage() {
         {/* FAQ Section */}
         <section className="py-16 md:py-20 bg-muted/30">
         
-          <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-6xl mx-auto px-4">
             <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-4">FAQ</h2>
             <p className="text-lg md:text-xl text-muted-foreground">What you need to know about MeetOnce</p>
@@ -242,7 +239,7 @@ export function LandingPage() {
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-primary"><path d="m6 9 6 6 6-6"/></svg>
                     </div>
                   </summary>
-                  <div className="px-6 pb-6 text-muted-foreground leading-relaxed">
+                  <div className="px-4 pb-6 text-muted-foreground leading-relaxed">
                     {item.a}
                   </div>
                 </details>
@@ -255,7 +252,7 @@ export function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-border">
+      <footer className="py-12 px-4 border-t border-border">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2">
             <span className="text-xl font-bold">MeetOnce</span>
