@@ -44,15 +44,15 @@ export const internalCreateUser = internalMutation({
     email: v.string(),
     name: v.string(),
     age: v.number(),
-    gender: v.union(v.literal("male"), v.literal("female"), v.literal("non-binary")),
+    gender: v.string(),
     location: v.string(),
     bio: v.string(),
     lookingFor: v.string(),
     interests: v.array(v.string()),
-    photoUrl: v.optional(v.string()),
+    photoStorageId: v.optional(v.string()),
     embedding: v.array(v.number()),
   },
-  
+
   handler: async (ctx, args) => {
     // Check if user already exists
     const existingUser = await ctx.db
@@ -74,7 +74,7 @@ export const internalCreateUser = internalMutation({
       bio: args.bio,
       lookingFor: args.lookingFor,
       interests: args.interests,
-      photoUrl: args.photoUrl,
+      photoStorageId: args.photoStorageId,
       embedding: args.embedding,
       photoStatus: "pending",
       photoResubmissionCount: 0,
@@ -92,12 +92,12 @@ export const createUser = action({
     email: v.string(),
     name: v.string(),
     age: v.number(),
-    gender: v.union(v.literal("male"), v.literal("female"), v.literal("non-binary")),
+    gender: v.string(),
     location: v.string(),
     bio: v.string(),
     lookingFor: v.string(),
     interests: v.array(v.string()),
-    photoUrl: v.optional(v.string()),
+    photoStorageId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Generate embedding from profile text
@@ -255,5 +255,27 @@ export const getUsersForMatching = query({
       .collect();
 
     return users.filter(user => !user.vacationMode);
+  },
+});
+
+export const isUserAdmin = query({
+  args: { clerkId: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", q => q.eq("clerkId", args.clerkId))
+      .first();
+
+    return user?.isAdmin ?? false;
+  },
+});
+
+export const makeUserAdmin = mutation({
+  args: { userId: v.id("users") },
+  returns: v.id("users"),
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, { isAdmin: true });
+    return args.userId;
   },
 });

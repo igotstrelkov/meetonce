@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import { COUNTRIES, GENDERS } from "@/lib/constants";
 import { useUser } from "@clerk/nextjs";
 import { useAction, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
@@ -20,8 +21,8 @@ export default function OnboardingPage() {
   const [formData, setFormData] = useState({
     name: "",
     age: 0,
-    gender: "male" as "male" | "female" | "non-binary",
-    location: "dublin" as "dublin",
+    gender: GENDERS[0].label as string,
+    location: COUNTRIES[0].label as string,
     bio: "",
     lookingFor: "",
     interests: [] as string[],
@@ -40,7 +41,7 @@ export default function OnboardingPage() {
 
     try {
       // Upload photo to Convex storage
-      let photoUrl = "";
+      let photoStorageId = "";
       if (formData.photo) {
         // Get upload URL
         const uploadUrl = await generateUploadUrl();
@@ -53,7 +54,7 @@ export default function OnboardingPage() {
         });
 
         const { storageId } = await result.json();
-        photoUrl = storageId;
+        photoStorageId = storageId;
       }
 
       // Create user profile
@@ -67,7 +68,7 @@ export default function OnboardingPage() {
         bio: formData.bio,
         lookingFor: formData.lookingFor,
         interests: formData.interests,
-        photoUrl,
+        photoStorageId,
       });
 
       router.push("/dashboard");

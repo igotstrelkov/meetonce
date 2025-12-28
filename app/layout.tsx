@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={outfit.variable}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased mb-8`}
       >
         <ClerkProvider afterSignOutUrl="/">
           <ConvexClientProvider>

@@ -4,14 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { COUNTRIES, GENDERS } from "@/lib/constants";
 import { useState } from "react";
 
 interface ProfileStepProps {
   data: {
     name: string;
     age: number;
-    gender: "male" | "female" | "non-binary";
-    location: "dublin";
+    gender: string;
+    location: string;
   };
   updateData: (data: any) => void;
   onNext: () => void;
@@ -88,9 +89,9 @@ export default function ProfileStep({ data, updateData, onNext }: ProfileStepPro
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="male">Male</SelectItem>
-              <SelectItem value="female">Female</SelectItem>
-              <SelectItem value="non-binary">Non-binary</SelectItem>
+              {GENDERS.map((gender) => (
+                <SelectItem key={gender.value} value={gender.label}>{gender.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -100,13 +101,14 @@ export default function ProfileStep({ data, updateData, onNext }: ProfileStepPro
           <Select
             value={data.location}
             onValueChange={(value) => updateData({ location: value })}
-            
           >
-            <SelectTrigger className="w-full">
-              <SelectValue  />
+            <SelectTrigger className="w-full" >
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="dublin">Dublin</SelectItem>
+              {COUNTRIES.map((country) => (
+                <SelectItem key={country.value} value={country.label}>{country.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

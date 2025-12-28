@@ -10,18 +10,14 @@ export default defineSchema({
     // Profile
     name: v.string(),
     age: v.number(),
-    gender: v.union(
-      v.literal("male"),
-      v.literal("female"),
-      v.literal("non-binary")
-    ),
+    gender: v.string(),
     location: v.string(),
     bio: v.string(),
     lookingFor: v.string(),
     interests: v.array(v.string()),
 
     // Photo & Review
-    photoUrl: v.optional(v.string()),
+    photoStorageId: v.optional(v.string()),
     photoStatus: v.union(
       v.literal("pending"),
       v.literal("approved"),

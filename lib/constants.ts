@@ -17,13 +17,23 @@ export const PASS_REASONS = [
   "no_chemistry",
 ] as const;
 
-export const REJECTION_REASONS = [
-  "inappropriate",
-  "no_face",
-  "group_photo",
-  "poor_quality",
-  "filtered",
-  "celebrity",
-  "child",
-  "other",
-] as const;
+export const REJECTION_CATEGORIES = [
+  { value: "inappropriate", label: "Inappropriate Content" },
+  { value: "no_face", label: "No Clear Face Visible" },
+  { value: "group_photo", label: "Group Photo" },
+  { value: "poor_quality", label: "Poor Quality" },
+  { value: "filtered", label: "Heavily Filtered" },
+  { value: "celebrity", label: "Celebrity/Stock Photo" },
+  { value: "child", label: "Contains Child" },
+  { value: "other", label: "Other" },
+];
+
+export const COUNTRIES = [
+  { value: "dublin", label: "Dublin" },
+]
+
+export const GENDERS = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+]
+  

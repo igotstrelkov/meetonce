@@ -41,7 +41,7 @@ export default function DashboardPage() {
 
   // User has completed onboarding
   return (
-    <div className="flex flex-col h-screen items-center gap-4 px-4 px-4">
+    <div className="flex flex-col h-screen items-center gap-4 px-4">
       <h1 className="text-3xl font-bold">Welcome back, {currentUser.name.split(" ")[0]}!</h1>
       <p className="text-gray-600">Your profile is {currentUser.photoStatus}</p>
       {currentUser.photoStatus === "pending" && (
