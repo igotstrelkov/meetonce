@@ -16,7 +16,7 @@ MeetOnce is an AI-powered dating platform that eliminates endless swiping by del
 ### Key User Flow
 1. User signs up via Clerk authentication → Redirected to `/onboarding`
 2. User completes 4-step onboarding wizard (Profile → Bio → Interests → Photo) → User created in Convex → Redirected to `/dashboard`
-3. Admin manually reviews and rates photo (1-10 scale) + approves/rejects
+3. Admin manually reviews photo in `/admin/photo-review`: **Two-step process** (Approve/Reject decision → Rate 1-10 attractiveness scale)
 4. Sunday 11pm: Weekly batch matching runs (6-stage AI pipeline)
 5. Monday 9am: Users receive one curated match via email
 6. Users respond "Interested" or "Pass" by Friday 11:59pm
@@ -71,7 +71,7 @@ ClerkProvider
 ```
 
 **Authentication Flow**:
-- Clerk middleware protects routes in `proxy.ts` (`/onboarding`, `/dashboard`)
+- Clerk middleware protects routes in `proxy.ts` (`/onboarding`, `/dashboard`, `/admin`)
 - Unauthenticated users trying to access protected routes are redirected to Clerk sign-in
 - ConvexClientProvider bridges Clerk auth with Convex backend
 - Convex functions access user identity via `ctx.auth.getUserIdentity()`
@@ -81,7 +81,13 @@ ClerkProvider
 - `/` - Public landing page (shows LandingPage component, redirects authenticated users to `/dashboard`)
 - `/dashboard` - Protected dashboard (requires authentication via Clerk middleware)
 - `/onboarding` - Protected onboarding wizard (requires authentication, redirects to `/dashboard` after completion)
-- Route protection handled by Clerk middleware, not Convex wrappers
+- `/admin` - Protected admin dashboard (requires authentication + admin flag in database)
+  - `/admin` - Platform overview with metrics
+  - `/admin/photo-review` - Two-step photo review queue (PRIMARY ADMIN TASK)
+  - `/admin/users` - User management and search
+  - `/admin/analytics` - Deep analytics and reporting
+- Route protection handled by Clerk middleware in `proxy.ts`, not Convex auth wrappers
+- Admin access controlled by `isAdmin` boolean field in users table
 
 **Convex Functions**:
 - **Queries**: Read-only database operations (e.g., `api.users.getCurrentUser`)
@@ -118,6 +124,16 @@ app/
   ├─ page.tsx                # Public landing page
   ├─ dashboard/
   │   └─ page.tsx            # Protected dashboard for authenticated users
+  ├─ admin/
+  │   ├─ layout.tsx          # Admin layout with navigation
+  │   ├─ AdminNav.tsx        # Admin tab navigation component
+  │   ├─ page.tsx            # Platform overview (Tab 1)
+  │   ├─ photo-review/
+  │   │   └─ page.tsx        # Two-step photo review queue (Tab 2)
+  │   ├─ users/
+  │   │   └─ page.tsx        # User management (Tab 3)
+  │   └─ analytics/
+  │       └─ page.tsx        # Analytics deep dive (Tab 4)
   ├─ (auth)/
   │   ├─ layout.tsx          # Auth layout wrapper
   │   └─ onboarding/
@@ -133,12 +149,13 @@ components/
   ├─ ConvexClientProvider.tsx  # Convex + Clerk integration
   ├─ header.tsx               # Navigation with auth buttons
   ├─ landing-page.tsx         # Main landing page component
-  └─ ui/                      # shadcn/ui components
+  └─ ui/                      # shadcn/ui components (dialog, textarea, etc.)
 
 convex/
   ├─ auth.config.ts     # Clerk JWT configuration
   ├─ schema.ts          # Database schema (4 tables, 18 indexes)
-  ├─ users.ts           # User CRUD operations
+  ├─ users.ts           # User CRUD operations + admin functions
+  ├─ admin.ts           # Admin-specific functions (photo review, metrics)
   ├─ lib/
   │   ├─ openrouter.ts  # OpenRouter API integration
   │   └─ cosine.ts      # Vector similarity calculations
@@ -146,7 +163,7 @@ convex/
 
 lib/
   ├─ utils.ts          # Utility functions (cn, date helpers)
-  └─ constants.ts      # App constants (INTERESTS, PASS_REASONS, etc.)
+  └─ constants.ts      # App constants (INTERESTS, PASS_REASONS, GENDERS, COUNTRIES, etc.)
 
 proxy.ts                # Clerk middleware for route protection
 ```
@@ -159,11 +176,12 @@ TypeScript path aliases configured in `tsconfig.json`:
 ### Database Schema (Core Tables)
 
 **users**:
-- Profile data: `clerkId`, `email`, `name`, `age`, `gender`, `location`, `bio` (500-1000 words)
-- Photo: `photoUrl` (Convex storage), `photoStatus` ('pending' | 'approved' | 'rejected')
+- Profile data: `clerkId`, `email`, `name`, `age`, `gender` (string), `location` (string), `bio` (500-1000 words)
+- Photo: `photoStorageId` (Convex storage ID, converted to URL via `ctx.storage.getUrl()` in queries), `photoStatus` ('pending' | 'approved' | 'rejected')
 - Rating: `attractivenessRating` (1-10, **NEVER exposed to users**, encrypted at rest)
 - AI: `embedding` (1536 floats from OpenAI text-embedding-3-small)
 - State: `vacationMode`, `vacationUntil`
+- Admin: `isAdmin` (boolean, grants access to `/admin` dashboard)
 
 **weeklyMatches**:
 - Match pair: `userId`, `matchUserId`, `weekOf` (e.g., '2024-12-16')
@@ -213,8 +231,10 @@ GOOGLE_PLACES_API_KEY=                  # Google Places API (venue selection)
 ## Critical Business Rules
 
 ### Photo Review & Ratings
-- **Two-step process**: Rate attractiveness (1-10) → Approve/Reject
-- Rating does NOT equal approval (can rate '4' and still approve if photo is appropriate)
+- **Two-step process**:
+  1. **Step 1: Approve/Reject Decision** - Admin decides if photo meets quality standards (keyboard shortcuts: A = approve, R = reject)
+  2. **Step 2: Attractiveness Rating** - If approved, admin rates 1-10 on attractiveness scale (keyboard shortcuts: 1-9, 0 for 10)
+- Rejection does NOT require rating - admin selects from 8 rejection reasons and provides optional guidance
 - **Attractiveness ratings are PRIVATE**: Never exposed to users via any API, encrypted at rest
 - Used only for ±2 compatibility matching (user rated 8 matches with 6-10 range)
 - 8 rejection reasons: poor quality, face obscured, group photo, inappropriate, heavily filtered, poor lighting, face not visible, other
@@ -248,23 +268,29 @@ All built with React Email + Resend:
 11. Missed match reminder (Saturday if no response)
 
 ### Admin Dashboard (/admin)
-Protected route (Clerk authentication required). Four tabs with auto-refresh every 30 seconds:
+Protected route (Clerk authentication + `isAdmin=true` required). Four tabs with auto-refresh every 30 seconds:
 
-**Tab 1: Platform Overview**
+**Tab 1: Platform Overview** (`/admin`)
 - User growth, photo queue status (alerts if >50 pending), matching performance
 - **Critical metrics**: Date completion rate (≥80%), mutual interest rate (≥30%), second date request rate
 - Alert system for issues: mutual interest <20%, photo queue >50, completion rate <70%
+- Metrics displayed: Total users, pending photos, approval rate, average rating (admin only)
 
-**Tab 2: Photo Review Queue** (PRIMARY ADMIN TASK)
-- Two-step review: Rate 1-10 → Approve (A key) or Reject (R key)
-- Rejection modal: Select reason + optional guidance for user
+**Tab 2: Photo Review Queue** (`/admin/photo-review`) - **PRIMARY ADMIN TASK**
+- **Two-step workflow**:
+  1. **Decision Step**: Approve (A key) or Reject (R key)
+  2. **Rating Step**: If approved, rate 1-10 attractiveness (1-9 keys, 0 for 10)
+- **Rejection flow**: Select from 8 reasons + optional guidance for user → Photo status set to 'rejected'
+- **Approval flow**: Rate attractiveness → Photo status set to 'approved' with rating stored
+- Keyboard navigation for efficiency (A/R for decision, 1-0 for rating)
+- Displays photo with user profile info (name, age, gender, location, bio snippet)
 - Goal: Review within 24 hours of submission
 
-**Tab 3: User Management**
+**Tab 3: User Management** (`/admin/users`)
 - Search users, view profiles, manual actions (re-rate photo, vacation mode)
 - View match history and feedback patterns
 
-**Tab 4: Analytics Deep Dive**
+**Tab 4: Analytics Deep Dive** (`/admin/analytics`)
 - Charts: User growth, pass reasons, mutual match trends, compatibility vs outcome correlation
 - Cohort analysis, CSV export, time range selector (7d/30d/90d/all)
 
@@ -279,3 +305,71 @@ Protected route (Clerk authentication required). Four tabs with auto-refresh eve
 - **User Creation**: Uses Convex actions (not mutations) because embedding generation requires `fetch()` to OpenRouter API
 - **Cost per user per week**: ~$0.03 (OpenRouter embeddings + GPT-4 + Google Places)
 - **Target metrics**: 30%+ mutual interest rate (both want second date), 80%+ date completion rate
+
+### Convex Storage Pattern
+Photo management follows a consistent storage ID → URL conversion pattern:
+
+**Storage (Write)**:
+```typescript
+// Store only the storage ID in database
+const uploadUrl = await generateUploadUrl();
+const result = await fetch(uploadUrl, {
+  method: "POST",
+  headers: { "Content-Type": photo.type },
+  body: photo,
+});
+const { storageId } = await result.json();
+
+await ctx.db.insert("users", {
+  photoStorageId: storageId,  // Store ID, not URL
+  // ... other fields
+});
+```
+
+**Retrieval (Read)**:
+```typescript
+// Convert storage ID to URL in queries
+const users = await ctx.db.query("users").collect();
+const usersWithUrls = await Promise.all(
+  users.map(async (user) => ({
+    ...user,
+    photoUrl: user.photoStorageId
+      ? await ctx.storage.getUrl(user.photoStorageId)
+      : null,
+  }))
+);
+```
+
+**Why this pattern?**:
+- Storage IDs are permanent references (e.g., `kg282te5bctnsvzj644af8k4x97y06y0`)
+- URLs are temporary and expire (contain time-limited tokens)
+- Always store IDs in database, convert to URLs in queries for display
+- Field naming: `photoStorageId` in schema, `photoUrl` in query results
+
+### Admin Access Setup
+
+To grant admin access to a user:
+
+1. **Using Convex Dashboard**:
+   - Navigate to your Convex dashboard → Data → users table
+   - Find the user by `clerkId` or `email`
+   - Edit the user and set `isAdmin: true`
+
+2. **Using Convex Function** (recommended for automation):
+   ```typescript
+   // In Convex dashboard or via mutation call
+   await ctx.runMutation(api.users.makeUserAdmin, {
+     userId: ctx.db.normalizeId("users", "user_id_here")
+   });
+   ```
+
+3. **Verification**:
+   - Log in as the user
+   - Navigate to `/admin` - should see admin dashboard
+   - If access denied, verify `isAdmin` field is `true` in database
+
+**Security Notes**:
+- Admin routes protected by Clerk middleware + `isAdmin` flag check
+- Admin functions (`convex/admin.ts`) should verify admin status in handler
+- Never expose admin functions to non-admin users via API
+- Attractiveness ratings NEVER exposed to end users (admin dashboard only)
