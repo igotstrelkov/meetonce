@@ -79,7 +79,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-2xl px-4">
+    <div className="max-w-xl mx-auto space-y-8 px-4">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold">Create Your Profile</h1>

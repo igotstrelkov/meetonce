@@ -1,14 +1,25 @@
 "use client";
 
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import MatchCard from "@/components/match/MatchCard";
 import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const currentUser = useQuery(api.users.getCurrentUser);
+  const { user } = useUser();
+  const currentUser = useQuery(
+    api.users.getUserByClerkId,
+    user ? { clerkId: user.id } : "skip"
+  );
+
+  const matchData = useQuery(
+    api.matches.getCurrentMatch,
+    currentUser?.photoStatus === "approved" ? { userId: currentUser._id } : "skip"
+  );
 
   useEffect(() => {
     // If still loading, wait
@@ -23,46 +34,71 @@ export default function DashboardPage() {
     // User exists and is authenticated - stay on dashboard
   }, [currentUser, router]);
 
-  // Loading state while checking user
   if (currentUser === undefined || currentUser === null) {
+    return <LoadingSpinner />;
+  }
+
+  if (currentUser.photoStatus === "rejected") {
     return (
-      <LoadingSpinner />
+      <div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <h2 className="text-2xl font-bold mb-2">Photo Needs Update</h2>
+          <p className="text-gray-700 mb-4">
+            {currentUser.photoRejectionReason || "Your photo didn't meet our quality standards."}
+          </p>
+          <a
+            href="/profile/edit-photo"
+            className="text-pink-600 hover:text-pink-700 font-semibold"
+          >
+            Upload New Photo →
+          </a>
+        </div>
+      </div>
     );
   }
 
-  // User is being redirected to onboarding
-  // if (currentUser === null) {
-  //   return (
-  //     <div className="flex h-screen items-center justify-center">
-  //       Redirecting to onboarding...
-  //     </div>
-  //   );
-  // }
-
-  // User has completed onboarding
-  return (
-    <div className="flex flex-col h-screen items-center gap-4 px-4">
-      <h1 className="text-3xl font-bold">Welcome back, {currentUser.name.split(" ")[0]}!</h1>
-      <p className="text-gray-600">Your profile is {currentUser.photoStatus}</p>
-      {currentUser.photoStatus === "pending" && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md ">
-          <p><strong>Your profile is being reviewed!</strong></p><p> We'll send you an email within 24 hours
-            once your profile is approved. Then you'll start receiving your weekly matches.</p>
-        </div>
-      )}
-      {currentUser.photoStatus === "approved" && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-w-md">
-          <p><strong>Your profile is live!</strong></p>
-          <p className="text-sm text-gray-700">
-             You'll receive your first match on Monday morning at 9am.
+  if (currentUser.photoStatus === "pending") {
+    return (
+      <div >
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+          <h2 className="text-2xl font-bold mb-2">Profile Under Review</h2>
+          <p className="text-gray-700">
+            Your profile is being reviewed by our team. You'll receive an email within 24 hours
+            when your profile is approved or if we need a different photo.
           </p>
         </div>
-      )}
-      {currentUser.photoStatus === "rejected" && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md">
-          <p><strong>Photo needs updating.</strong></p><p> Please upload a new photo that meets our guidelines.</p>
+      </div>
+    );
+  }
+
+  if (!matchData) {
+    return (
+      <div>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+          <h2 className="text-2xl font-bold mb-2">No Match This Week</h2>
+          <p className="text-gray-700">
+            We couldn't find a compatible match for you this week.
+            We'll keep looking for next Monday!
+          </p>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">Your Weekly Match</h1>
+        <p className="text-gray-600">
+          Respond by Friday 11:59pm
+        </p>
+      </div>
+
+      <MatchCard
+        match={matchData.match}
+        matchUser={matchData.matchUser}
+        isReversed={matchData.isReversed}
+      />
     </div>
   );
 }

@@ -9,13 +9,13 @@ export const INTERESTS = [
 ] as const;
 
 export const PASS_REASONS = [
-  "too_far",
-  "lifestyle",
-  "attraction",
-  "profile",
-  "dealbreaker",
-  "no_chemistry",
-] as const;
+  { value: "too_far", label: "Too far away" },
+  { value: "lifestyle", label: "Lifestyle mismatch" },
+  { value: "attraction", label: "Not physically attracted" },
+  { value: "profile", label: "Profile didn't resonate" },
+  { value: "dealbreaker", label: "Dealbreaker in profile" },
+  { value: "no_chemistry", label: "Don't feel the chemistry" },
+];
 
 export const REJECTION_CATEGORIES = [
   { value: "inappropriate", label: "Inappropriate Content" },

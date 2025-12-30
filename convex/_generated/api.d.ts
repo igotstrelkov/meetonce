@@ -12,6 +12,7 @@ import type * as admin from "../admin.js";
 import type * as crons from "../crons.js";
 import type * as lib_matching from "../lib/matching.js";
 import type * as lib_openrouter from "../lib/openrouter.js";
+import type * as matches from "../matches.js";
 import type * as matching from "../matching.js";
 import type * as users from "../users.js";
 
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   "lib/matching": typeof lib_matching;
   "lib/openrouter": typeof lib_openrouter;
+  matches: typeof matches;
   matching: typeof matching;
   users: typeof users;
 }>;

@@ -92,41 +92,12 @@ export default function PhotoReviewPage() {
     setStep("decision");
   };
 
-  // if (!currentPhoto) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-[400px]">
-  //       <div className="text-center">
-  //         <h2 className="text-2xl font-bold mb-2">No Pending Photos! 🎉</h2>
-  //         <p className="text-gray-600">All photos have been reviewed.</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // Debug logging
-  // console.log("Current photo:", currentPhoto);
-  // console.log("Photo URL:", currentPhoto.photoUrl);
-
   // 1. Loading State
     if (pendingPhotos === undefined) {
     return <LoadingSpinner />;
   }
 
-  // 2. Empty State
-  // if (pendingPhotos === null) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-[400px]">
-        
-  //       <div className="text-center">
-  //         <h2 className="text-2xl font-bold mb-2">No Pending Photos! 🎉</h2>
-  //         <p className="text-gray-600">All photos have been reviewed.</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // 3. Render State (We know pendingPhotos[0] exists)
-  // Ensure currentPhoto is defined for the rest of the component
+  // 2. Render State
   const currentPhoto = pendingPhotos[0];
 
   return (
@@ -143,7 +114,7 @@ export default function PhotoReviewPage() {
       {pendingPhotos.length === 0 ? (
         <div className="flex items-center justify-center min-h-[300px]">
           <div className="text-center">
-            {/* <h2 className="text-2xl font-bold mb-2">No Pending Photos!</h2> */}
+            <h2 className="text-2xl font-bold mb-2">No Pending Photos</h2>
             <p className="text-gray-600">All photos have been reviewed</p>
           </div>
         </div>
@@ -162,11 +133,6 @@ export default function PhotoReviewPage() {
               <p className="text-gray-500">No photo uploaded</p>
             </div>
           )}
-        </div>
-
-        {/* Debug info - remove this after fixing */}
-        <div className="text-xs text-gray-400 mb-4 text-center">
-          Photo URL: {currentPhoto.photoUrl || "NULL"}
         </div>
 
         <div className="text-center mb-6">

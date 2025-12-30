@@ -136,7 +136,7 @@ export default function PhotoStep({ data, updateData, onBack, onSubmit }: PhotoS
         {error && <p className="text-sm text-center text-red-600 font-medium bg-red-50 py-2 rounded-lg">{error}</p>}
 
         {/* Guidelines - Mobile Card Style */}
-        <div className="bg-white border rounded-xl p-4 shadow-sm space-y-3">
+        <div className="bg-white border rounded-xl p-4 space-y-3 max-w-sm mx-auto">
           <h3 className="text-sm font-semibold text-gray-900 flex items-center">
              Guidelines
           </h3>
