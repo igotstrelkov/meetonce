@@ -314,8 +314,14 @@ CLERK_JWT_ISSUER_DOMAIN=                # Clerk JWT issuer for Convex
 OPENROUTER_API_KEY=                     # OpenRouter API key (for embeddings + GPT-4)
 EMBEDDING_MODEL=                        # Optional: OpenAI embedding model (default: openai/text-embedding-3-small)
 RESEND_API_KEY=                         # Resend email API key
+NEXT_PUBLIC_APP_URL=                    # App URL for email links (default: http://localhost:3000)
 GOOGLE_PLACES_API_KEY=                  # Google Places API (venue selection)
 ```
+
+**Email Configuration**:
+- Emails are sent from `MeetOnce <matches@meetonce.app>`
+- Domain must be verified in Resend dashboard before production use
+- Update sender address in `convex/emails.ts` if using different domain
 
 ## UI Development
 
@@ -363,19 +369,34 @@ GOOGLE_PLACES_API_KEY=                  # Google Places API (venue selection)
 - Post-deadline responses rejected
 - If both pass: No contact info shared, wait for next Monday
 
-### Email Templates (10+ types required)
-All built with React Email + Resend:
-1. Account submitted for review confirmation
-2. Account approved - profile is live
-3. Account rejected with reason + guidance
-4. Weekly match delivery (Monday 9am)
-5. Mutual match celebration (both interested)
-6. Match passed notification
-7. Date confirmation with calendar invite
-8. Date reminder (24 hours before)
-9. Post-date feedback request (24 hours after)
-10. Mutual second-date interest (contact info sharing)
-11. Missed match reminder (Saturday if no response)
+### Email Templates
+Built with React Email + Resend. Email integration is **ACTIVE** using Resend API.
+
+**Implemented Templates** (`emails/` directory):
+1. ✅ **PhotoApproved.tsx** - Account approved, profile is live
+2. ✅ **PhotoRejected.tsx** - Account rejected with reason + optional guidance
+3. ✅ **WeeklyMatch.tsx** - Weekly match delivery (Monday 9am)
+4. ✅ **MutualMatch.tsx** - Mutual match celebration (both interested)
+5. ✅ **SecondDateContact.tsx** - Mutual second-date interest (contact info sharing)
+
+**Email Functions** (`convex/emails.ts`):
+- All 5 email functions use Resend with `react:` parameter for React Email templates
+- Error handling with try-catch and console logging
+- From address: `MeetOnce <matches@meetonce.app>`
+- Uses environment variable `RESEND_API_KEY`
+
+**Email Triggers**:
+- Photo approval/rejection → `convex/admin.ts` (approvePhoto, rejectPhoto mutations)
+- Mutual match → `convex/matches.ts` (respondToMatch mutation, sent to BOTH users)
+- Second date contact → `convex/feedback.ts` (submitDateFeedback mutation, sent to BOTH users)
+
+**Planned Templates** (not yet implemented):
+- Account submitted for review confirmation
+- Match passed notification
+- Date confirmation with calendar invite
+- Date reminder (24 hours before)
+- Post-date feedback request (24 hours after)
+- Missed match reminder (Saturday if no response)
 
 ### Admin Dashboard (/admin)
 Protected route (Clerk authentication + `isAdmin=true` required). Four tabs with auto-refresh every 30 seconds:

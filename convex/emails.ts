@@ -1,5 +1,10 @@
-import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
+import MutualMatch from "../emails/MutualMatch";
+import PhotoApproved from "../emails/PhotoApproved";
+import PhotoRejected from "../emails/PhotoRejected";
+import SecondDateContact from "../emails/SecondDateContact";
+import WeeklyMatch from "../emails/WeeklyMatch";
+import { internalAction } from "./_generated/server";
 
 export const sendPhotoApprovedEmail = internalAction({
   args: {
@@ -23,29 +28,24 @@ export const sendPhotoApprovedEmail = internalAction({
       ==================================
     `);
 
-    // Uncomment when ready to send real emails:
-    /*
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     try {
       await resend.emails.send({
-        from: "MeetOnce <matches@yourdomain.com>",
+        from: "MeetOnce <matches@meetonce.app>",
         to: args.to,
         subject: "✅ Your Profile is Live!",
-        html: `
-          <h1>Your Profile is Live!</h1>
-          <p>Hi ${args.userName},</p>
-          <p>Great news! Your photo has been approved and your profile is now live.</p>
-          <p>You'll start receiving weekly matches every Monday morning.</p>
-          <p><a href="${args.dashboardUrl}">Go to Dashboard</a></p>
-        `,
+        react: PhotoApproved({
+          userName: args.userName,
+          dashboardUrl: args.dashboardUrl,
+        }),
       });
-      console.log(`Photo approved email sent to ${args.to}`);
+      console.log(`✅ Photo approved email sent to ${args.to}`);
     } catch (error) {
-      console.error("Email error:", error);
+      console.error("❌ Email error:", error);
+      throw error;
     }
-    */
   },
 });
 
@@ -74,30 +74,26 @@ export const sendPhotoRejectedEmail = internalAction({
       ==================================
     `);
 
-    // Uncomment when ready to send real emails:
-    /*
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     try {
       await resend.emails.send({
-        from: "MeetOnce <matches@yourdomain.com>",
+        from: "MeetOnce <matches@meetonce.app>",
         to: args.to,
         subject: "Photo Review Update",
-        html: `
-          <h1>Photo Review Update</h1>
-          <p>Hi ${args.userName},</p>
-          <p>Your photo needs to be updated.</p>
-          <p><strong>Reason:</strong> ${args.reason}</p>
-          ${args.guidance ? `<p><strong>Guidance:</strong> ${args.guidance}</p>` : ''}
-          <p><a href="${args.uploadUrl}">Upload New Photo</a></p>
-        `,
+        react: PhotoRejected({
+          userName: args.userName,
+          reason: args.reason,
+          guidance: args.guidance,
+          uploadUrl: args.uploadUrl,
+        }),
       });
-      console.log(`Photo rejected email sent to ${args.to}`);
+      console.log(`✅ Photo rejected email sent to ${args.to}`);
     } catch (error) {
-      console.error("Email error:", error);
+      console.error("❌ Email error:", error);
+      throw error;
     }
-    */
   },
 });
 
@@ -110,8 +106,6 @@ export const sendWeeklyMatchEmail = internalAction({
     matchUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    // TODO: Integrate with Resend
-    // For now, just log the email that would be sent
     console.log(`
       ====== WEEKLY MATCH EMAIL ======
       To: ${args.to}
@@ -129,28 +123,26 @@ export const sendWeeklyMatchEmail = internalAction({
       ================================
     `);
 
-    // Uncomment when ready to send real emails:
-    /*
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     try {
       await resend.emails.send({
-        from: "MeetOnce <matches@yourdomain.com>",
+        from: "MeetOnce <matches@meetonce.app>",
         to: args.to,
         subject: `Your Weekly Match: ${args.matchName}!`,
-        html: `
-          <h1>Your Weekly Match</h1>
-          <p>Hi ${args.userName},</p>
-          <p>We've found someone special for you: ${args.matchName}, ${args.matchAge}</p>
-          <p><a href="${args.matchUrl}">View Your Match</a></p>
-        `,
+        react: WeeklyMatch({
+          userName: args.userName,
+          matchName: args.matchName,
+          matchAge: args.matchAge,
+          matchUrl: args.matchUrl,
+        }),
       });
-      console.log(`Email sent to ${args.to}`);
+      console.log(`✅ Weekly match email sent to ${args.to}`);
     } catch (error) {
-      console.error("Email error:", error);
+      console.error("❌ Email error:", error);
+      throw error;
     }
-    */
   },
 });
 
@@ -187,34 +179,28 @@ export const sendMutualMatchEmail = internalAction({
       ================================
     `);
 
-    // Uncomment when ready to send real emails:
-    /*
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     try {
       await resend.emails.send({
-        from: "MeetOnce <matches@yourdomain.com>",
+        from: "MeetOnce <matches@meetonce.app>",
         to: args.to,
-        subject: \`🎉 It's a Match with \${args.matchName}!\`,
-        html: \`
-          <h1>It's a Match!</h1>
-          <p>Hi \${args.userName},</p>
-          <p>Exciting news! \${args.matchName} is interested too!</p>
-          <h3>Conversation Starters:</h3>
-          <ul>
-            \${args.conversationStarters.map((s, i) => \`<li>\${i + 1}. \${s}</li>\`).join('')}
-          </ul>
-          <h3>Suggested Meeting Spot:</h3>
-          <p><strong>\${args.venueName}</strong><br>\${args.venueAddress}</p>
-          <p><a href="\${args.matchUrl}">View Match Details</a></p>
-        \`,
+        subject: `🎉 It's a Match with ${args.matchName}!`,
+        react: MutualMatch({
+          userName: args.userName,
+          matchName: args.matchName,
+          conversationStarters: args.conversationStarters,
+          venueName: args.venueName,
+          venueAddress: args.venueAddress,
+          matchUrl: args.matchUrl,
+        }),
       });
-      console.log(\`Mutual match email sent to \${args.to}\`);
+      console.log(`✅ Mutual match email sent to ${args.to}`);
     } catch (error) {
-      console.error("Email error:", error);
+      console.error("❌ Email error:", error);
+      throw error;
     }
-    */
   },
 });
 
@@ -241,5 +227,25 @@ export const sendSecondDateContactEmail = internalAction({
       Reach out and plan your second date!
       ======================================
     `);
+
+    const { Resend } = await import("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    try {
+      await resend.emails.send({
+        from: "MeetOnce <matches@meetonce.app>",
+        to: args.to,
+        subject: `🎉 ${args.matchName} wants a second date too!`,
+        react: SecondDateContact({
+          userName: args.userName,
+          matchName: args.matchName,
+          matchEmail: args.matchEmail,
+        }),
+      });
+      console.log(`✅ Second date contact email sent to ${args.to}`);
+    } catch (error) {
+      console.error("❌ Email error:", error);
+      throw error;
+    }
   },
 });
