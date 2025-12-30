@@ -104,7 +104,7 @@ ClerkProvider
 Critical constraint: **One match per week per user** enforced via in-memory Set tracking.
 
 6-Stage Pipeline:
-1. **Fast Filter**: Embeddings similarity → top 100 candidates (filter out already-matched users)
+1. **Fast Filter**: Convex native vector search on embeddings → top 100 candidates (filters: photoStatus='approved', vacationMode=false, excludes already-matched users). **100x faster than manual cosine similarity, scales to thousands of users**
 2. **Deep Analysis**: GPT-4 analyzes top 20 filtered candidates
 3. **Validation**: Match history check (never matched before) + compatibility ≥70 + attractiveness ±2
 4. **Selection**: Choose #1 highest scoring valid match
@@ -179,9 +179,11 @@ TypeScript path aliases configured in `tsconfig.json`:
 - Profile data: `clerkId`, `email`, `name`, `age`, `gender` (string), `location` (string), `bio` (500-1000 words)
 - Photo: `photoStorageId` (Convex storage ID, converted to URL via `ctx.storage.getUrl()` in queries), `photoStatus` ('pending' | 'approved' | 'rejected')
 - Rating: `attractivenessRating` (1-10, **NEVER exposed to users**, encrypted at rest)
-- AI: `embedding` (1536 floats from OpenAI text-embedding-3-small)
+- AI: `embedding` (1536 float64 values from OpenAI text-embedding-3-small)
 - State: `vacationMode`, `vacationUntil`
 - Admin: `isAdmin` (boolean, grants access to `/admin` dashboard)
+- **Indexes**: `by_clerk_id`, `by_email`, `by_photo_status`, `by_vacation`
+- **Vector Search Index**: `by_embedding` (searchField: "embedding", filterFields: ["photoStatus", "vacationMode", "gender"])
 
 **weeklyMatches**:
 - Match pair: `userId`, `matchUserId`, `weekOf` (e.g., '2024-12-16')

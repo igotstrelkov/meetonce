@@ -9,7 +9,6 @@
  */
 
 import type * as admin from "../admin.js";
-import type * as lib_cosine from "../lib/cosine.js";
 import type * as lib_openrouter from "../lib/openrouter.js";
 import type * as users from "../users.js";
 
@@ -21,7 +20,6 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
-  "lib/cosine": typeof lib_cosine;
   "lib/openrouter": typeof lib_openrouter;
   users: typeof users;
 }>;

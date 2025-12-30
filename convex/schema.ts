@@ -28,7 +28,7 @@ export default defineSchema({
     photoResubmissionCount: v.number(),
 
     // AI Matching
-    embedding: v.optional(v.array(v.number())),
+    embedding: v.optional(v.array(v.float64())),
 
     // Status
     vacationMode: v.boolean(),
@@ -44,7 +44,12 @@ export default defineSchema({
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"])
     .index("by_photo_status", ["photoStatus"])
-    .index("by_vacation", ["vacationMode"]),
+    .index("by_vacation", ["vacationMode"])
+    // Vector search index for AI matching
+    .searchIndex("by_embedding", {
+      searchField: "embedding",
+      filterFields: ["photoStatus", "vacationMode", "gender"]
+    }),
 
   weeklyMatches: defineTable({
     // Match Participants
