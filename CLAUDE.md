@@ -17,11 +17,13 @@ MeetOnce is an AI-powered dating platform that eliminates endless swiping by del
 1. User signs up via Clerk authentication → Redirected to `/onboarding`
 2. User completes 4-step onboarding wizard (Profile → Bio → Interests → Photo) → User created in Convex → Redirected to `/dashboard`
 3. Admin manually reviews photo in `/admin/photo-review`: **Two-step process** (Approve/Reject decision → Rate 1-10 attractiveness scale)
-4. Sunday 11pm: Weekly batch matching runs (6-stage AI pipeline)
-5. Monday 9am: Users receive one curated match via email
-6. Users respond "Interested" or "Pass" by Friday 11:59pm
-7. If mutual match: Receive conversation starters + suggested venue + schedule date
-8. Post-date feedback (8 questions) determines algorithm success
+4. User sees "Profile Under Review" message on `/dashboard` until photo is approved
+5. Sunday 11pm: Weekly batch matching runs (6-stage AI pipeline)
+6. Monday 9am: Users receive one curated match via email
+7. Users view match on `/dashboard`: See full profile, compatibility score, and explanation
+8. Users respond "Interested" or "Pass" by Friday 11:59pm (optional pass feedback with 6 categories)
+9. If mutual match: Conversation starters + suggested venue revealed on dashboard
+10. Post-date feedback (8 questions) determines algorithm success
 
 ### Success Metrics (Primary KPI)
 - **Mutual Interest Rate**: ≥30% (both users want second date after meeting)
@@ -132,6 +134,23 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 - **Hidden until mutual match**: Conversation starters + suggested venue
 - This prevents venue bias and focuses decision on compatibility
 
+**Match Display & Response Flow** (`/dashboard`):
+- Queries `getCurrentMatch` to get current week's match (checks both user and matchUser directions)
+- Displays different states based on user status:
+  - `photoStatus = "pending"` → "Profile Under Review" message
+  - `photoStatus = "rejected"` → "Photo Needs Update" with rejection reason
+  - No match found → "No Match This Week" message
+  - Active match → Full match card with response buttons
+- **Response Handling**:
+  - "I'm Interested" button → Updates `userResponse` or `matchResponse` (based on direction)
+  - "Pass" button → Shows optional feedback form with 6 categories
+  - Responses trigger mutual match detection (both = "interested" → `mutualMatch = true`)
+- **Mutual Match Reveal**:
+  - Conversation starters (array of 3) revealed
+  - Suggested venue (name, address, placeId, description) revealed
+  - Celebration message displayed
+- All photo storage IDs converted to URLs via `ctx.storage.getUrl()` in queries
+
 ### File Structure
 
 ```
@@ -139,7 +158,7 @@ app/
   ├─ layout.tsx              # Root layout with providers
   ├─ page.tsx                # Public landing page
   ├─ dashboard/
-  │   └─ page.tsx            # Protected dashboard for authenticated users
+  │   └─ page.tsx            # Match display dashboard (shows current week's match)
   ├─ admin/
   │   ├─ layout.tsx          # Admin layout with navigation
   │   ├─ AdminNav.tsx        # Admin tab navigation component
@@ -165,7 +184,10 @@ components/
   ├─ ConvexClientProvider.tsx  # Convex + Clerk integration
   ├─ header.tsx               # Navigation with auth buttons
   ├─ landing-page.tsx         # Main landing page component
-  └─ ui/                      # shadcn/ui components (dialog, textarea, etc.)
+  ├─ match/
+  │   ├─ MatchCard.tsx        # Match profile display with response buttons
+  │   └─ PassFeedbackForm.tsx # Optional pass feedback (6 categories)
+  └─ ui/                      # shadcn/ui components (dialog, textarea, card, etc.)
 
 convex/
   ├─ auth.config.ts     # Clerk JWT configuration
@@ -174,6 +196,7 @@ convex/
   ├─ users.ts           # User CRUD operations + admin functions
   ├─ admin.ts           # Admin-specific functions (photo review, metrics)
   ├─ matching.ts        # Batched matching algorithm (actions, queries, mutations)
+  ├─ matches.ts         # Match display queries and response mutations
   ├─ lib/
   │   ├─ openrouter.ts  # OpenRouter API integration
   │   ├─ matching.ts    # Matching helpers (compatibility analysis, conversation starters)
