@@ -36,4 +36,22 @@ export const GENDERS = [
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
 ]
+
+export const WENT_WELL_OPTIONS = [
+  "Great conversation",
+  "Lots in common",
+  "Good chemistry",
+  "Attractive",
+  "Funny",
+  "Genuine",
+];
+
+export const WENT_POORLY_OPTIONS = [
+  "Awkward silences",
+  "Nothing in common",
+  "No chemistry",
+  "Not as described",
+  "Late/unreliable",
+  "Inappropriate behavior",
+];
   

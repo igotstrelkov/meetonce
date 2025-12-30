@@ -58,6 +58,34 @@ export const getCurrentMatch = query({
   },
 });
 
+export const getMatchById = query({
+  args: { matchId: v.id("weeklyMatches") },
+  handler: async (ctx, args) => {
+    const match = await ctx.db.get(args.matchId);
+    if (!match) return null;
+
+    // Load both users with photo URLs
+    const user = await ctx.db.get(match.userId);
+    const matchUser = await ctx.db.get(match.matchUserId);
+
+    if (!user || !matchUser) return null;
+
+    const userPhotoUrl = user.photoStorageId
+      ? await ctx.storage.getUrl(user.photoStorageId)
+      : null;
+
+    const matchUserPhotoUrl = matchUser.photoStorageId
+      ? await ctx.storage.getUrl(matchUser.photoStorageId)
+      : null;
+
+    return {
+      match,
+      user: { ...user, photoUrl: userPhotoUrl },
+      matchUser: { ...matchUser, photoUrl: matchUserPhotoUrl },
+    };
+  },
+});
+
 export const respondToMatch = mutation({
   args: {
     matchId: v.id("weeklyMatches"),

@@ -83,6 +83,7 @@ ClerkProvider
 - `/` - Public landing page (shows LandingPage component, redirects authenticated users to `/dashboard`)
 - `/dashboard` - Protected dashboard (requires authentication via Clerk middleware)
 - `/onboarding` - Protected onboarding wizard (requires authentication, redirects to `/dashboard` after completion)
+- `/feedback/[matchId]` - Protected post-date feedback form (8 questions tracking PRIMARY METRIC)
 - `/admin` - Protected admin dashboard (requires authentication + admin flag in database)
   - `/admin` - Platform overview with metrics
   - `/admin/photo-review` - Two-step photo review queue (PRIMARY ADMIN TASK)
@@ -134,6 +135,22 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 - **Hidden until mutual match**: Conversation starters + suggested venue
 - This prevents venue bias and focuses decision on compatibility
 
+**Post-Date Feedback System** (`/feedback/[matchId]`):
+- **PRIMARY METRIC**: "Would you want to see them again?" (yes/maybe/no)
+- **8-Question Form**:
+  1. Did the date happen? * (yes/cancelled_by_them/cancelled_by_me/rescheduled)
+  2. Overall rating * (1-5 stars, conditional on date happening)
+  3. Would meet again? * (yes/maybe/no - **THE PRIMARY METRIC**)
+  4. What went well? (multi-select: great conversation, lots in common, good chemistry, attractive, funny, genuine)
+  5. What didn't go well? (optional multi-select: awkward silences, nothing in common, no chemistry, not as described, late/unreliable, inappropriate behavior)
+  6. Conversation starters helpful? (very/somewhat/not_used/not_helpful)
+  7. Venue rating? (perfect/good/okay/not_good/went_elsewhere)
+  8. Additional thoughts? (optional text area)
+- **Mutual Second-Date Detection**: If both users answer "yes" to Q3, system logs mutual interest (TODO: send contact info email)
+- Form submission saves to `dateOutcomes` table with `providedAt` timestamp
+- Conditional rendering: Questions 2-8 only show if user selects "yes" to Q1
+- Success KPI: ≥30% mutual interest rate (both want second date)
+
 **Match Display & Response Flow** (`/dashboard`):
 - Queries `getCurrentMatch` to get current week's match (checks both user and matchUser directions)
 - Displays different states based on user status:
@@ -157,28 +174,31 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 app/
   ├─ layout.tsx              # Root layout with providers
   ├─ page.tsx                # Public landing page
-  ├─ dashboard/
-  │   └─ page.tsx            # Match display dashboard (shows current week's match)
-  ├─ admin/
-  │   ├─ layout.tsx          # Admin layout with navigation
-  │   ├─ AdminNav.tsx        # Admin tab navigation component
-  │   ├─ page.tsx            # Platform overview (Tab 1)
-  │   ├─ photo-review/
-  │   │   └─ page.tsx        # Two-step photo review queue (Tab 2)
-  │   ├─ users/
-  │   │   └─ page.tsx        # User management (Tab 3)
-  │   └─ analytics/
-  │       └─ page.tsx        # Analytics deep dive (Tab 4)
-  ├─ (auth)/
-  │   ├─ layout.tsx          # Auth layout wrapper
-  │   └─ onboarding/
-  │       ├─ page.tsx        # Onboarding orchestrator
-  │       ├─ ProfileStep.tsx # Step 1: Basic info
-  │       ├─ BioStep.tsx     # Step 2: Bio and looking for
-  │       ├─ InterestsStep.tsx # Step 3: Interest selection
-  │       ├─ PhotoStep.tsx   # Step 4: Photo upload
-  │       └─ StepWrapper.tsx # Reusable step wrapper
-  └─ globals.css             # Global styles
+  ├─ globals.css             # Global styles
+  └─ (auth)/                 # Protected routes group
+      ├─ layout.tsx          # Auth layout wrapper
+      ├─ dashboard/
+      │   └─ page.tsx        # Match display dashboard (shows current week's match)
+      ├─ onboarding/
+      │   ├─ page.tsx        # Onboarding orchestrator
+      │   ├─ ProfileStep.tsx # Step 1: Basic info
+      │   ├─ BioStep.tsx     # Step 2: Bio and looking for
+      │   ├─ InterestsStep.tsx # Step 3: Interest selection
+      │   ├─ PhotoStep.tsx   # Step 4: Photo upload
+      │   └─ StepWrapper.tsx # Reusable step wrapper
+      ├─ feedback/
+      │   └─ [matchId]/
+      │       └─ page.tsx    # Post-date feedback form (8 questions, PRIMARY METRIC tracking)
+      └─ admin/
+          ├─ layout.tsx      # Admin layout with navigation
+          ├─ AdminNav.tsx    # Admin tab navigation component
+          ├─ page.tsx        # Platform overview (Tab 1)
+          ├─ photo-review/
+          │   └─ page.tsx    # Two-step photo review queue (Tab 2)
+          ├─ users/
+          │   └─ page.tsx    # User management (Tab 3)
+          └─ analytics/
+              └─ page.tsx    # Analytics deep dive (Tab 4)
 
 components/
   ├─ ConvexClientProvider.tsx  # Convex + Clerk integration
@@ -187,7 +207,9 @@ components/
   ├─ match/
   │   ├─ MatchCard.tsx        # Match profile display with response buttons
   │   └─ PassFeedbackForm.tsx # Optional pass feedback (6 categories)
-  └─ ui/                      # shadcn/ui components (dialog, textarea, card, etc.)
+  ├─ feedback/
+  │   └─ PostDateFeedbackForm.tsx # 8-question post-date feedback (PRIMARY METRIC)
+  └─ ui/                      # shadcn/ui components (dialog, textarea, card, radio-group, checkbox, etc.)
 
 convex/
   ├─ auth.config.ts     # Clerk JWT configuration
@@ -196,7 +218,8 @@ convex/
   ├─ users.ts           # User CRUD operations + admin functions
   ├─ admin.ts           # Admin-specific functions (photo review, metrics)
   ├─ matching.ts        # Batched matching algorithm (actions, queries, mutations)
-  ├─ matches.ts         # Match display queries and response mutations
+  ├─ matches.ts         # Match display queries (getCurrentMatch, getMatchById) and response mutations
+  ├─ feedback.ts        # Post-date feedback mutations (submitPassFeedback, submitDateFeedback, getFeedbackForMatch)
   ├─ lib/
   │   ├─ openrouter.ts  # OpenRouter API integration
   │   ├─ matching.ts    # Matching helpers (compatibility analysis, conversation starters)
