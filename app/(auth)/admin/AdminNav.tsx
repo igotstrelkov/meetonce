@@ -9,7 +9,7 @@ export default function AdminNav() {
   const tabs = [
     { name: "Overview", href: "/admin" },
     { name: "Photo Review", href: "/admin/photo-review" },
-    { name: "Users", href: "/admin/users" },
+    { name: "Matches", href: "/admin/matches" },
     { name: "Analytics", href: "/admin/analytics" },
   ];
 

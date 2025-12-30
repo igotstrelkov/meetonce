@@ -191,14 +191,15 @@ app/
       │       └─ page.tsx    # Post-date feedback form (8 questions, PRIMARY METRIC tracking)
       └─ admin/
           ├─ layout.tsx      # Admin layout with navigation
-          ├─ AdminNav.tsx    # Admin tab navigation component
+          ├─ AdminNav.tsx    # Admin tab navigation component (4 tabs)
           ├─ page.tsx        # Platform overview (Tab 1)
           ├─ photo-review/
           │   └─ page.tsx    # Two-step photo review queue (Tab 2)
-          ├─ users/
-          │   └─ page.tsx    # User management (Tab 3)
+          ├─ matches/
+          │   ├─ page.tsx    # All matches view with filters (Tab 3)
+          │   └─ MatchDetailsModal.tsx # Detailed match modal with outcomes
           └─ analytics/
-              └─ page.tsx    # Analytics deep dive (Tab 4)
+              └─ page.tsx    # Analytics deep dive with PRIMARY METRIC (Tab 4)
 
 components/
   ├─ ConvexClientProvider.tsx  # Convex + Clerk integration
@@ -216,15 +217,19 @@ convex/
   ├─ schema.ts          # Database schema (4 tables: users, weeklyMatches, passReasons, dateOutcomes)
   ├─ crons.ts           # Scheduled jobs (weekly matching on Sunday 11pm)
   ├─ users.ts           # User CRUD operations + admin functions
-  ├─ admin.ts           # Admin-specific functions (photo review, metrics)
+  ├─ admin.ts           # Admin queries: photo review, platform metrics, analytics, all matches
   ├─ matching.ts        # Batched matching algorithm (actions, queries, mutations)
   ├─ matches.ts         # Match display queries (getCurrentMatch, getMatchById) and response mutations
   ├─ feedback.ts        # Post-date feedback mutations (submitPassFeedback, submitDateFeedback, getFeedbackForMatch)
+  ├─ emails.ts          # Email actions (sendWeeklyMatchEmail, sendMutualMatchEmail, sendSecondDateContactEmail)
   ├─ lib/
   │   ├─ openrouter.ts  # OpenRouter API integration
   │   ├─ matching.ts    # Matching helpers (compatibility analysis, conversation starters)
   │   └─ cosine.ts      # Vector similarity calculations (legacy - now uses native vector search)
   └─ _generated/        # Auto-generated Convex types
+
+emails/
+  └─ WeeklyMatch.tsx    # React Email template for weekly match notifications
 
 lib/
   ├─ utils.ts          # Utility functions (cn, date helpers)
@@ -391,13 +396,38 @@ Protected route (Clerk authentication + `isAdmin=true` required). Four tabs with
 - Displays photo with user profile info (name, age, gender, location, bio snippet)
 - Goal: Review within 24 hours of submission
 
-**Tab 3: User Management** (`/admin/users`)
-- Search users, view profiles, manual actions (re-rate photo, vacation mode)
-- View match history and feedback patterns
+**Tab 3: Matches** (`/admin/matches`)
+- **All Matches View**: See all weekly matches with filters by week
+- **Stats Overview**: Total matches, mutual matches (%), dates completed, both passed count
+- **Week Filter Dropdown**: Filter matches by specific week or view all
+- **Match Cards**: Clickable cards showing:
+  - Both user names with mutual match badge
+  - Week, compatibility score
+  - Response status for both users (pending/interested/passed)
+  - Sent and expires dates
+- **Match Details Modal**: Click any match to see:
+  - Full match information (week, compatibility, status)
+  - AI explanation of why they were matched
+  - Conversation starters and suggested venue
+  - Both users' responses with timestamps
+  - Pass reasons (if applicable)
+  - Date outcomes from both users (if mutual match happened)
+  - **SUCCESS STORY indicator** if both want second date (PRIMARY METRIC)
 
 **Tab 4: Analytics Deep Dive** (`/admin/analytics`)
-- Charts: User growth, pass reasons, mutual match trends, compatibility vs outcome correlation
-- Cohort analysis, CSV export, time range selector (7d/30d/90d/all)
+- **Matching Performance Card**:
+  - This week's matches count
+  - Response rate (% of users who responded)
+  - Mutual match rate (% of responded matches that were mutual)
+- **Date Outcomes Card**:
+  - Dates completed count
+  - Average date rating (1-5 stars)
+  - Success stories (mutual second date requests)
+- **PRIMARY SUCCESS METRIC (Large Card)**:
+  - Mutual Interest Rate displayed prominently with large percentage
+  - Formula: (Both users want second date / Total dates completed) × 100
+  - Target indicator: ✓ Above Target (30%) or ⚠️ Below Target (30%)
+  - This is THE key metric validating algorithm success
 
 ## Development Notes
 
@@ -480,3 +510,35 @@ To grant admin access to a user:
 - Admin functions (`convex/admin.ts`) should verify admin status in handler
 - Never expose admin functions to non-admin users via API
 - Attractiveness ratings NEVER exposed to end users (admin dashboard only)
+
+### Email Integration
+
+**Email System** (Resend + React Email):
+- Email templates located in `emails/` directory (React Email components)
+- Email sending functions in `convex/emails.ts` as internal actions
+- Templates use `@react-email/components` for responsive, accessible emails
+
+**Available Email Functions**:
+1. `sendWeeklyMatchEmail`: Notify user of their weekly match (Monday 9am)
+   - Args: to, userName, matchName, matchAge, matchUrl
+   - Template: `emails/WeeklyMatch.tsx`
+
+2. `sendMutualMatchEmail`: Celebrate mutual match with conversation starters and venue
+   - Args: to, userName, matchName, conversationStarters, venueName, venueAddress
+   - Sent when both users respond "interested"
+
+3. `sendSecondDateContactEmail`: Share contact info when both want second date
+   - Args: to, userName, matchName, matchEmail
+   - Triggered by mutual "yes" on Q3 of post-date feedback
+   - **This validates the PRIMARY METRIC**
+
+**Email Configuration**:
+- Set `RESEND_API_KEY` in `.env.local`
+- Update sender domain in email functions (currently: `matches@yourdomain.com`)
+- All email functions currently log to console (uncomment Resend code to send real emails)
+- Email templates use pink (#ec4899) brand color matching platform theme
+
+**Integration Points**:
+- Weekly matching cron job should call `sendWeeklyMatchEmail` after creating matches
+- Mutual match detection in `convex/matches.ts` should call `sendMutualMatchEmail`
+- Date feedback submission in `convex/feedback.ts` should call `sendSecondDateContactEmail`

@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 
 export const submitPassFeedback = mutation({
   args: {
@@ -79,7 +80,27 @@ export const submitDateFeedback = mutation({
       if (otherFeedback?.wouldMeetAgain === "yes") {
         // MUTUAL SECOND DATE! 🎉
         console.log("🎉 MUTUAL SECOND DATE INTEREST!");
-        // TODO: Send email with contact info
+
+        // Get both users and the match
+        const user = await ctx.db.get(args.userId);
+        const matchUser = await ctx.db.get(args.matchUserId);
+
+        if (user && matchUser) {
+          // Send contact info to both users
+          await ctx.scheduler.runAfter(0, internal.emails.sendSecondDateContactEmail, {
+            to: user.email,
+            userName: user.name,
+            matchName: matchUser.name,
+            matchEmail: matchUser.email,
+          });
+
+          await ctx.scheduler.runAfter(0, internal.emails.sendSecondDateContactEmail, {
+            to: matchUser.email,
+            userName: matchUser.name,
+            matchName: user.name,
+            matchEmail: user.email,
+          });
+        }
       }
     }
   },

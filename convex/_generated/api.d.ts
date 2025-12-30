@@ -10,6 +10,7 @@
 
 import type * as admin from "../admin.js";
 import type * as crons from "../crons.js";
+import type * as emails from "../emails.js";
 import type * as feedback from "../feedback.js";
 import type * as lib_matching from "../lib/matching.js";
 import type * as lib_openrouter from "../lib/openrouter.js";
@@ -26,6 +27,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   crons: typeof crons;
+  emails: typeof emails;
   feedback: typeof feedback;
   "lib/matching": typeof lib_matching;
   "lib/openrouter": typeof lib_openrouter;
