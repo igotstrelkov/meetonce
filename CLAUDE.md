@@ -101,15 +101,31 @@ ClerkProvider
 - **Important**: Mutations/Queries cannot use `fetch()` - use actions instead
 
 **Weekly Matching Algorithm** (Sunday 11pm scheduled function):
-Critical constraint: **One match per week per user** enforced via in-memory Set tracking.
+Implemented as batched Convex actions for scalability. Processes users in batches of 50 to prevent timeouts.
 
-6-Stage Pipeline:
-1. **Fast Filter**: Convex native vector search on embeddings → top 100 candidates (filters: photoStatus='approved', vacationMode=false, excludes already-matched users). **100x faster than manual cosine similarity, scales to thousands of users**
-2. **Deep Analysis**: GPT-4 analyzes top 20 filtered candidates
-3. **Validation**: Match history check (never matched before) + compatibility ≥70 + attractiveness ±2
-4. **Selection**: Choose #1 highest scoring valid match
-5. **Package**: Generate explanation, conversation starters, venue (Google Places API for midpoint café)
-6. **Schedule**: Queue for Monday 9am email delivery
+**Architecture**:
+- **Actions**: Orchestrate process, perform vector search, make LLM calls to OpenRouter
+- **Queries**: Load user batches, filter candidates by match history
+- **Mutations**: Save matches to database
+- **Batching**: Recursive scheduling via `ctx.scheduler.runAfter()` chains batches together
+
+**Critical Constraints**:
+- **One match per week per user** (enforced via in-batch Set tracking)
+- **Pass history respected**: If either person passed before, they will NEVER be matched again
+- **Never match same pair twice** (compound index validation in both directions)
+
+**6-Stage Pipeline** (per user):
+1. **Vector Search** (Action): `ctx.vectorSearch()` finds top 256 similar users by embedding cosine similarity. **100x faster than manual calculation, scales to thousands**
+2. **Fast Filter** (Query): Load full documents, filter by photoStatus='approved', vacationMode=false, match/pass history
+3. **Deep Analysis** (Action): GPT-4 analyzes top 20 filtered candidates for compatibility (0-100 score + explanation)
+4. **Validation** (Query): Check attractiveness ±2, compatibility ≥70, pass history in both directions
+5. **Package** (Action): Generate conversation starters + venue suggestion via LLM
+6. **Save** (Mutation): Write match record to weeklyMatches table
+
+**Pass History Tracking**:
+- Checks both `by_user_and_match` and `by_match_and_user` indexes
+- If `userResponse="passed"` OR `matchResponse="passed"` → Never re-match
+- Respects user preferences and improves algorithm over time
 
 **Progressive Disclosure Pattern**:
 - Before mutual match: Show compatibility score + explanation + full profiles
@@ -153,12 +169,15 @@ components/
 
 convex/
   ├─ auth.config.ts     # Clerk JWT configuration
-  ├─ schema.ts          # Database schema (4 tables, 18 indexes)
+  ├─ schema.ts          # Database schema (4 tables: users, weeklyMatches, passReasons, dateOutcomes)
+  ├─ crons.ts           # Scheduled jobs (weekly matching on Sunday 11pm)
   ├─ users.ts           # User CRUD operations + admin functions
   ├─ admin.ts           # Admin-specific functions (photo review, metrics)
+  ├─ matching.ts        # Batched matching algorithm (actions, queries, mutations)
   ├─ lib/
   │   ├─ openrouter.ts  # OpenRouter API integration
-  │   └─ cosine.ts      # Vector similarity calculations
+  │   ├─ matching.ts    # Matching helpers (compatibility analysis, conversation starters)
+  │   └─ cosine.ts      # Vector similarity calculations (legacy - now uses native vector search)
   └─ _generated/        # Auto-generated Convex types
 
 lib/
@@ -176,31 +195,62 @@ TypeScript path aliases configured in `tsconfig.json`:
 ### Database Schema (Core Tables)
 
 **users**:
-- Profile data: `clerkId`, `email`, `name`, `age`, `gender` (string), `location` (string), `bio` (500-1000 words)
-- Photo: `photoStorageId` (Convex storage ID, converted to URL via `ctx.storage.getUrl()` in queries), `photoStatus` ('pending' | 'approved' | 'rejected')
-- Rating: `attractivenessRating` (1-10, **NEVER exposed to users**, encrypted at rest)
-- AI: `embedding` (1536 float64 values from OpenAI text-embedding-3-small)
-- State: `vacationMode`, `vacationUntil`
-- Admin: `isAdmin` (boolean, grants access to `/admin` dashboard)
+- **Authentication**: `clerkId`, `email`
+- **Profile**: `name`, `age`, `gender`, `location`, `bio` (500-1000 words), `lookingFor`, `interests` (array)
+- **Photo & Review**:
+  - `photoStorageId` (optional - Convex storage ID, converted to URL via `ctx.storage.getUrl()` in queries)
+  - `photoStatus` ('pending' | 'approved' | 'rejected')
+  - `attractivenessRating` (optional, 1-10, **NEVER exposed to users**, encrypted at rest)
+  - `photoRejectionReason` (optional string - guidance for rejected photos)
+  - `photoResubmissionCount` (number - tracks resubmissions)
+- **AI Matching**: `embedding` (optional, 1536 float64 values from OpenAI text-embedding-3-small)
+- **State**: `vacationMode` (boolean), `vacationUntil` (optional timestamp)
+- **Admin**: `isAdmin` (boolean, grants access to `/admin` dashboard)
+- **Timestamps**: `createdAt`, `updatedAt`
 - **Indexes**: `by_clerk_id`, `by_email`, `by_photo_status`, `by_vacation`
-- **Vector Search Index**: `by_embedding` (searchField: "embedding", filterFields: ["photoStatus", "vacationMode", "gender"])
+- **Vector Search Index**: `by_embedding` (vectorField: "embedding", dimensions: 1536, filterFields: ["photoStatus", "vacationMode", "gender"])
 
 **weeklyMatches**:
-- Match pair: `userId`, `matchUserId`, `weekOf` (e.g., '2024-12-16')
-- AI content: `compatibilityScore` (0-100), `explanation`, `conversationStarters` (array), `suggestedVenue` (object)
-- Responses: `userResponse`, `matchResponse` ('pending' | 'interested' | 'passed')
-- State: `mutualMatch` (boolean), `status` ('sent' | 'expired' | 'completed')
-- Timestamps: `sentAt`, `expiresAt` (Friday 11:59pm), `dateScheduledFor`
-- **Critical indexes**: `by_user_and_match`, `by_match_and_user` (prevent duplicate matches)
+- **Match Participants**: `userId`, `matchUserId`, `weekOf` (string, e.g., '2024-12-16')
+- **AI Analysis**:
+  - `compatibilityScore` (number, 0-100)
+  - `explanation` (string, 2-3 warm paragraphs)
+  - `conversationStarters` (array of 3 strings)
+- **Venue**: `suggestedVenue` (object with name, address, placeId, description)
+- **Responses**:
+  - `userResponse`, `matchResponse` ('pending' | 'interested' | 'passed')
+  - `userRespondedAt`, `matchRespondedAt` (optional timestamps)
+- **Status**:
+  - `mutualMatch` (boolean - both interested)
+  - `status` ('sent' | 'expired' | 'completed')
+- **Scheduling**:
+  - `dateScheduled` (boolean)
+  - `dateScheduledFor` (optional timestamp)
+- **Timestamps**: `sentAt`, `expiresAt` (Friday 11:59pm)
+- **Indexes**: `by_user_and_match`, `by_match_and_user` (prevent duplicate matches), `by_user`, `by_week`, `by_user_and_week`, `by_match_user_and_week`
 
 **passReasons**:
-- Feedback: `userId`, `matchId`, `reason` (6 categories: too_far, lifestyle, attraction, profile, dealbreaker, no_chemistry)
-- Used for algorithm improvement
+- **Fields**: `userId`, `matchId`, `matchUserId`, `weekOf`
+- **Reason**: 7 categories ('too_far' | 'lifestyle' | 'attraction' | 'profile' | 'dealbreaker' | 'no_chemistry' | 'skipped')
+- **Timestamp**: `providedAt`
+- **Purpose**: Algorithm improvement and user preference learning
+- **Indexes**: `by_user`, `by_match`, `by_reason`
 
 **dateOutcomes**:
 - **CRITICAL for algorithm validation**: Post-date feedback
-- Key fields: `dateHappened`, `wouldMeetAgain` ('yes' | 'maybe' | 'no'), `overallRating` (1-5 stars)
-- Quality metrics: `wentWell` (array), `wentPoorly` (array), `conversationStartersHelpful`, `venueRating`
+- **Relational**: `matchId`, `userId`, `matchUserId`, `weekOf`
+- **Core Feedback**:
+  - `dateHappened` ('yes' | 'cancelled_by_them' | 'cancelled_by_me' | 'rescheduled')
+  - `overallRating` (optional, 1-5 stars)
+  - `wouldMeetAgain` (optional: 'yes' | 'maybe' | 'no')
+- **Quality Metrics**:
+  - `wentWell` (optional array - positive aspects)
+  - `wentPoorly` (optional array - negative aspects)
+- **Feature Feedback**:
+  - `conversationStartersHelpful` (optional: 'very' | 'somewhat' | 'not_used' | 'not_helpful')
+  - `venueRating` (optional: 'perfect' | 'good' | 'okay' | 'not_good' | 'went_elsewhere')
+- **Additional**: `additionalThoughts` (optional string), `providedAt` (timestamp), `feedbackProvided` (boolean)
+- **Indexes**: `by_match`, `by_user`, `by_date_happened`, `by_would_meet_again`
 
 ### Environment Variables
 Required in `.env.local`:
@@ -242,12 +292,19 @@ GOOGLE_PLACES_API_KEY=                  # Google Places API (venue selection)
 - 8 rejection reasons: poor quality, face obscured, group photo, inappropriate, heavily filtered, poor lighting, face not visible, other
 
 ### Matching Constraints
-- **One match per week per user** (strictly enforced)
-- **Never match same pair twice** (compound index validation)
+- **One match per week per user** (strictly enforced via in-batch Set tracking)
+- **Never match same pair twice** (compound index validation in both directions)
+- **Pass history respected**: If either person passed previously, they will NEVER be matched again
 - Compatibility threshold: Score ≥70 required
 - Attractiveness compatibility: Within ±2 points
 - Users with `vacationMode=true` excluded from matching
 - Only users with `photoStatus='approved'` participate
+- Batched processing: 50 users per batch to prevent timeouts and scale to thousands
+
+**Testing the matching algorithm**:
+- Manual trigger: Run `internal.matching.testMatchingAlgorithm` in Convex dashboard
+- Processes small batch (5 users) for testing
+- Production: Runs automatically every Sunday at 11pm UTC via cron job
 
 ### Response Deadlines
 - Match sent: Monday 9am
@@ -305,6 +362,8 @@ Protected route (Clerk authentication + `isAdmin=true` required). Four tabs with
 - shadcn/ui components are customizable and located in `components/ui/`
 - **Route Protection**: Handled by Clerk middleware in `proxy.ts`, not Convex auth wrappers
 - **User Creation**: Uses Convex actions (not mutations) because embedding generation requires `fetch()` to OpenRouter API
+- **Vector Search**: Only available in Convex actions (not queries/mutations), returns `Array<{_id, _score}>`
+- **Batched Processing**: Critical for scaling - processes 50 users per batch, chains batches via scheduler
 - **Cost per user per week**: ~$0.03 (OpenRouter embeddings + GPT-4 + Google Places)
 - **Target metrics**: 30%+ mutual interest rate (both want second date), 80%+ date completion rate
 

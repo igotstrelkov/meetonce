@@ -16,17 +16,27 @@ export const getUserByClerkId = query({
 
 export const getCurrentUser = query({
   args: {},
-  returns: v.union(v.any(), v.null()),
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       return null;
     }
 
-    return await ctx.db
+    const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", q => q.eq("clerkId", identity.subject))
       .first();
+
+    if (!user) {
+      return null;
+    }
+
+    return {
+      ...user,
+      photoUrl: user.photoStorageId
+        ? await ctx.storage.getUrl(user.photoStorageId)
+        : null
+    };
   },
 });
 
@@ -244,19 +254,19 @@ export const setVacationMode = mutation({
   },
 });
 
-export const getUsersForMatching = query({
-  args: {},
-  returns: v.array(v.any()),
-  handler: async (ctx) => {
-    // Get all approved users not on vacation
-    const users = await ctx.db
-      .query("users")
-      .withIndex("by_photo_status", q => q.eq("photoStatus", "approved"))
-      .collect();
+// export const getUsersForMatching = query({
+//   args: {},
+//   returns: v.array(v.any()),
+//   handler: async (ctx) => {
+//     // Get all approved users not on vacation
+//     const users = await ctx.db
+//       .query("users")
+//       .withIndex("by_photo_status", q => q.eq("photoStatus", "approved"))
+//       .collect();
 
-    return users.filter(user => !user.vacationMode);
-  },
-});
+//     return users.filter(user => !user.vacationMode);
+//   },
+// });
 
 export const isUserAdmin = query({
   args: { clerkId: v.string() },

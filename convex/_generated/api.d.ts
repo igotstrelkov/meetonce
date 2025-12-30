@@ -9,7 +9,10 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as crons from "../crons.js";
+import type * as lib_matching from "../lib/matching.js";
 import type * as lib_openrouter from "../lib/openrouter.js";
+import type * as matching from "../matching.js";
 import type * as users from "../users.js";
 
 import type {
@@ -20,7 +23,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  crons: typeof crons;
+  "lib/matching": typeof lib_matching;
   "lib/openrouter": typeof lib_openrouter;
+  matching: typeof matching;
   users: typeof users;
 }>;
 

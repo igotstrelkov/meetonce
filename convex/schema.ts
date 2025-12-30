@@ -46,8 +46,9 @@ export default defineSchema({
     .index("by_photo_status", ["photoStatus"])
     .index("by_vacation", ["vacationMode"])
     // Vector search index for AI matching
-    .searchIndex("by_embedding", {
-      searchField: "embedding",
+    .vectorIndex("by_embedding", {
+      vectorField: "embedding",
+      dimensions: 1536,
       filterFields: ["photoStatus", "vacationMode", "gender"]
     }),
 
