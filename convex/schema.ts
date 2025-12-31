@@ -27,6 +27,8 @@ export default defineSchema({
     photoRejectionReason: v.optional(v.string()),
     photoResubmissionCount: v.number(),
 
+    // Composite field for vectorSearch filters
+    matchKey: v.string(),
     // AI Matching
     embedding: v.optional(v.array(v.float64())),
 
@@ -40,6 +42,10 @@ export default defineSchema({
     // Timestamps
     createdAt: v.number(),
     updatedAt: v.number(),
+
+    interestedIn: v.string(),
+    minAge: v.optional(v.number()),
+    maxAge: v.optional(v.number()),
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"])
@@ -49,7 +55,7 @@ export default defineSchema({
     .vectorIndex("by_embedding", {
       vectorField: "embedding",
       dimensions: 1536,
-      filterFields: ["photoStatus", "vacationMode", "gender"]
+      filterFields: ["matchKey"],
     }),
 
   weeklyMatches: defineTable({

@@ -56,7 +56,7 @@ npx convex docs      # Launch Convex documentation
 - **Backend/Database**: Convex (serverless DB + functions + scheduled jobs + file storage)
 - **Email**: Resend with React Email templates
 - **AI**: OpenRouter API (proxies OpenAI text-embedding-3-small for embeddings, GPT-4o for analysis)
-- **Photo Tools**: face-api.js (browser-based face detection) + browser-image-compression
+- **Photo Tools**: ✅ face-api.js (browser-based face detection) + browser-image-compression (implemented)
 - **UI Components**: shadcn/ui with base-maia style preset
 - **Styling**: Tailwind CSS v4
 - **Fonts**: Outfit (primary), Geist, Geist Mono
@@ -397,6 +397,40 @@ Built with React Email + Resend. Email integration is **ACTIVE** using Resend AP
 - Date reminder (24 hours before)
 - Post-date feedback request (24 hours after)
 - Missed match reminder (Saturday if no response)
+
+### Photo Validation System
+**Client-side photo processing** implemented in `PhotoStep.tsx` with automatic face detection and image optimization.
+
+**Validation Pipeline** (4 steps, runs on photo upload):
+1. **File Validation**: Type check (must be image), size check (10MB max before compression)
+2. **Face Detection**: face-api.js TinyFaceDetector + FaceLandmark68Net models
+   - ❌ No face detected → Error: "No face detected. Please upload a clear photo showing your face."
+   - ❌ Multiple faces → Error: "Multiple faces detected. Please upload a photo with only you in it."
+   - ✅ Exactly one face → Proceed to compression
+3. **Image Compression**: browser-image-compression
+   - Max size: 1MB
+   - Max dimensions: 1920px
+   - Web worker enabled for performance
+   - Preserves original file type
+4. **Storage**: Compressed file uploaded to Convex storage
+
+**Model Files** (`public/models/`):
+- `tiny_face_detector_model-*` (189KB + 2.9KB manifest)
+- `face_landmark_68_model-*` (348KB + 7.7KB manifest)
+- Models loaded on component mount, graceful degradation if loading fails
+
+**User Experience**:
+- Loading state: "Analyzing photo... Detecting face and optimizing"
+- Validation happens immediately after file selection
+- Clear error messages for validation failures
+- Automatic retry by selecting new photo
+- Buttons disabled during validation
+
+**Benefits**:
+- Reduces admin photo review workload (filters out group photos and non-face images)
+- Saves storage costs (1MB max vs 10MB original)
+- Improves upload speed (smaller file size)
+- Better user experience (immediate feedback vs waiting for admin rejection)
 
 ### Admin Dashboard (/admin)
 Protected route (Clerk authentication + `isAdmin=true` required). Four tabs with auto-refresh every 30 seconds:

@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
-import { COUNTRIES, GENDERS } from "@/lib/constants";
 import { useUser } from "@clerk/nextjs";
 import { useAction, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
@@ -14,15 +13,18 @@ import ProfileStep from "./ProfileStep";
 export default function OnboardingPage() {
   const { user } = useUser();
   const router = useRouter();
-  const createUser = useAction(api.users.createUser);
+  const createUser = useAction(api.users.createUserProfile);
   const generateUploadUrl = useMutation(api.users.generateUploadUrl);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
     age: 0,
-    gender: GENDERS[0].label as string,
-    location: COUNTRIES[0].label as string,
+    gender: "",
+    location: "Dublin",
+    interestedIn: "",
+    minAge: 18,
+    maxAge: 50,
     bio: "",
     lookingFor: "",
     interests: [] as string[],
@@ -68,6 +70,9 @@ export default function OnboardingPage() {
         bio: formData.bio,
         lookingFor: formData.lookingFor,
         interests: formData.interests,
+        interestedIn: formData.interestedIn,
+        minAge: formData.minAge,
+        maxAge: formData.maxAge,
         photoStorageId,
       });
 

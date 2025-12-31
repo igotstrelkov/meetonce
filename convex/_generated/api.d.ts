@@ -14,6 +14,7 @@ import type * as emails from "../emails.js";
 import type * as feedback from "../feedback.js";
 import type * as lib_matching from "../lib/matching.js";
 import type * as lib_openrouter from "../lib/openrouter.js";
+import type * as lib_utils from "../lib/utils.js";
 import type * as matches from "../matches.js";
 import type * as matching from "../matching.js";
 import type * as users from "../users.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   feedback: typeof feedback;
   "lib/matching": typeof lib_matching;
   "lib/openrouter": typeof lib_openrouter;
+  "lib/utils": typeof lib_utils;
   matches: typeof matches;
   matching: typeof matching;
   users: typeof users;

@@ -112,7 +112,7 @@ export default function PhotoReviewPage() {
       </div>
 
       {pendingPhotos.length === 0 ? (
-        <div className="flex items-center justify-center min-h-[300px]">
+        <div className="flex items-center justify-center min-h-[300px] rounded-lg border p-4">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-2">No Pending Photos</h2>
             <p className="text-gray-600">All photos have been reviewed</p>
@@ -120,7 +120,7 @@ export default function PhotoReviewPage() {
         </div>
       ): (
       <>
-      <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="bg-white rounded-lg border p-4">
         <div className="flex justify-center mb-6">
           {currentPhoto.photoUrl ? (
             <img
@@ -142,14 +142,12 @@ export default function PhotoReviewPage() {
             Resubmissions: {currentPhoto.photoResubmissionCount}
           </p>
         </div>
-      </div>
-
-      {/* Step 1: Decision (Approve or Reject) */}
+        {/* Step 1: Decision (Approve or Reject) */}
       {step === "decision" && (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-xl font-bold mb-4">
+        <div className="p-4">
+          {/* <h3 className="text-xl font-bold mb-4">
             Step 1: Approve or Reject?
-          </h3>
+          </h3> */}
           <div className="flex gap-4 justify-center">
             <Button
               onClick={handleApproveDecision}
@@ -175,7 +173,7 @@ export default function PhotoReviewPage() {
 
       {/* Step 2: Rating (Only if Approved) */}
       {step === "rating" && (
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div>
           <h3 className="text-xl font-bold mb-4">
             Step 2: Rate Attractiveness (1-10)
           </h3>
@@ -199,6 +197,7 @@ export default function PhotoReviewPage() {
           </p>
         </div>
       )}
+      </div>
 </>)}
 
       

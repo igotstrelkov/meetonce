@@ -1,13 +1,15 @@
-import { internalQuery, internalMutation, internalAction } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
+import { Doc } from "./_generated/dataModel";
+import { internalAction, internalMutation, internalQuery } from "./_generated/server";
 import {
   analyzeCompatibility,
-  generateConversationStarters,
-  suggestVenue,
   formatProfile,
-  getWeekOfString
+  generateConversationStarters,
+  getWeekOfString,
+  suggestVenue
 } from "./lib/matching";
+import { makeMatchKey } from "./lib/utils";
 
 // ===== QUERIES (Read-only database operations) =====
 
@@ -32,7 +34,7 @@ export const getUnmatchedUsersBatch = internalQuery({
       .collect();
 
     // Filter out users who already have matches this week
-    const unmatched = [];
+    const unmatched: Doc<"users">[] = [];
     for (const user of allEligible) {
       const hasMatch = await ctx.db
         .query("weeklyMatches")
@@ -66,6 +68,10 @@ export const loadAndFilterCandidates = internalQuery({
   handler: async (ctx, args) => {
     const candidates = [];
 
+    // Load the user to get their preferences
+    const user = await ctx.db.get(args.userId);
+    if (!user) return [];
+
     for (const candidateId of args.candidateIds) {
       // Skip self
       if (candidateId === args.userId) continue;
@@ -97,6 +103,28 @@ export const loadAndFilterCandidates = internalQuery({
       // Only include if never matched before
       if (!previousMatch && !reversePreviousMatch) {
         candidates.push(candidate);
+      }
+
+      // Filter user's age preference for candidate
+      if (user.minAge && candidate.age < user.minAge) {
+        console.log(`Filtered out ${candidate.name}: too young (${candidate.age} < ${user.minAge})`);
+        continue;
+      }
+      
+      if (user.maxAge && candidate.age > user.maxAge) {
+        console.log(`Filtered out ${candidate.name}: too old (${candidate.age} > ${user.maxAge})`);
+        continue;
+      }
+      
+      // Filter candidate's age preference for user (bidirectional check)
+      if (candidate.minAge && user.age < candidate.minAge) {
+        console.log(`Filtered out ${candidate.name}: user too young for candidate`);
+        continue;
+      }
+      
+      if (candidate.maxAge && user.age > candidate.maxAge) {
+        console.log(`Filtered out ${candidate.name}: user too old for candidate`);
+        continue;
       }
     }
 
@@ -270,11 +298,18 @@ export const runMatchingBatch = internalAction({
         continue;
       }
 
+      const matchKey = makeMatchKey({
+        photoStatus: "approved",
+        vacationMode: false,
+        gender: user.interestedIn
+      });
+
       // Step 2a: Vector search for similar users (MUST be in action!)
       // ctx.vectorSearch returns Array<{_id, _score}>
       const vectorResults = await ctx.vectorSearch("users", "by_embedding", {
         vector: user.embedding,
         limit: 256, // Max limit, we'll narrow down
+        filter: (q) => q.eq("matchKey", matchKey),
       });
 
       console.log(`Vector search found ${vectorResults.length} similar users for ${user.name}`);
@@ -284,9 +319,6 @@ export const runMatchingBatch = internalAction({
         .filter(result => result._id !== user._id)
         .slice(0, 100) // Top 100 by similarity
         .map(result => result._id);
-
-      // Filter out candidates on vacation or with unapproved photos
-      // (We do this in loadAndFilterCandidates by only loading valid users)
 
       if (candidateIds.length === 0) {
         console.log(`No vector search candidates for ${user.name}`);

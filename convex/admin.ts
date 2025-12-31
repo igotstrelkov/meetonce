@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { mutation, query } from "./_generated/server";
+import { makeMatchKey } from "./lib/utils";
 
 export const getPendingPhotos = query({
   args: {},
@@ -45,6 +46,7 @@ export const approvePhoto = mutation({
       photoStatus: "approved",
       attractivenessRating: args.rating,
       updatedAt: Date.now(),
+      matchKey: makeMatchKey({ photoStatus: "approved", vacationMode: user.vacationMode, gender: user.gender }),
     });
 
     // Send approval email
@@ -76,6 +78,7 @@ export const rejectPhoto = mutation({
       photoRejectionReason: args.rejectionReason,
       photoResubmissionCount: user.photoResubmissionCount + 1,
       updatedAt: Date.now(),
+      matchKey: makeMatchKey({ photoStatus: "rejected", vacationMode: user.vacationMode, gender: user.gender }),
     });
 
     // Send rejection email

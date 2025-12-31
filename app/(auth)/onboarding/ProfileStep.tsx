@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { COUNTRIES, GENDERS } from "@/lib/constants";
 import { useState } from "react";
 
@@ -13,6 +14,9 @@ interface ProfileStepProps {
     age: number;
     gender: string;
     location: string;
+    interestedIn: string;
+    minAge: number;
+    maxAge: number;
   };
   updateData: (data: any) => void;
   onNext: () => void;
@@ -34,6 +38,14 @@ export default function ProfileStep({ data, updateData, onNext }: ProfileStepPro
 
     if (!data.location) {
       newErrors.location = "Location is required";
+    }
+
+    if (!data.interestedIn) {
+      newErrors.interestedIn = "Please select who you are interested in";
+    }
+
+    if (!data.minAge || !data.maxAge) {
+      newErrors.ageRange = "Age preference is required";
     }
 
     setErrors(newErrors);
@@ -60,7 +72,6 @@ export default function ProfileStep({ data, updateData, onNext }: ProfileStepPro
             id="name"
             value={data.name}
             onChange={(e) => updateData({ name: e.target.value })}
-            placeholder="John Doe"
             className="w-full"
           />
           {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
@@ -73,7 +84,6 @@ export default function ProfileStep({ data, updateData, onNext }: ProfileStepPro
             type="number"
             value={data.age || ""}
             onChange={(e) => updateData({ age: parseInt(e.target.value) })}
-            placeholder="25"
             className="w-full"
           />
           {errors.age && <p className="text-sm text-red-500 mt-1">{errors.age}</p>}
@@ -94,6 +104,40 @@ export default function ProfileStep({ data, updateData, onNext }: ProfileStepPro
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="interestedIn" className="mb-2 block">Interested In *</Label>
+          <Select
+            value={data.interestedIn}
+            onValueChange={(value) => updateData({ interestedIn: value })}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {GENDERS.map((gender) => (
+                <SelectItem key={gender.value} value={gender.label}>{gender.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.interestedIn && <p className="text-sm text-red-500 mt-1">{errors.interestedIn}</p>}
+        </div>
+
+        <div>
+           <Label className="mb-2 block">Age Range ({data.minAge || 18} - {data.maxAge || 100})</Label>
+           <Slider
+              value={[data.minAge || 18, data.maxAge || 100]}
+              min={18}
+              max={100}
+              step={1}
+              onValueChange={(value) => {
+                const [min, max] = value as number[];
+                updateData({ minAge: min, maxAge: max });
+              }}
+              className="py-4"
+           />
+           {errors.ageRange && <p className="text-sm text-red-500 mt-1">{errors.ageRange}</p>}
         </div>
 
         <div>

@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { action, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { generateEmbedding } from "./lib/openrouter";
+import { makeMatchKey } from "./lib/utils";
 
 export const getUserByClerkId = query({
   args: { clerkId: v.string() },
@@ -59,6 +60,9 @@ export const internalCreateUser = internalMutation({
     bio: v.string(),
     lookingFor: v.string(),
     interests: v.array(v.string()),
+    interestedIn: v.string(),
+    minAge: v.number(),
+    maxAge: v.number(),
     photoStorageId: v.optional(v.string()),
     embedding: v.array(v.number()),
   },
@@ -84,6 +88,9 @@ export const internalCreateUser = internalMutation({
       bio: args.bio,
       lookingFor: args.lookingFor,
       interests: args.interests,
+      interestedIn: args.interestedIn,
+      minAge: args.minAge,
+      maxAge: args.maxAge,
       photoStorageId: args.photoStorageId,
       embedding: args.embedding,
       photoStatus: "pending",
@@ -92,11 +99,12 @@ export const internalCreateUser = internalMutation({
       isAdmin: false,
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      matchKey: makeMatchKey({ photoStatus: "pending", vacationMode: false, gender: args.gender }),
     });
   },
 });
 
-export const createUser = action({
+export const createUserProfile = action({
   args: {
     clerkId: v.string(),
     email: v.string(),
@@ -107,17 +115,14 @@ export const createUser = action({
     bio: v.string(),
     lookingFor: v.string(),
     interests: v.array(v.string()),
+    interestedIn: v.string(),
+    minAge: v.number(),
+    maxAge: v.number(),
     photoStorageId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Generate embedding from profile text
-    const profileText = `
-      Name: ${args.name}, Age: ${args.age}, Gender: ${args.gender}
-      Location: ${args.location}
-      Bio: ${args.bio}
-      Looking for: ${args.lookingFor}
-      Interests: ${args.interests.join(", ")}
-    `;
+    const profileText = `${args.bio}\n\nLooking for ${args.lookingFor}`;
 
     const embedding = await generateEmbedding(profileText);
 
@@ -137,6 +142,9 @@ export const internalUpdateProfile = internalMutation({
     bio: v.optional(v.string()),
     lookingFor: v.optional(v.string()),
     interests: v.optional(v.array(v.string())),
+    interestedIn: v.optional(v.string()),
+    minAge: v.optional(v.number()),
+    maxAge: v.optional(v.number()),
     embedding: v.optional(v.array(v.number())),
   },
   handler: async (ctx, args) => {
@@ -163,6 +171,9 @@ export const updateProfile = action({
     bio: v.optional(v.string()),
     lookingFor: v.optional(v.string()),
     interests: v.optional(v.array(v.string())),
+    interestedIn: v.optional(v.string()),
+    minAge: v.optional(v.number()),
+    maxAge: v.optional(v.number()),
   },
   
   handler: async (ctx, args) => {
@@ -178,15 +189,9 @@ export const updateProfile = action({
        
        if (!user) throw new Error("User not found");
 
-       const profileText = `
-        Name: ${args.name ?? user.name}, Age: ${args.age ?? user.age}, Gender: ${user.gender}
-        Location: ${args.location ?? user.location}
-        Bio: ${args.bio ?? user.bio}
-        Looking for: ${args.lookingFor ?? user.lookingFor}
-        Interests: ${(args.interests ?? user.interests).join(", ")}
-      `;
+       const profileText = `${args.bio}\n\nLooking for ${args.lookingFor}`;
 
-      embedding = await generateEmbedding(profileText);
+        embedding = await generateEmbedding(profileText);
     }
 
     await ctx.runMutation(internal.users.internalUpdateProfile, {
@@ -223,6 +228,7 @@ export const updatePhotoStatus = mutation({
     await ctx.db.patch(userId, {
       ...updates,
       updatedAt: Date.now(),
+      matchKey: makeMatchKey({ photoStatus: args.photoStatus, vacationMode: user.vacationMode, gender: user.gender }),
     });
 
     return userId;
@@ -244,10 +250,13 @@ export const setVacationMode = mutation({
       throw new Error("User not found");
     }
 
+
+
     await ctx.db.patch(userId, {
       vacationMode,
       vacationUntil,
       updatedAt: Date.now(),
+      matchKey: makeMatchKey({ photoStatus: user.photoStatus, vacationMode, gender: user.gender }),
     });
 
     return userId;

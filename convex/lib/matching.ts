@@ -92,13 +92,7 @@ export async function suggestVenue(location: string): Promise<{
 }
 
 export function formatProfile(user: any): string {
-  return `
-Name: ${user.name}, Age: ${user.age}, Gender: ${user.gender}
-Location: ${user.location}
-Bio: ${user.bio}
-Looking for: ${user.lookingFor}
-Interests: ${user.interests.join(", ")}
-  `.trim();
+  return `${user.bio}\n\nLooking for ${user.lookingFor}`;
 }
 
 export function getWeekOfString(): string {
