@@ -2,6 +2,7 @@
 
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import MatchCard from "@/components/match/MatchCard";
+import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
@@ -18,7 +19,7 @@ export default function DashboardPage() {
 
   const matchData = useQuery(
     api.matches.getCurrentMatch,
-    currentUser?.photoStatus === "approved" ? { userId: currentUser._id } : "skip"
+    currentUser ? { userId: currentUser._id } : "skip"
   );
 
   useEffect(() => {
@@ -34,8 +35,38 @@ export default function DashboardPage() {
     // User exists and is authenticated - stay on dashboard
   }, [currentUser, router]);
 
-  if (currentUser === undefined || currentUser === null) {
+  if (currentUser === undefined || matchData === undefined) {
     return <LoadingSpinner />;
+  }
+
+  if (currentUser === null) {
+    return (
+      <div className="flex h-[60vh] w-full items-center justify-center">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold text-gray-900">User Profile Not Found</h2>
+          <p className="text-gray-600">
+            We couldn't locate your profile data. You may need to complete the onboarding process.
+          </p>
+          <Button onClick={() => router.push("/onboarding")}>
+            Complete Onboarding
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (matchData === null) {
+    return (
+      <div className="flex h-[60vh] w-full items-center justify-center">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 max-w-md text-center shadow-sm">
+          <div className="text-4xl mb-4">👋</div>
+          <h2 className="text-2xl font-bold mb-2 text-blue-900">No Match This Week</h2>
+          <p className="text-blue-800">
+            We're still looking for your perfect match. New matches are released every Monday morning!
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (currentUser.photoStatus === "rejected") {
@@ -71,19 +102,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (!matchData) {
-    return (
-      <div>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-          <h2 className="text-2xl font-bold mb-2">No Match This Week</h2>
-          <p className="text-gray-700">
-            We couldn't find a compatible match for you this week.
-            We'll keep looking for next Monday!
-          </p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div>
