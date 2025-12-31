@@ -1,6 +1,7 @@
-import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
+import { mutation, query } from "./_generated/server";
+import { getWeekOfString } from "./lib/matching";
 
 export const getCurrentMatch = query({
   args: { userId: v.id("users") },
@@ -148,10 +149,3 @@ export const respondToMatch = mutation({
     }
   },
 });
-
-function getWeekOfString(): string {
-  const now = new Date();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - now.getDay() + 1);
-  return monday.toISOString().split('T')[0];
-}

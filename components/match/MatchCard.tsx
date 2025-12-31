@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { api } from "@/convex/_generated/api";
+import { useMutation } from "convex/react";
+import { useState } from "react";
 import PassFeedbackForm from "./PassFeedbackForm";
 
 export default function MatchCard({ match, matchUser, isReversed }: any) {
@@ -65,13 +64,13 @@ export default function MatchCard({ match, matchUser, isReversed }: any) {
   };
 
   return (
-    <Card className="p-8 space-y-6">
+    <div className="space-y-6">
       {/* Profile Photo */}
       <div className="flex justify-center">
         <img
           src={matchUser?.photoUrl || "/default-avatar.png"}
           alt={matchUser?.name}
-          className="w-64 h-64 object-cover rounded-lg shadow-lg"
+          className="w-96 h-96 object-cover rounded-lg shadow-lg"
         />
       </div>
 
@@ -84,9 +83,9 @@ export default function MatchCard({ match, matchUser, isReversed }: any) {
       </div>
 
       {/* Compatibility Score */}
-      <div className="bg-pink-50 rounded-lg p-4 text-center">
+      <div className="bg-orange-50 rounded-lg p-4 text-center">
         <div className="text-sm text-gray-600 mb-1">Compatibility Score</div>
-        <div className="text-4xl font-bold text-pink-600">
+        <div className="text-4xl font-bold text-primary">
           {match.compatibilityScore}%
         </div>
       </div>
@@ -132,7 +131,7 @@ export default function MatchCard({ match, matchUser, isReversed }: any) {
           <Button
             onClick={handleInterested}
             size="lg"
-            className="flex-1 bg-pink-600 hover:bg-pink-700"
+            className="flex-1"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting..." : "❤️ I'm Interested!"}
@@ -177,8 +176,8 @@ export default function MatchCard({ match, matchUser, isReversed }: any) {
 
       {/* Mutual Match! */}
       {match.mutualMatch && (
-        <div className="bg-pink-50 border-2 border-pink-500 rounded-lg p-6 space-y-4">
-          <h3 className="text-2xl font-bold text-center text-pink-600">
+        <div className="bg-orange-50 border-2 border-orange-500 rounded-lg p-6 space-y-4">
+          <h3 className="text-2xl font-bold text-center text-orange-600">
             🎉 It's a Match!
           </h3>
 
@@ -209,6 +208,6 @@ export default function MatchCard({ match, matchUser, isReversed }: any) {
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }

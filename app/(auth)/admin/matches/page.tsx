@@ -1,10 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,8 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import MatchDetailsModal from "./MatchDetailsModal";
+import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import { useState } from "react";
+import { MetricCard } from "../page";
+import MatchDetailsModal from "./MatchDetailsModal";
 
 export default function MatchesAdminPage() {
   const [selectedWeek, setSelectedWeek] = useState<string>("all");
@@ -47,29 +48,23 @@ export default function MatchesAdminPage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="text-sm text-gray-600">Total Matches</div>
-          <div className="text-2xl font-bold">{stats.totalMatches}</div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-sm text-gray-600">Mutual Matches</div>
-          <div className="text-2xl font-bold text-green-600">
-            {stats.mutualMatches}
-          </div>
-          <div className="text-xs text-gray-500">{stats.mutualMatchRate}% rate</div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-sm text-gray-600">Dates Completed</div>
-          <div className="text-2xl font-bold text-blue-600">
-            {stats.datesCompleted}
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-sm text-gray-600">Both Passed</div>
-          <div className="text-2xl font-bold text-gray-600">
-            {stats.bothPassedCount}
-          </div>
-        </Card>
+        <MetricCard
+          title="Total Matches"
+          value={stats.totalMatches}
+        />
+        <MetricCard
+          title="Mutual Matches"
+          value={stats.mutualMatches}
+          subtitle={`${stats.mutualMatchRate}% rate`}
+        />
+        <MetricCard
+          title="Dates Completed"
+          value={stats.datesCompleted}
+        />
+        <MetricCard
+          title="Both Passed"
+          value={stats.bothPassedCount}
+        />
       </div>
 
       {/* Week Filter */}

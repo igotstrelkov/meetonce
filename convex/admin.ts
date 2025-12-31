@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { getWeekOfString } from "./lib/matching";
 import { makeMatchKey } from "./lib/utils";
 
 export const getPendingPhotos = query({
@@ -85,7 +86,7 @@ export const rejectPhoto = mutation({
     await ctx.scheduler.runAfter(0, internal.emails.sendPhotoRejectedEmail, {
       to: user.email,
       userName: user.name,
-      reason: formatRejectionReason(args.rejectionReason),
+      reason: args.rejectionReason,
       guidance: args.guidance,
       uploadUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/onboarding`,
     });
@@ -306,23 +307,23 @@ export const getWeeksWithMatches = query({
 });
 
 // Helper functions
-function getWeekOfString(): string {
-  const now = new Date();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - now.getDay() + 1);
-  return monday.toISOString().split('T')[0];
-}
+// function getWeekOfString(): string {
+//   const now = new Date();
+//   const monday = new Date(now);
+//   monday.setDate(now.getDate() - now.getDay() + 1);
+//   return monday.toISOString().split('T')[0];
+// }
 
-function formatRejectionReason(reason: string): string {
-  const reasons: Record<string, string> = {
-    poor_quality: "Poor photo quality",
-    face_obscured: "Face is obscured or not clearly visible",
-    group_photo: "Group photo (we need a solo photo)",
-    inappropriate: "Inappropriate content",
-    heavily_filtered: "Heavily filtered or edited",
-    poor_lighting: "Poor lighting",
-    face_not_visible: "Face not visible",
-    other: "Photo doesn't meet our standards",
-  };
-  return reasons[reason] || reason;
-}
+// function formatRejectionReason(reason: string): string {
+//   const reasons: Record<string, string> = {
+//     poor_quality: "Poor photo quality",
+//     face_obscured: "Face is obscured or not clearly visible",
+//     group_photo: "Group photo (we need a solo photo)",
+//     inappropriate: "Inappropriate content",
+//     heavily_filtered: "Heavily filtered or edited",
+//     poor_lighting: "Poor lighting",
+//     face_not_visible: "Face not visible",
+//     other: "Photo doesn't meet our standards",
+//   };
+//   return reasons[reason] || reason;
+// }

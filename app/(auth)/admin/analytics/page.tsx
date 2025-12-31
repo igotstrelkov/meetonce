@@ -1,7 +1,8 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { Card } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 
 export default function AnalyticsPage() {
   const matchingMetrics = useQuery(api.admin.getMatchingAnalytics);
@@ -26,7 +27,7 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Matching Performance */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <Card className="p-6">
           <h3 className="text-xl font-semibold mb-4">Matching Performance</h3>
           <div className="space-y-4">
             <MetricRow
@@ -42,10 +43,10 @@ export default function AnalyticsPage() {
               value={`${Math.round(matchingMetrics.mutualMatchRate)}%`}
             />
           </div>
-        </div>
+        </Card>
 
         {/* Date Outcomes */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <Card className="p-6">
           <h3 className="text-xl font-semibold mb-4">Date Outcomes</h3>
           <div className="space-y-4">
             <MetricRow
@@ -61,13 +62,13 @@ export default function AnalyticsPage() {
               value={outcomeMetrics.successStories}
             />
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* PRIMARY METRIC */}
-      <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg shadow-lg p-8 text-center">
+      <Card className="p-8 text-center">
         <h3 className="text-xl font-semibold mb-2">PRIMARY SUCCESS METRIC</h3>
-        <div className="text-6xl font-bold text-pink-600 my-4">
+        <div className="text-6xl font-bold text-primary my-4">
           {Math.round(outcomeMetrics.mutualInterestRate)}%
         </div>
         <p className="text-gray-700 text-lg">Mutual Interest Rate</p>
@@ -83,7 +84,7 @@ export default function AnalyticsPage() {
             ⚠️ Below Target (30%)
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

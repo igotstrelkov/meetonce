@@ -1,6 +1,7 @@
 "use client";
 
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { Card } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 
@@ -43,7 +44,7 @@ export default function AdminOverviewPage() {
         />
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
+      <Card className="p-4">
         <h3 className="text-lg font-semibold mb-4">Approval Rate</h3>
         <div className="flex items-end space-x-2">
           <div className="text-4xl font-bold text-primary">
@@ -53,12 +54,12 @@ export default function AdminOverviewPage() {
             of users approved
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
 
-function MetricCard({
+export function MetricCard({
   title,
   value,
   subtitle,
@@ -66,13 +67,11 @@ function MetricCard({
 }: {
   title: string;
   value: number;
-  subtitle: string;
+  subtitle?: string;
   urgent?: boolean;
 }) {
   return (
-    <div className={`bg-white rounded-lg shadow p-6 ${
-      urgent ? "ring-2 ring-red-500" : ""
-    }`}>
+    <Card className="p-4">
       <h3 className="text-sm font-medium text-gray-600 mb-2">{title}</h3>
       <div className="text-3xl font-bold mb-1">{value}</div>
       <p className="text-sm text-gray-500">{subtitle}</p>
@@ -81,6 +80,6 @@ function MetricCard({
           ⚠️ Needs attention
         </p>
       )}
-    </div>
+    </Card>
   );
 }

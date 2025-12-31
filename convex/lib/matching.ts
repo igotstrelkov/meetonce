@@ -33,7 +33,8 @@ Respond with JSON:
     max_tokens: 500,
   });
 
-  const parsed = JSON.parse(response);
+  const content = response.choices[0].message.content;
+  const parsed = JSON.parse(content);
   return {
     score: parsed.score,
     explanation: parsed.explanation,
@@ -71,7 +72,8 @@ Respond with JSON:
     max_tokens: 300,
   });
 
-  const parsed = JSON.parse(response);
+  const content = response.choices[0].message.content;
+  const parsed = JSON.parse(content);
   return parsed.starters;
 }
 
@@ -97,8 +99,20 @@ export function formatProfile(user: any): string {
 
 export function getWeekOfString(): string {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
+  const dayOfWeek = now.getDay();
+
+  // Calculate days to subtract to get to Monday
+  // Sunday (0) should go back 6 days, Monday (1) stays same, etc.
+  const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+  // Create Monday's date
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - daysToSubtract);
+
+  // Format as YYYY-MM-DD in LOCAL timezone (not UTC)
+  const year = monday.getFullYear();
+  const month = String(monday.getMonth() + 1).padStart(2, '0');
+  const day = String(monday.getDate()).padStart(2, '0');
+
   return `${year}-${month}-${day}`;
 }
