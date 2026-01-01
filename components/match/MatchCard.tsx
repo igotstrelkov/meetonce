@@ -100,7 +100,7 @@ export default function MatchCard({ match, matchUser, isReversed }: any) {
 
       {/* Full Profile */}
       <div className="space-y-4">
-        <div>
+        {/* <div>
           <h3 className="text-lg font-semibold mb-2">About {matchUser?.name}</h3>
           <p className="text-gray-700 leading-relaxed">{matchUser?.bio}</p>
         </div>
@@ -108,7 +108,7 @@ export default function MatchCard({ match, matchUser, isReversed }: any) {
         <div>
           <h3 className="text-lg font-semibold mb-2">Looking For</h3>
           <p className="text-gray-700 leading-relaxed">{matchUser?.lookingFor}</p>
-        </div>
+        </div> */}
 
         <div>
           <h3 className="text-lg font-semibold mb-2">Interests</h3>
@@ -134,7 +134,7 @@ export default function MatchCard({ match, matchUser, isReversed }: any) {
             className="flex-1"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Submitting..." : "❤️ I'm Interested!"}
+            {isSubmitting ? "Submitting..." : "I'm Interested!"}
           </Button>
           <Button
             onClick={handlePass}

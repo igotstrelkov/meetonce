@@ -64,6 +64,7 @@ export const internalCreateUser = internalMutation({
     minAge: v.number(),
     maxAge: v.number(),
     photoStorageId: v.optional(v.string()),
+    verificationDocStorageId: v.optional(v.string()),
     embedding: v.array(v.number()),
   },
 
@@ -92,9 +93,11 @@ export const internalCreateUser = internalMutation({
       minAge: args.minAge,
       maxAge: args.maxAge,
       photoStorageId: args.photoStorageId,
+      verificationDocStorageId: args.verificationDocStorageId,
       embedding: args.embedding,
       photoStatus: "pending",
       photoResubmissionCount: 0,
+      verificationStatus: "pending",
       vacationMode: false,
       isAdmin: false,
       createdAt: Date.now(),
@@ -119,6 +122,7 @@ export const createUserProfile = action({
     minAge: v.number(),
     maxAge: v.number(),
     photoStorageId: v.optional(v.string()),
+    verificationDocStorageId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Generate embedding from profile text

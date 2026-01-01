@@ -121,18 +121,41 @@ export default function PhotoReviewPage() {
       ): (
       <>
       <div>
-        <div className="flex justify-center mb-6">
-          {currentPhoto.photoUrl ? (
-            <img
-              src={currentPhoto.photoUrl}
-              alt="User photo"
-              className="w-96 h-96 object-cover rounded-lg"
-            />
-          ) : (
-            <div className="w-96 h-96 bg-gray-200 rounded-lg flex items-center justify-center">
-              <p className="text-gray-500">No photo uploaded</p>
-            </div>
-          )}
+        {/* Display both selfie and verification document */}
+        <div className="flex gap-6 justify-center mb-6">
+          {/* Selfie */}
+          <div className="flex-1 max-w-md">
+            <h3 className="text-sm font-semibold mb-2 text-center">Profile Photo</h3>
+            {currentPhoto.photoUrl ? (
+              <img
+                src={currentPhoto.photoUrl}
+                alt="User photo"
+                className="w-full h-96 object-cover rounded-lg"
+              />
+            ) : (
+              <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500">No photo uploaded</p>
+              </div>
+            )}
+          </div>
+
+          {/* Verification Document */}
+          <div className="flex-1 max-w-md">
+            <h3 className="text-sm font-semibold mb-2 text-center">
+              Verification Document
+            </h3>
+            {currentPhoto.verificationDocUrl ? (
+              <img
+                src={currentPhoto.verificationDocUrl}
+                alt="Verification document"
+                className="w-full h-96 object-contain rounded-lg bg-gray-50"
+              />
+            ) : (
+              <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500">No document uploaded</p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="text-center mb-6">

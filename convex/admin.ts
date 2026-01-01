@@ -20,9 +20,14 @@ export const getPendingPhotos = query({
           ? await ctx.storage.getUrl(user.photoStorageId)
           : null;
 
+        const verificationDocUrl = user.verificationDocStorageId
+          ? await ctx.storage.getUrl(user.verificationDocStorageId)
+          : null;
+
         return {
           ...user,
           photoUrl, // Return as photoUrl for display in UI
+          verificationDocUrl, // Return as verificationDocUrl for display in UI
         };
       })
     );

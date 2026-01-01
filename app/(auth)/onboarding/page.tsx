@@ -6,6 +6,7 @@ import { useAction, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BioStep from "./BioStep";
+import DocumentStep from "./DocumentStep";
 import InterestsStep from "./InterestsStep";
 import PhotoStep from "./PhotoStep";
 import ProfileStep from "./ProfileStep";
@@ -29,6 +30,7 @@ export default function OnboardingPage() {
     lookingFor: "",
     interests: [] as string[],
     photo: null as File | null,
+    verificationDoc: null as File | null,
   });
 
   const updateFormData = (data: Partial<typeof formData>) => {
@@ -45,18 +47,27 @@ export default function OnboardingPage() {
       // Upload photo to Convex storage
       let photoStorageId = "";
       if (formData.photo) {
-        // Get upload URL
         const uploadUrl = await generateUploadUrl();
-
-        // Upload the file
         const result = await fetch(uploadUrl, {
           method: "POST",
           headers: { "Content-Type": formData.photo.type },
           body: formData.photo,
         });
-
         const { storageId } = await result.json();
         photoStorageId = storageId;
+      }
+
+      // Upload verification document to Convex storage
+      let verificationDocStorageId = "";
+      if (formData.verificationDoc) {
+        const uploadUrl = await generateUploadUrl();
+        const result = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": formData.verificationDoc.type },
+          body: formData.verificationDoc,
+        });
+        const { storageId } = await result.json();
+        verificationDocStorageId = storageId;
       }
 
       // Create user profile
@@ -74,6 +85,7 @@ export default function OnboardingPage() {
         minAge: formData.minAge,
         maxAge: formData.maxAge,
         photoStorageId,
+        verificationDocStorageId,
       });
 
       router.push("/dashboard");
@@ -89,7 +101,7 @@ export default function OnboardingPage() {
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold">Create Your Profile</h1>
           <div className="text-sm text-gray-600">
-            Step {currentStep} of 4
+            Step {currentStep} of 5
           </div>
         </div>
 
@@ -97,7 +109,7 @@ export default function OnboardingPage() {
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-primary h-2 rounded-full transition-all"
-            style={{ width: `${(currentStep / 4) * 100}%` }}
+            style={{ width: `${(currentStep / 5) * 100}%` }}
           />
         </div>
       </div>
@@ -131,6 +143,15 @@ export default function OnboardingPage() {
 
         {currentStep === 4 && (
           <PhotoStep
+            data={formData}
+            updateData={updateFormData}
+            onBack={prevStep}
+            onNext={nextStep}
+          />
+        )}
+
+        {currentStep === 5 && (
+          <DocumentStep
             data={formData}
             updateData={updateFormData}
             onBack={prevStep}
