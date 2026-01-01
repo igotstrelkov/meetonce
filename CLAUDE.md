@@ -119,7 +119,7 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 
 **6-Stage Pipeline** (per user):
 1. **Vector Search** (Action): `ctx.vectorSearch()` finds top 256 similar users by embedding cosine similarity. **100x faster than manual calculation, scales to thousands**
-2. **Fast Filter** (Query): Load full documents, filter by photoStatus='approved', vacationMode=false, match/pass history
+2. **Fast Filter** (Query): Load full documents, filter by accountStatus='approved', vacationMode=false, match/pass history
 3. **Deep Analysis** (Action): GPT-4 analyzes top 20 filtered candidates for compatibility (0-100 score + explanation)
 4. **Validation** (Query): Check attractiveness ±2, compatibility ≥70, pass history in both directions
 5. **Package** (Action): Generate conversation starters + venue suggestion via LLM
@@ -154,8 +154,8 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 **Match Display & Response Flow** (`/dashboard`):
 - Queries `getCurrentMatch` to get current week's match (checks both user and matchUser directions)
 - Displays different states based on user status:
-  - `photoStatus = "pending"` → "Profile Under Review" message
-  - `photoStatus = "rejected"` → "Photo Needs Update" with rejection reason
+  - `accountStatus = "pending"` → "Profile Under Review" message
+  - `accountStatus = "rejected"` → "Photo Needs Update" with rejection reason
   - No match found → "No Match This Week" message
   - Active match → Full match card with response buttons
 - **Response Handling**:
@@ -250,16 +250,16 @@ TypeScript path aliases configured in `tsconfig.json`:
 - **Profile**: `name`, `age`, `gender`, `location`, `bio` (500-1000 words), `lookingFor`, `interests` (array)
 - **Photo & Review**:
   - `photoStorageId` (optional - Convex storage ID, converted to URL via `ctx.storage.getUrl()` in queries)
-  - `photoStatus` ('pending' | 'approved' | 'rejected')
+  - `accountStatus` ('pending' | 'approved' | 'rejected')
   - `attractivenessRating` (optional, 1-10, **NEVER exposed to users**, encrypted at rest)
-  - `photoRejectionReason` (optional string - guidance for rejected photos)
-  - `photoResubmissionCount` (number - tracks resubmissions)
+  - `accountRejectionReason` (optional string - guidance for rejected photos)
+  - `accountResubmissionCount` (number - tracks resubmissions)
 - **AI Matching**: `embedding` (optional, 1536 float64 values from OpenAI text-embedding-3-small)
 - **State**: `vacationMode` (boolean), `vacationUntil` (optional timestamp)
 - **Admin**: `isAdmin` (boolean, grants access to `/admin` dashboard)
 - **Timestamps**: `createdAt`, `updatedAt`
-- **Indexes**: `by_clerk_id`, `by_email`, `by_photo_status`, `by_vacation`
-- **Vector Search Index**: `by_embedding` (vectorField: "embedding", dimensions: 1536, filterFields: ["photoStatus", "vacationMode", "gender"])
+- **Indexes**: `by_clerk_id`, `by_email`, `by_account_status`, `by_vacation`
+- **Vector Search Index**: `by_embedding` (vectorField: "embedding", dimensions: 1536, filterFields: ["accountStatus", "vacationMode", "gender"])
 
 **weeklyMatches**:
 - **Match Participants**: `userId`, `matchUserId`, `weekOf` (string, e.g., '2024-12-16')
@@ -355,7 +355,7 @@ GOOGLE_PLACES_API_KEY=                  # Google Places API (venue selection)
 - Compatibility threshold: Score ≥70 required
 - Attractiveness compatibility: Within ±2 points
 - Users with `vacationMode=true` excluded from matching
-- Only users with `photoStatus='approved'` participate
+- Only users with `accountStatus='approved'` participate
 - Batched processing: 50 users per batch to prevent timeouts and scale to thousands
 
 **Testing the matching algorithm**:

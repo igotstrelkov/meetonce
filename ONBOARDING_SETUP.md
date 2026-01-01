@@ -163,8 +163,8 @@ export const createUser = mutation({
     const userId = await ctx.db.insert("users", {
       ...args,
       embedding,
-      photoStatus: "pending",  // Awaiting admin review
-      photoResubmissionCount: 0,
+      accountStatus: "pending",  // Awaiting admin review
+      accountResubmissionCount: 0,
       vacationMode: false,
       isAdmin: false,
       createdAt: Date.now(),
@@ -219,21 +219,21 @@ const [formData, setFormData] = useState({
 
 ### 2. Pending Approval (In Convex)
 - Completed onboarding
-- `photoStatus: "pending"`
+- `accountStatus: "pending"`
 - Waiting for admin review (24h)
 - Can view profile but cannot get matches
 
 ### 3. Approved (Active)
 - Admin approved photo
-- `photoStatus: "approved"`
+- `accountStatus: "approved"`
 - Eligible for weekly matching
 - Full platform access
 
 ### 4. Rejected (Resubmit Required)
 - Admin rejected photo
-- `photoStatus: "rejected"`
+- `accountStatus: "rejected"`
 - Can edit profile and resubmit
-- `photoResubmissionCount` incremented
+- `accountResubmissionCount` incremented
 
 ## Testing Checklist
 
@@ -275,7 +275,7 @@ const [formData, setFormData] = useState({
 - [ ] Photo uploads to Convex storage
 - [ ] User created in Convex database
 - [ ] Embedding generated
-- [ ] photoStatus set to "pending"
+- [ ] accountStatus set to "pending"
 - [ ] Redirects to homepage
 - [ ] No duplicate user creation
 
@@ -325,7 +325,7 @@ Already configured in `.env.local`:
 - Creates entry in `users` table
 - Photo stored in Convex storage (separate from DB)
 - Embedding (1536 floats) generated via OpenRouter
-- Initial status: `photoStatus: "pending"`
+- Initial status: `accountStatus: "pending"`
 
 **Storage Used Per User**:
 - Database: ~2KB (profile data + embedding)

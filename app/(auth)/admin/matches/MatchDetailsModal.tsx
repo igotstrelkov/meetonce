@@ -77,7 +77,7 @@ export default function MatchDetailsModal({
           <div>
             <h3 className="font-semibold mb-2">Conversation Starters</h3>
             <ul className="text-sm space-y-1">
-              {match.conversationStarters.map((starter, i) => (
+              {match.conversationStarters.map((starter: string, i: number) => (
                 <li key={i} className="text-gray-700">
                   • {starter}
                 </li>

@@ -76,7 +76,7 @@ export default function MatchesAdminPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Weeks</SelectItem>
-            {weeks.map((week) => (
+            {weeks.map((week: string) => (
               <SelectItem key={week} value={week}>
                 Week of {new Date(week).toLocaleDateString()}
               </SelectItem>
@@ -87,7 +87,7 @@ export default function MatchesAdminPage() {
 
       {/* Matches List */}
       <div className="space-y-4">
-        {matches.map((match) => (
+        {matches.map((match: any) => (
           <Card
             key={match._id}
             className="p-6 hover:shadow-lg transition-shadow cursor-pointer"

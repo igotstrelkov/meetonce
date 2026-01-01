@@ -79,7 +79,7 @@ export const internalCreateUser = internalMutation({
       throw new Error("User already exists");
     }
 
-    await ctx.db.insert("users", {
+    const userId = await ctx.db.insert("users", {
       clerkId: args.clerkId,
       email: args.email,
       name: args.name,
@@ -95,15 +95,16 @@ export const internalCreateUser = internalMutation({
       photoStorageId: args.photoStorageId,
       verificationDocStorageId: args.verificationDocStorageId,
       embedding: args.embedding,
-      photoStatus: "pending",
-      photoResubmissionCount: 0,
-      verificationStatus: "pending",
+      accountResubmissionCount: 0,
+      accountStatus: "pending",
       vacationMode: false,
       isAdmin: false,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      matchKey: makeMatchKey({ photoStatus: "pending", vacationMode: false, gender: args.gender }),
+      matchKey: makeMatchKey({ accountStatus: "pending", vacationMode: false, gender: args.gender }),
     });
+
+    return userId;
   },
 });
 
@@ -213,12 +214,12 @@ export const getUserInternal = internalQuery({
   }
 });
 
-export const updatePhotoStatus = mutation({
+export const updateAccountStatus = mutation({
   args: {
     userId: v.id("users"),
-    photoStatus: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
+    accountStatus: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
     attractivenessRating: v.optional(v.number()),
-    photoRejectionReason: v.optional(v.string()),
+    accountRejectionReason: v.optional(v.string()),
   },
   returns: v.id("users"),
   handler: async (ctx, args) => {
@@ -232,7 +233,33 @@ export const updatePhotoStatus = mutation({
     await ctx.db.patch(userId, {
       ...updates,
       updatedAt: Date.now(),
-      matchKey: makeMatchKey({ photoStatus: args.photoStatus, vacationMode: user.vacationMode, gender: user.gender }),
+      matchKey: makeMatchKey({ accountStatus: args.accountStatus, vacationMode: user.vacationMode, gender: user.gender }),
+    });
+
+    return userId;
+  },
+});
+
+export const internalUpdateAccountStatus = internalMutation({
+  args: {
+    userId: v.id("users"),
+    accountStatus: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
+    attractivenessRating: v.optional(v.number()),
+    accountRejectionReason: v.optional(v.string()),
+  },
+  returns: v.id("users"),
+  handler: async (ctx, args) => {
+    const { userId, ...updates } = args;
+
+    const user = await ctx.db.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    await ctx.db.patch(userId, {
+      ...updates,
+      updatedAt: Date.now(),
+      matchKey: makeMatchKey({ accountStatus: args.accountStatus, vacationMode: user.vacationMode, gender: user.gender }),
     });
 
     return userId;
@@ -260,7 +287,7 @@ export const setVacationMode = mutation({
       vacationMode,
       vacationUntil,
       updatedAt: Date.now(),
-      matchKey: makeMatchKey({ photoStatus: user.photoStatus, vacationMode, gender: user.gender }),
+      matchKey: makeMatchKey({ accountStatus: user.accountStatus, vacationMode, gender: user.gender }),
     });
 
     return userId;
@@ -274,7 +301,7 @@ export const setVacationMode = mutation({
 //     // Get all approved users not on vacation
 //     const users = await ctx.db
 //       .query("users")
-//       .withIndex("by_photo_status", q => q.eq("photoStatus", "approved"))
+//       .withIndex("by_account_status", q => q.eq("accountStatus", "approved"))
 //       .collect();
 
 //     return users.filter(user => !user.vacationMode);
@@ -300,5 +327,23 @@ export const makeUserAdmin = mutation({
   handler: async (ctx, args) => {
     await ctx.db.patch(args.userId, { isAdmin: true });
     return args.userId;
+  },
+});
+
+// Helper functions for seeding
+export const getAllUsersInternal = internalQuery({
+  args: {},
+  returns: v.array(v.any()),
+  handler: async (ctx) => {
+    return await ctx.db.query("users").collect();
+  },
+});
+
+export const deleteUser = internalMutation({
+  args: { userId: v.id("users") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.userId);
+    return null;
   },
 });

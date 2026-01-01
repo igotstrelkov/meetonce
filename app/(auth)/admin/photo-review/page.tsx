@@ -162,7 +162,7 @@ export default function PhotoReviewPage() {
           <h3 className="text-2xl font-bold">{currentPhoto.name}, {currentPhoto.age}</h3>
           <p className="text-gray-600">{currentPhoto.location}</p>
           <p className="text-sm text-gray-500 mt-2">
-            Resubmissions: {currentPhoto.photoResubmissionCount}
+            Resubmissions: {currentPhoto.accountResubmissionCount}
           </p>
         </div>
         {/* Step 1: Decision (Approve or Reject) */}

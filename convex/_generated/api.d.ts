@@ -17,6 +17,7 @@ import type * as lib_openrouter from "../lib/openrouter.js";
 import type * as lib_utils from "../lib/utils.js";
 import type * as matches from "../matches.js";
 import type * as matching from "../matching.js";
+import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 
 import type {
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   "lib/utils": typeof lib_utils;
   matches: typeof matches;
   matching: typeof matching;
+  seed: typeof seed;
   users: typeof users;
 }>;
 

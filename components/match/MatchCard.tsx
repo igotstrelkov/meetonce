@@ -6,8 +6,9 @@ import { useMutation } from "convex/react";
 import { useState } from "react";
 import PassFeedbackForm from "./PassFeedbackForm";
 
-export default function MatchCard({ match, matchUser, isReversed }: any) {
+export default function MatchCard({ match, matchUser, isReversed, currentUserId }: any) {
   const respond = useMutation(api.matches.respondToMatch);
+  const submitPassFeedback = useMutation(api.feedback.submitPassFeedback);
   const [showPassFeedback, setShowPassFeedback] = useState(false);
   const [hasResponded, setHasResponded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,9 +52,15 @@ export default function MatchCard({ match, matchUser, isReversed }: any) {
       setHasResponded(true);
       setShowPassFeedback(false);
 
-      // TODO: Save pass reason if provided
+      // Save pass reason if provided
       if (reason) {
-        console.log("Pass reason:", reason);
+        await submitPassFeedback({
+          matchId: match._id,
+          userId: currentUserId,
+          matchUserId: isReversed ? match.userId : match.matchUserId,
+          weekOf: match.weekOf,
+          reason: reason as any,
+        });
       }
     } catch (error) {
       console.error("Error responding to match:", error);

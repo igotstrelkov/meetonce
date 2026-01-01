@@ -25,17 +25,17 @@ Updated `app/page.tsx` to:
 ### 3. Authenticated + Profile Pending
 - **Show**: Welcome message + Yellow alert
 - **Message**: "Your photo is being reviewed! We'll send you an email within 24 hours..."
-- **Status**: `photoStatus === "pending"`
+- **Status**: `accountStatus === "pending"`
 
 ### 4. Authenticated + Profile Approved
 - **Show**: Welcome message + Green success alert
 - **Message**: "Your profile is live! You'll receive your first match on Monday morning at 9am."
-- **Status**: `photoStatus === "approved"`
+- **Status**: `accountStatus === "approved"`
 
 ### 5. Authenticated + Profile Rejected
 - **Show**: Welcome message + Red warning alert
 - **Message**: "Photo needs updating. Please upload a new photo that meets our guidelines."
-- **Status**: `photoStatus === "rejected"`
+- **Status**: `accountStatus === "rejected"`
 - **TODO**: Add "Update Photo" button to edit profile
 
 ## Code Changes

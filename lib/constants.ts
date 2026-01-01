@@ -6,7 +6,7 @@ export const INTERESTS = [
   "Volunteering", "Entrepreneurship", "Tech", "Science", "History",
   "Movies", "TV Shows", "Theater", "Concerts", "Festivals",
   "Pets", "Dogs", "Cats", "Nature", "Camping",
-] as const;
+]
 
 export const PASS_REASONS = [
   { value: "too_far", label: "Too far away" },
@@ -15,7 +15,7 @@ export const PASS_REASONS = [
   { value: "profile", label: "Profile didn't resonate" },
   { value: "dealbreaker", label: "Dealbreaker in profile" },
   { value: "no_chemistry", label: "Don't feel the chemistry" },
-];
+]
 
 export const REJECTION_CATEGORIES = [
   { value: "inappropriate", label: "Inappropriate Content" },

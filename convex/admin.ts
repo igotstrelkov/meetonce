@@ -10,7 +10,7 @@ export const getPendingPhotos = query({
   handler: async (ctx) => {
     const users = await ctx.db
       .query("users")
-      .withIndex("by_photo_status", q => q.eq("photoStatus", "pending"))
+      .withIndex("by_account_status", q => q.eq("accountStatus", "pending"))
       .collect();
 
     // Convert storage IDs to URLs
@@ -49,10 +49,10 @@ export const approvePhoto = mutation({
 
     // Update photo status
     await ctx.db.patch(args.userId, {
-      photoStatus: "approved",
+      accountStatus: "approved",
       attractivenessRating: args.rating,
       updatedAt: Date.now(),
-      matchKey: makeMatchKey({ photoStatus: "approved", vacationMode: user.vacationMode, gender: user.gender }),
+      matchKey: makeMatchKey({ accountStatus: "approved", vacationMode: user.vacationMode, gender: user.gender }),
     });
 
     // Send approval email
@@ -80,11 +80,11 @@ export const rejectPhoto = mutation({
     if (!user) throw new Error("User not found");
 
     await ctx.db.patch(args.userId, {
-      photoStatus: "rejected",
-      photoRejectionReason: args.rejectionReason,
-      photoResubmissionCount: user.photoResubmissionCount + 1,
+      accountStatus: "rejected",
+      accountRejectionReason: args.rejectionReason,
+      accountResubmissionCount: user.accountResubmissionCount + 1,
       updatedAt: Date.now(),
-      matchKey: makeMatchKey({ photoStatus: "rejected", vacationMode: user.vacationMode, gender: user.gender }),
+      matchKey: makeMatchKey({ accountStatus: "rejected", vacationMode: user.vacationMode, gender: user.gender }),
     });
 
     // Send rejection email
@@ -115,10 +115,10 @@ export const getPlatformMetrics = query({
     const allUsers = await ctx.db.query("users").collect();
 
     const totalUsers = allUsers.length;
-    const pendingPhotos = allUsers.filter(u => u.photoStatus === "pending").length;
-    const approvedUsers = allUsers.filter(u => u.photoStatus === "approved").length;
+    const pendingPhotos = allUsers.filter(u => u.accountStatus === "pending").length;
+    const approvedUsers = allUsers.filter(u => u.accountStatus === "approved").length;
     const activeUsers = allUsers.filter(u =>
-      u.photoStatus === "approved" && !u.vacationMode
+      u.accountStatus === "approved" && !u.vacationMode
     ).length;
 
     return {

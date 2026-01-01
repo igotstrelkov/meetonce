@@ -18,26 +18,21 @@ export default defineSchema({
 
     // Photo & Review
     photoStorageId: v.optional(v.string()),
-    photoStatus: v.union(
+    // Verification Document
+    verificationDocStorageId: v.optional(v.string()),
+    // Account Status
+    accountStatus: v.union(
       v.literal("pending"),
       v.literal("approved"),
       v.literal("rejected")
     ),
     attractivenessRating: v.optional(v.number()),
-    photoRejectionReason: v.optional(v.string()),
-    photoResubmissionCount: v.number(),
-
-    // Verification Document
-    verificationDocStorageId: v.optional(v.string()),
-    verificationStatus: v.union(
-      v.literal("pending"),
-      v.literal("approved"),
-      v.literal("rejected")
-    ),
-    verificationRejectionReason: v.optional(v.string()),
+    accountRejectionReason: v.optional(v.string()),
+    accountResubmissionCount: v.number(),
 
     // Composite field for vectorSearch filters
     matchKey: v.string(),
+    
     // AI Matching
     embedding: v.optional(v.array(v.float64())),
 
@@ -58,8 +53,7 @@ export default defineSchema({
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"])
-    .index("by_photo_status", ["photoStatus"])
-    .index("by_verification_status", ["verificationStatus"])
+    .index("by_account_status", ["accountStatus"])
     .index("by_vacation", ["vacationMode"])
     // Vector search index for AI matching
     .vectorIndex("by_embedding", {

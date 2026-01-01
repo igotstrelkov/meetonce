@@ -57,7 +57,7 @@ npm run dev
 5. **Verify Fields**:
    - `clerkId` matches Clerk user ID
    - `embedding` is array of 1536 floats
-   - `photoStatus` is "pending"
+   - `accountStatus` is "pending"
    - `photoUrl` points to storage
 
 ## 📂 File Structure Overview
@@ -131,7 +131,7 @@ npm run build
 - [ ] User record created in `users` table
 - [ ] Photo uploaded to Convex storage
 - [ ] Embedding array has 1536 floats
-- [ ] photoStatus is "pending"
+- [ ] accountStatus is "pending"
 - [ ] All profile fields populated
 
 ### UI/UX
@@ -157,8 +157,8 @@ npm run build
   "interests": ["Hiking", "Coffee", "Reading"],
   "photoUrl": "kg2abc...",
   "embedding": [0.123, -0.456, ...], // 1536 floats
-  "photoStatus": "pending",
-  "photoResubmissionCount": 0,
+  "accountStatus": "pending",
+  "accountResubmissionCount": 0,
   "vacationMode": false,
   "isAdmin": false,
   "createdAt": 1703462400000,

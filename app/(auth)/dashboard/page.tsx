@@ -69,13 +69,13 @@ export default function DashboardPage() {
     );
   }
 
-  if (currentUser.photoStatus === "rejected") {
+  if (currentUser.accountStatus === "rejected") {
     return (
       <div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
           <h2 className="text-2xl font-bold mb-2">Photo Needs Update</h2>
           <p className="text-gray-700 mb-4">
-            {currentUser.photoRejectionReason || "Your photo didn't meet our quality standards."}
+            {currentUser.accountRejectionReason || "Your photo didn't meet our quality standards."}
           </p>
           <a
             href="/profile/edit-photo"
@@ -88,7 +88,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (currentUser.photoStatus === "pending") {
+  if (currentUser.accountStatus === "pending") {
     return (
       <div >
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
@@ -117,6 +117,7 @@ export default function DashboardPage() {
         match={matchData.match}
         matchUser={matchData.matchUser}
         isReversed={matchData.isReversed}
+        currentUserId={currentUser._id}
       />
     </div>
   );

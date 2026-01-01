@@ -27,7 +27,7 @@ export const getUnmatchedUsersBatch = internalQuery({
       .query("users")
       .filter(q =>
         q.and(
-          q.eq(q.field("photoStatus"), "approved"),
+          q.eq(q.field("accountStatus"), "approved"),
           q.eq(q.field("vacationMode"), false)
         )
       )
@@ -81,7 +81,7 @@ export const loadAndFilterCandidates = internalQuery({
       if (!candidate) continue;
 
       // Filter: Must have approved photo and not be on vacation
-      if (candidate.photoStatus !== "approved" || candidate.vacationMode) {
+      if (candidate.accountStatus !== "approved" || candidate.vacationMode) {
         continue;
       }
 
@@ -299,7 +299,7 @@ export const runMatchingBatch = internalAction({
       }
 
       const matchKey = makeMatchKey({
-        photoStatus: "approved",
+        accountStatus: "approved",
         vacationMode: false,
         gender: user.interestedIn
       });

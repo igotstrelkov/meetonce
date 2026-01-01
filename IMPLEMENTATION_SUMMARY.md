@@ -9,7 +9,7 @@
 1. **users** (4 indexes)
    - Stores user profiles, photos, AI embeddings
    - Fields: clerkId, email, name, age, gender, location, bio, lookingFor, interests
-   - Photo: photoUrl, photoStatus, attractivenessRating, photoRejectionReason
+   - Photo: photoUrl, accountStatus, attractivenessRating, accountRejectionReason
    - AI: embedding (1536 floats from OpenAI)
    - Status: vacationMode, isAdmin
 
@@ -35,7 +35,7 @@
 - `createUser()` - Create user with embedding generation
 - `generateUploadUrl()` - Generate URL for photo upload
 - `updateProfile()` - Update profile and regenerate embedding
-- `updatePhotoStatus()` - Admin photo approval/rejection
+- `updateAccountStatus()` - Admin verification (document and photo) approval/rejection
 - `setVacationMode()` - Enable/disable vacation mode
 - `getUsersForMatching()` - Get approved users for matching
 
@@ -86,7 +86,7 @@
 2. Photo uploaded to Convex storage
 3. `createUser()` mutation called
 4. AI embedding generated (OpenRouter)
-5. User created with `photoStatus: "pending"`
+5. User created with `accountStatus: "pending"`
 6. Redirect to homepage
 
 ## File Structure

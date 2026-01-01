@@ -22,7 +22,7 @@
    - ✅ `getCurrentUser` - Get authenticated user
    - ✅ `createUser` - Create user with embedding generation
    - ✅ `updateProfile` - Update profile and regenerate embedding
-   - ✅ `updatePhotoStatus` - Admin photo approval/rejection
+   - ✅ `updateAccountStatus` - Admin verification (document and photo) approval/rejection
    - ✅ `setVacationMode` - Enable/disable vacation mode
    - ✅ `getUsersForMatching` - Get approved users for matching
 
@@ -47,7 +47,7 @@ Run `npx convex dev --once` output:
   [+] passReasons.by_user
   [+] users.by_clerk_id
   [+] users.by_email
-  [+] users.by_photo_status
+  [+] users.by_account_status
   [+] users.by_vacation
   [+] weeklyMatches.by_match_and_user
   [+] weeklyMatches.by_match_user_and_week
@@ -65,12 +65,12 @@ Run `npx convex dev --once` output:
 
 **Key Fields**:
 - `clerkId` - Authentication identifier
-- `photoStatus` - pending | approved | rejected
+- `accountStatus` - pending | approved | rejected
 - `attractivenessRating` - 1-10 (PRIVATE, never exposed)
 - `embedding` - 1536-dimensional vector for matching
 - `vacationMode` - Exclude from matching when true
 
-**Indexes**: by_clerk_id, by_email, by_photo_status, by_vacation
+**Indexes**: by_clerk_id, by_email, by_account_status, by_vacation
 
 ### 2. weeklyMatches
 **Purpose**: Store weekly match pairs with AI-generated content
