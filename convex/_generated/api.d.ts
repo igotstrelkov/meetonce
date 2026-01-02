@@ -15,10 +15,12 @@ import type * as feedback from "../feedback.js";
 import type * as lib_matching from "../lib/matching.js";
 import type * as lib_openrouter from "../lib/openrouter.js";
 import type * as lib_utils from "../lib/utils.js";
+import type * as lib_vapi from "../lib/vapi.js";
 import type * as matches from "../matches.js";
 import type * as matching from "../matching.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
+import type * as voice from "../voice.js";
 
 import type {
   ApiFromModules,
@@ -34,10 +36,12 @@ declare const fullApi: ApiFromModules<{
   "lib/matching": typeof lib_matching;
   "lib/openrouter": typeof lib_openrouter;
   "lib/utils": typeof lib_utils;
+  "lib/vapi": typeof lib_vapi;
   matches: typeof matches;
   matching: typeof matching;
   seed: typeof seed;
   users: typeof users;
+  voice: typeof voice;
 }>;
 
 /**
