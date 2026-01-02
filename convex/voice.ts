@@ -1,0 +1,86 @@
+import { v } from "convex/values";
+import { action } from "./_generated/server";
+import { getOrCreateAssistant } from "./lib/vapi";
+import { processVoiceTranscript } from "./lib/openrouter";
+
+/**
+ * Create or get Bio assistant ID
+ */
+export const getBioAssistant = action({
+  args: {},
+  returns: v.string(),
+  handler: async () => {
+    return await getOrCreateAssistant("bio");
+  },
+});
+
+/**
+ * Create or get Preferences assistant ID
+ */
+export const getPreferencesAssistant = action({
+  args: {},
+  returns: v.string(),
+  handler: async () => {
+    return await getOrCreateAssistant("preferences");
+  },
+});
+
+/**
+ * Process voice transcript and return optimized text
+ */
+export const processTranscript = action({
+  args: {
+    transcript: v.string(),
+    type: v.union(v.literal("bio"), v.literal("preferences")),
+  },
+  returns: v.string(),
+  handler: async (ctx, args) => {
+    if (!args.transcript || args.transcript.trim().length === 0) {
+      throw new Error("Transcript cannot be empty");
+    }
+
+    try {
+      const processedText = await processVoiceTranscript(
+        args.transcript,
+        args.type
+      );
+
+      // Validate word count
+      const wordCount = processedText
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean).length;
+
+      if (args.type === "bio") {
+        if (wordCount < 50 || wordCount > 300) {
+          console.warn(
+            `Bio word count ${wordCount} is outside range 50-300, retrying...`
+          );
+          // Retry with stricter prompt
+          const retryText = await processVoiceTranscript(
+            args.transcript + "\n\nIMPORTANT: The output MUST be between 50-300 words.",
+            args.type
+          );
+          return retryText;
+        }
+      } else {
+        if (wordCount < 20 || wordCount > 100) {
+          console.warn(
+            `Preferences word count ${wordCount} is outside range 20-100, retrying...`
+          );
+          // Retry with stricter prompt
+          const retryText = await processVoiceTranscript(
+            args.transcript + "\n\nIMPORTANT: The output MUST be between 20-100 words.",
+            args.type
+          );
+          return retryText;
+        }
+      }
+
+      return processedText;
+    } catch (error: any) {
+      console.error("Error processing transcript:", error);
+      throw new Error(`Failed to process transcript: ${error.message}`);
+    }
+  },
+});

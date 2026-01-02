@@ -91,3 +91,54 @@ export async function callWithRetry(
     }
   }
 }
+
+/**
+ * Process voice interview transcript into optimized bio or preferences text
+ */
+export async function processVoiceTranscript(
+  transcript: string,
+  type: "bio" | "preferences"
+): Promise<string> {
+  const systemPrompts = {
+    bio: `You are a professional dating profile writer. Convert this voice interview transcript into a compelling, authentic bio (50-300 words).
+
+REQUIREMENTS:
+- Write in first person
+- Capture their personality and authenticity
+- Focus on specifics, not generics
+- Natural, conversational tone
+- Remove filler words and repetition
+- Organize into coherent narrative
+
+OUTPUT FORMAT: Single paragraph bio (50-300 words)`,
+
+    preferences: `You are a professional dating profile writer. Convert this voice interview transcript into clear relationship preferences (20-100 words).
+
+REQUIREMENTS:
+- Write in first person
+- Focus on values and compatibility
+- Be specific about what matters
+- Positive framing (what they want, not just what they don't)
+- Remove filler words
+
+OUTPUT FORMAT: Single paragraph preferences (20-100 words)`,
+  };
+
+  const response = await callOpenRouter({
+    model: "openai/gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: systemPrompts[type],
+      },
+      {
+        role: "user",
+        content: `TRANSCRIPT:\n${transcript}\n\nGenerate the optimized ${type}.`,
+      },
+    ],
+    temperature: 0.7,
+    max_tokens: 500,
+  });
+
+  return response.choices[0].message.content.trim();
+}

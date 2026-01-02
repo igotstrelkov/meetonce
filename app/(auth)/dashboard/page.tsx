@@ -55,20 +55,6 @@ export default function DashboardPage() {
     );
   }
 
-  if (matchData === null) {
-    return (
-      <div className="flex h-[60vh] w-full items-center justify-center">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 max-w-md text-center shadow-sm">
-          <div className="text-4xl mb-4">👋</div>
-          <h2 className="text-2xl font-bold mb-2 text-blue-900">No Match This Week</h2>
-          <p className="text-blue-800">
-            We're still looking for your perfect match. New matches are released every Monday morning!
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   if (currentUser.accountStatus === "rejected") {
     return (
       <div>
@@ -102,7 +88,17 @@ export default function DashboardPage() {
     );
   }
 
-
+  if (matchData === null) {
+    return (
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+        <h2 className="text-2xl font-bold mb-2">No Match This Week</h2>
+        <p className="text-gray-700">
+          We're still looking for your perfect match. New matches are released every Monday morning!
+        </p>
+      </div>
+    );
+  }
+  
 
   return (
     <div>
