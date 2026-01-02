@@ -12,7 +12,21 @@ interface OpenRouterMessage {
 interface OpenRouterRequest {
   model: string;
   messages: OpenRouterMessage[];
-  response_format?: { type: "json_object" };
+  response_format?:
+    | { type: "json_object" }
+    | {
+        type: "json_schema";
+        json_schema: {
+          name: string;
+          strict?: boolean;
+          schema: {
+            type: string;
+            properties: Record<string, any>;
+            required?: string[];
+            additionalProperties?: boolean;
+          };
+        };
+      };
   temperature?: number;
   max_tokens?: number;
 }

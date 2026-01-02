@@ -24,7 +24,7 @@ export function VoiceStateIndicator({ state, error, canProceed }: VoiceStateIndi
   if (state === "idle") {
     return (
       <div className="text-center text-gray-600">
-        <p className="text-sm">Ready to start your voice interview</p>
+        <p className="text-sm">Ready to start the interview?</p>
       </div>
     );
   }
@@ -38,7 +38,7 @@ export function VoiceStateIndicator({ state, error, canProceed }: VoiceStateIndi
             Recording...
           </span>
         </div>
-        <p className="text-sm text-gray-600 mt-1">Speak naturally with the AI matchmaker</p>
+        <p className="text-sm text-gray-600 mt-1">Speak with AI matchmaker</p>
       </div>
     );
   }

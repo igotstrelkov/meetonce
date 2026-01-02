@@ -78,8 +78,8 @@ export function VoiceInterviewCard({
 
   if (!assistantId) {
     return (
-      <Card className="p-8 h-[268px]">
-        <div className="flex flex-col items-center justify-center h-full text-center">
+      <Card className="p-8">
+        <div className="space-y-6 h-[268px] items-center justify-center text-center">
           <LoadingSpinner/>
         </div>
       </Card>
@@ -88,12 +88,13 @@ export function VoiceInterviewCard({
 
   return (
     <Card className="p-8">
-      <div className="space-y-6">
-        {/* <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">{title}</h2>
-          <p className="text-gray-600">{description}</p>
-        </div> */}
-
+      <div className="space-y-6 h-[268px]">
+        
+        
+        {!assistantId ? (
+            <LoadingSpinner/>
+        ) : (
+        <>
         <VoiceWaveform isActive={isWaveformActive} />
 
         <VoiceStateIndicator
@@ -109,6 +110,10 @@ export function VoiceInterviewCard({
           disabled={!assistantId || isProcessing}
           canProceed={canProceed}
         />
+        </>
+      )}
+
+        
       </div>
     </Card>
   );
