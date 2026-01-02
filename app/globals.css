@@ -124,3 +124,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Voice waveform animation */
+@keyframes wave {
+  0%, 100% {
+    height: 0.5rem;
+  }
+  50% {
+    height: 5rem;
+  }
+}
+
+.animate-wave {
+  animation: wave 1.5s ease-in-out infinite;
+}
