@@ -5,7 +5,8 @@ import { useUser } from "@clerk/nextjs";
 import { useAction, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import BioStep from "./BioStep";
+import BiographyVoiceStep from "./BiographyVoiceStep";
+import PreferencesVoiceStep from "./PreferencesVoiceStep";
 import DocumentStep from "./DocumentStep";
 import InterestsStep from "./InterestsStep";
 import PhotoStep from "./PhotoStep";
@@ -101,7 +102,7 @@ export default function OnboardingPage() {
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold">Create Your Profile</h1>
           <div className="text-sm text-gray-600">
-            Step {currentStep} of 5
+            Step {currentStep} of 6
           </div>
         </div>
 
@@ -109,7 +110,7 @@ export default function OnboardingPage() {
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-primary h-2 rounded-full transition-all"
-            style={{ width: `${(currentStep / 5) * 100}%` }}
+            style={{ width: `${(currentStep / 6) * 100}%` }}
           />
         </div>
       </div>
@@ -124,7 +125,7 @@ export default function OnboardingPage() {
         )}
 
         {currentStep === 2 && (
-          <BioStep
+          <BiographyVoiceStep
             data={formData}
             updateData={updateFormData}
             onNext={nextStep}
@@ -133,7 +134,7 @@ export default function OnboardingPage() {
         )}
 
         {currentStep === 3 && (
-          <InterestsStep
+          <PreferencesVoiceStep
             data={formData}
             updateData={updateFormData}
             onNext={nextStep}
@@ -142,6 +143,15 @@ export default function OnboardingPage() {
         )}
 
         {currentStep === 4 && (
+          <InterestsStep
+            data={formData}
+            updateData={updateFormData}
+            onNext={nextStep}
+            onBack={prevStep}
+          />
+        )}
+
+        {currentStep === 5 && (
           <PhotoStep
             data={formData}
             updateData={updateFormData}
@@ -150,7 +160,7 @@ export default function OnboardingPage() {
           />
         )}
 
-        {currentStep === 5 && (
+        {currentStep === 6 && (
           <DocumentStep
             data={formData}
             updateData={updateFormData}
