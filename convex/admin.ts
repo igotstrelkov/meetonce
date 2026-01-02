@@ -6,7 +6,6 @@ import { makeMatchKey } from "./lib/utils";
 
 export const getPendingPhotos = query({
   args: {},
-  returns: v.array(v.any()),
   handler: async (ctx) => {
     const users = await ctx.db
       .query("users")

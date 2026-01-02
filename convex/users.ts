@@ -347,3 +347,48 @@ export const deleteUser = internalMutation({
     return null;
   },
 });
+
+export const updateUserPhotos = mutation({
+  args: {
+    type: v.union(v.literal("photo"), v.literal("document"), v.literal("update")),
+    photoStorageId: v.optional(v.string()),
+    verificationDocStorageId: v.optional(v.string()),
+  },
+  returns: v.string(),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Generate upload URL for photo or document
+    if (args.type === "photo" || args.type === "document") {
+      return await ctx.storage.generateUploadUrl();
+    }
+
+    // Update user record with new storage IDs
+    if (args.type === "update") {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_clerk_id", q => q.eq("clerkId", identity.subject))
+        .first();
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      await ctx.db.patch(user._id, {
+        photoStorageId: args.photoStorageId,
+        verificationDocStorageId: args.verificationDocStorageId,
+        accountStatus: "pending",
+        accountResubmissionCount: (user.accountResubmissionCount || 0) + 1,
+        updatedAt: Date.now(),
+        matchKey: makeMatchKey({ accountStatus: "pending", vacationMode: user.vacationMode, gender: user.gender }),
+      });
+
+      return "Updated successfully";
+    }
+
+    throw new Error("Invalid type");
+  },
+});

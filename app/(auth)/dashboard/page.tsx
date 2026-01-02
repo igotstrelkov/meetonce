@@ -73,16 +73,13 @@ export default function DashboardPage() {
     return (
       <div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <h2 className="text-2xl font-bold mb-2">Photo Needs Update</h2>
+          <h2 className="text-2xl font-bold mb-2">Profile Needs Update</h2>
           <p className="text-gray-700 mb-4">
-            {currentUser.accountRejectionReason || "Your photo didn't meet our quality standards."}
+            {currentUser.accountRejectionReason || "Your profile didn't meet our quality standards."}
           </p>
-          <a
-            href="/profile/edit-photo"
-            className="text-pink-600 hover:text-pink-700 font-semibold"
-          >
-            Upload New Photo →
-          </a>
+          <Button onClick={() => router.push("/onboarding/resubmit")}>
+            Resubmit Profile
+          </Button>
         </div>
       </div>
     );

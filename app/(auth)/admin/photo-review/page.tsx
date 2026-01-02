@@ -165,6 +165,17 @@ export default function PhotoReviewPage() {
             Resubmissions: {currentPhoto.accountResubmissionCount}
           </p>
         </div>
+
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2">About Them</h3>
+          <p className="text-gray-700 leading-relaxed">{currentPhoto?.bio}</p>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2">Looking For</h3>
+          <p className="text-gray-700 leading-relaxed">{currentPhoto?.lookingFor}</p>
+        </div>
+
         {/* Step 1: Decision (Approve or Reject) */}
       {step === "decision" && (
         <div className="p-4">
