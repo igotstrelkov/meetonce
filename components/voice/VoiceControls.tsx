@@ -7,9 +7,26 @@ interface VoiceControlsProps {
   onStart: () => void;
   onRetry: () => void;
   disabled?: boolean;
+  canProceed?: boolean;
 }
 
-export function VoiceControls({ state, onStart, onRetry, disabled }: VoiceControlsProps) {
+export function VoiceControls({ state, onStart, onRetry, disabled, canProceed }: VoiceControlsProps) {
+  if (state === "complete" || canProceed) {
+    return (
+      <div className="flex justify-center">
+        <Button
+          onClick={onRetry}
+          variant="outline"
+          size="sm"
+          className="gap-2"
+        >
+          <RotateCcw className="w-4 h-4" />
+          Redo Interview
+        </Button>
+      </div>
+    );
+  }
+  
   if (state === "idle") {
     return (
       <div className="flex justify-center">
@@ -26,21 +43,21 @@ export function VoiceControls({ state, onStart, onRetry, disabled }: VoiceContro
     );
   }
 
-  if (state === "recording" || state === "processing") {
-    return (
-      <div className="flex justify-center">
-        <Button
-          onClick={onRetry}
-          variant="outline"
-          size="lg"
-          className="gap-2"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Start Over
-        </Button>
-      </div>
-    );
-  }
+  // if (state === "recording" || state === "processing") {
+  //   return (
+  //     <div className="flex justify-center">
+  //       <Button
+  //         onClick={onRetry}
+  //         variant="outline"
+  //         size="lg"
+  //         className="gap-2"
+  //       >
+  //         <RotateCcw className="w-4 h-4" />
+  //         Start Over
+  //       </Button>
+  //     </div>
+  //   );
+  // }
 
   if (state === "error") {
     return (
@@ -52,22 +69,6 @@ export function VoiceControls({ state, onStart, onRetry, disabled }: VoiceContro
         >
           <RotateCcw className="w-4 h-4" />
           Try Again
-        </Button>
-      </div>
-    );
-  }
-
-  if (state === "complete") {
-    return (
-      <div className="flex justify-center">
-        <Button
-          onClick={onRetry}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Redo Interview
         </Button>
       </div>
     );

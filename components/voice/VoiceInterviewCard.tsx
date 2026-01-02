@@ -1,28 +1,31 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { VoiceWaveform } from "./VoiceWaveform";
-import { VoiceStateIndicator } from "./VoiceStateIndicator";
-import { VoiceControls } from "./VoiceControls";
+import { api } from "@/convex/_generated/api";
 import { useVapiCall } from "@/lib/hooks/useVapiCall";
 import { useAction } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { useEffect, useState } from "react";
+import { LoadingSpinner } from "../LoadingSpinner";
+import { VoiceControls } from "./VoiceControls";
+import { VoiceStateIndicator } from "./VoiceStateIndicator";
+import { VoiceWaveform } from "./VoiceWaveform";
 
 interface VoiceInterviewCardProps {
-  title: string;
-  description: string;
+  // title: string;
+  // description: string;
   type: "bio" | "preferences";
   onComplete: (transcript: string, processedText: string) => void;
   assistantId?: string;
+  canProceed?: boolean;
 }
 
 export function VoiceInterviewCard({
-  title,
-  description,
+  // title,
+  // description,
   type,
   onComplete,
   assistantId: providedAssistantId,
+  canProceed,
 }: VoiceInterviewCardProps) {
   const [assistantId, setAssistantId] = useState<string | null>(providedAssistantId || null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -65,7 +68,7 @@ export function VoiceInterviewCard({
     }
   };
 
-  const { state, duration, error, startCall, retry } = useVapiCall({
+  const { state, error, startCall, retry } = useVapiCall({
     assistantId: assistantId || "",
     onTranscriptComplete: handleTranscriptComplete,
   });
@@ -75,9 +78,9 @@ export function VoiceInterviewCard({
 
   if (!assistantId) {
     return (
-      <Card className="p-8">
-        <div className="text-center">
-          <p className="text-gray-600">Loading voice assistant...</p>
+      <Card className="p-8 h-[268px]">
+        <div className="flex flex-col items-center justify-center h-full text-center">
+          <LoadingSpinner/>
         </div>
       </Card>
     );
@@ -86,17 +89,17 @@ export function VoiceInterviewCard({
   return (
     <Card className="p-8">
       <div className="space-y-6">
-        <div className="text-center">
+        {/* <div className="text-center">
           <h2 className="text-2xl font-bold mb-2">{title}</h2>
           <p className="text-gray-600">{description}</p>
-        </div>
+        </div> */}
 
         <VoiceWaveform isActive={isWaveformActive} />
 
         <VoiceStateIndicator
           state={currentState}
-          duration={duration}
           error={error || undefined}
+          canProceed={canProceed}
         />
 
         <VoiceControls
@@ -104,6 +107,7 @@ export function VoiceInterviewCard({
           onStart={startCall}
           onRetry={retry}
           disabled={!assistantId || isProcessing}
+          canProceed={canProceed}
         />
       </div>
     </Card>

@@ -52,25 +52,25 @@ export const processTranscript = action({
         .filter(Boolean).length;
 
       if (args.type === "bio") {
-        if (wordCount < 50 || wordCount > 300) {
+        if (wordCount < 100 || wordCount > 500) {
           console.warn(
-            `Bio word count ${wordCount} is outside range 50-300, retrying...`
+            `Bio word count ${wordCount} is outside range 100-500, retrying...`
           );
           // Retry with stricter prompt
           const retryText = await processVoiceTranscript(
-            args.transcript + "\n\nIMPORTANT: The output MUST be between 50-300 words.",
+            args.transcript + "\n\nIMPORTANT: The output MUST be between 100-500 words.",
             args.type
           );
           return retryText;
         }
       } else {
-        if (wordCount < 20 || wordCount > 100) {
+        if (wordCount < 100 || wordCount > 500) {
           console.warn(
-            `Preferences word count ${wordCount} is outside range 20-100, retrying...`
+            `Preferences word count ${wordCount} is outside range 100-500, retrying...`
           );
           // Retry with stricter prompt
           const retryText = await processVoiceTranscript(
-            args.transcript + "\n\nIMPORTANT: The output MUST be between 20-100 words.",
+            args.transcript + "\n\nIMPORTANT: The output MUST be between 100-500 words.",
             args.type
           );
           return retryText;

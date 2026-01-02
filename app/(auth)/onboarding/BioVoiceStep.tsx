@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { VoiceInterviewCard } from "@/components/voice/VoiceInterviewCard";
-import StepWrapper from "./StepWrapper";
 import { useState } from "react";
+import StepWrapper from "./StepWrapper";
 
 interface BioVoiceStepProps {
   data: {
@@ -41,15 +41,14 @@ export default function BioVoiceStep({
 
   return (
     <StepWrapper
-      title="Tell us your story"
-      description="Have a natural conversation with our AI interviewer"
+      title="About You"
+      description="Tell us about yourself, your passions, what makes you unique"
     >
       <div className="space-y-6">
         <VoiceInterviewCard
-          title="About You"
-          description="Tell us about yourself, your passions, what makes you unique"
           type="bio"
           onComplete={handleComplete}
+          canProceed={canProceed}
         />
 
         <div className="flex justify-between">

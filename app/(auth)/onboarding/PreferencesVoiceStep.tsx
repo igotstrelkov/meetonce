@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { VoiceInterviewCard } from "@/components/voice/VoiceInterviewCard";
-import StepWrapper from "./StepWrapper";
 import { useState } from "react";
+import StepWrapper from "./StepWrapper";
 
 interface PreferencesVoiceStepProps {
   data: {
@@ -41,13 +41,11 @@ export default function PreferencesVoiceStep({
 
   return (
     <StepWrapper
-      title="What you're looking for"
-      description="Share what matters most to you in a partner"
+      title="Your Ideal Match"
+      description="Describe the qualities and values you're seeking"
     >
       <div className="space-y-6">
         <VoiceInterviewCard
-          title="Your Ideal Match"
-          description="Describe the qualities and values you're seeking"
           type="preferences"
           onComplete={handleComplete}
         />
