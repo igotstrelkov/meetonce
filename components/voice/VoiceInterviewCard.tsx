@@ -2,9 +2,9 @@
 
 import { Card } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
-import { useVapiCall } from "@/lib/hooks/useVapiCall";
+import { useVapiCall } from "@/hooks/useVapiCall";
 import { useAction } from "convex/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { VoiceControls } from "./VoiceControls";
 import { VoiceStateIndicator } from "./VoiceStateIndicator";
@@ -27,29 +27,16 @@ export function VoiceInterviewCard({
   assistantId: providedAssistantId,
   canProceed,
 }: VoiceInterviewCardProps) {
-  const [assistantId, setAssistantId] = useState<string | null>(providedAssistantId || null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const getBioAssistant = useAction(api.voice.getBioAssistant);
-  const getPreferencesAssistant = useAction(api.voice.getPreferencesAssistant);
-  const processTranscript = useAction(api.voice.processTranscript);
+  // Get assistant ID from environment variables or prop
+  const assistantId = providedAssistantId || (
+    type === "bio"
+      ? process.env.NEXT_PUBLIC_VAPI_BIO_ASSISTANT_ID
+      : process.env.NEXT_PUBLIC_VAPI_PREFERENCES_ASSISTANT_ID
+  );
 
-  // Load assistant ID on mount if not provided
-  useEffect(() => {
-    if (!assistantId) {
-      const loadAssistant = async () => {
-        try {
-          const id = type === "bio"
-            ? await getBioAssistant()
-            : await getPreferencesAssistant();
-          setAssistantId(id);
-        } catch (error) {
-          console.error("Failed to load assistant:", error);
-        }
-      };
-      loadAssistant();
-    }
-  }, [assistantId, type, getBioAssistant, getPreferencesAssistant]);
+  const processTranscript = useAction(api.voice.processTranscript);
 
   const handleTranscriptComplete = async (transcript: string) => {
     if (!transcript || transcript.trim().length === 0) {

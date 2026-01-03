@@ -1,29 +1,6 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
-import { getOrCreateAssistant } from "./lib/vapi";
 import { processVoiceTranscript } from "./lib/openrouter";
-
-/**
- * Create or get Bio assistant ID
- */
-export const getBioAssistant = action({
-  args: {},
-  returns: v.string(),
-  handler: async () => {
-    return await getOrCreateAssistant("bio");
-  },
-});
-
-/**
- * Create or get Preferences assistant ID
- */
-export const getPreferencesAssistant = action({
-  args: {},
-  returns: v.string(),
-  handler: async () => {
-    return await getOrCreateAssistant("preferences");
-  },
-});
 
 /**
  * Process voice transcript and return optimized text

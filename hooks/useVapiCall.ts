@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef, useEffect } from "react";
-import Vapi from "@vapi-ai/web";
 import type { VoiceState } from "@/components/voice/VoiceStateIndicator";
+import Vapi from "@vapi-ai/web";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UseVapiCallProps {
   assistantId: string;
@@ -126,7 +126,8 @@ export function useVapiCall({ assistantId, onTranscriptComplete }: UseVapiCallPr
   const retry = useCallback(() => {
     stopCall();
     setError(null);
-  }, [stopCall]);
+    startCall();
+  }, [stopCall, startCall]);
 
   return {
     state,
