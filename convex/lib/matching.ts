@@ -86,17 +86,17 @@ You MUST respond with valid JSON in this exact format:
           properties: {
             score: {
               type: "number",
-              description: "Compatibility score from 0-100"
+              description: "Compatibility score from 0-100",
             },
             explanation: {
               type: "string",
-              description: "2-3 warm paragraphs explaining compatibility"
-            }
+              description: "2-3 warm paragraphs explaining compatibility",
+            },
           },
           required: ["score", "explanation"],
-          additionalProperties: false
-        }
-      }
+          additionalProperties: false,
+        },
+      },
     },
     temperature: 0.7,
     max_tokens: 600,
@@ -113,7 +113,9 @@ You MUST respond with valid JSON in this exact format:
   } catch (error) {
     console.error("Failed to parse compatibility response:", content);
     console.error("Parse error:", error);
-    throw new Error(`Invalid JSON response from LLM: ${content.substring(0, 100)}`);
+    throw new Error(
+      `Invalid JSON response from LLM: ${content.substring(0, 100)}`
+    );
   }
 }
 
@@ -204,16 +206,16 @@ You MUST respond with valid JSON in this exact format:
               type: "array",
               description: "Array of 3 conversation starters",
               items: {
-                type: "string"
+                type: "string",
               },
               minItems: 3,
-              maxItems: 3
-            }
+              maxItems: 3,
+            },
           },
           required: ["starters"],
-          additionalProperties: false
-        }
-      }
+          additionalProperties: false,
+        },
+      },
     },
     temperature: 0.8,
     max_tokens: 400,
@@ -227,7 +229,9 @@ You MUST respond with valid JSON in this exact format:
   } catch (error) {
     console.error("Failed to parse conversation starters response:", content);
     console.error("Parse error:", error);
-    throw new Error(`Invalid JSON response from LLM: ${content.substring(0, 100)}`);
+    throw new Error(
+      `Invalid JSON response from LLM: ${content.substring(0, 100)}`
+    );
   }
 }
 
@@ -265,8 +269,8 @@ export function getWeekOfString(): string {
 
   // Format as YYYY-MM-DD in LOCAL timezone (not UTC)
   const year = monday.getFullYear();
-  const month = String(monday.getMonth() + 1).padStart(2, '0');
-  const day = String(monday.getDate()).padStart(2, '0');
+  const month = String(monday.getMonth() + 1).padStart(2, "0");
+  const day = String(monday.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
 }

@@ -45,10 +45,7 @@ export default function PreferencesVoiceStep({
       description="Describe the qualities and values you're seeking"
     >
       <div className="space-y-6">
-        <VoiceInterviewCard
-          type="preferences"
-          onComplete={handleComplete}
-        />
+        <VoiceInterviewCard type="preferences" onComplete={handleComplete} />
 
         <div className="flex justify-between">
           <Button onClick={onBack} variant="outline">

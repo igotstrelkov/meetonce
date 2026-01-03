@@ -16,7 +16,12 @@ interface PhotoStepProps {
   onNext: () => void;
 }
 
-export default function PhotoStep({ data, updateData, onBack, onNext }: PhotoStepProps) {
+export default function PhotoStep({
+  data,
+  updateData,
+  onBack,
+  onNext,
+}: PhotoStepProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,7 +85,9 @@ export default function PhotoStep({ data, updateData, onBack, onNext }: PhotoSte
           .withFaceLandmarks();
 
         if (detections.length === 0) {
-          setError("No face detected. Please upload a clear photo showing your face.");
+          setError(
+            "No face detected. Please upload a clear photo showing your face."
+          );
           setIsValidating(false);
           URL.revokeObjectURL(previewUrl);
           if (fileInputRef.current) {
@@ -90,7 +97,9 @@ export default function PhotoStep({ data, updateData, onBack, onNext }: PhotoSte
         }
 
         if (detections.length > 1) {
-          setError("Multiple faces detected. Please upload a photo with only you in it.");
+          setError(
+            "Multiple faces detected. Please upload a photo with only you in it."
+          );
           setIsValidating(false);
           URL.revokeObjectURL(previewUrl);
           if (fileInputRef.current) {
@@ -178,8 +187,12 @@ export default function PhotoStep({ data, updateData, onBack, onNext }: PhotoSte
                 <Camera size={40} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Analyzing photo...</h3>
-                <p className="text-sm text-gray-500 mt-1">Detecting face and optimizing</p>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Analyzing photo...
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Detecting face and optimizing
+                </p>
               </div>
               <div className="inline-flex items-center text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
                 <span className="animate-spin mr-2">⚙️</span>
@@ -215,8 +228,12 @@ export default function PhotoStep({ data, updateData, onBack, onNext }: PhotoSte
                 <Camera size={40} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Upload Photo</h3>
-                <p className="text-sm text-gray-500 mt-1">Tap to select from library</p>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Upload Photo
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Tap to select from library
+                </p>
               </div>
               <div className="inline-flex items-center text-xs text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
                 <ImageIcon size={12} className="mr-1.5" />
@@ -226,7 +243,11 @@ export default function PhotoStep({ data, updateData, onBack, onNext }: PhotoSte
           )}
         </div>
 
-        {error && <p className="text-sm text-center text-red-600 font-medium bg-red-50 py-2 rounded-lg max-w-sm mx-auto">{error}</p>}
+        {error && (
+          <p className="text-sm text-center text-red-600 font-medium bg-red-50 py-2 rounded-lg max-w-sm mx-auto">
+            {error}
+          </p>
+        )}
 
         {/* Guidelines - Mobile Card Style */}
         <div className="bg-white border rounded-xl p-4 space-y-3 max-w-sm mx-auto">
@@ -241,10 +262,12 @@ export default function PhotoStep({ data, updateData, onBack, onNext }: PhotoSte
               <span className="text-green-500">✓</span> <span>Solo photo</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-green-500">✓</span> <span>Recent photo</span>
+              <span className="text-green-500">✓</span>{" "}
+              <span>Recent photo</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-green-500">✓</span> <span>Good lighting</span>
+              <span className="text-green-500">✓</span>{" "}
+              <span>Good lighting</span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-red-500">✕</span> <span>No filters</span>
@@ -260,10 +283,21 @@ export default function PhotoStep({ data, updateData, onBack, onNext }: PhotoSte
       </div>
 
       <div className="flex gap-3 pt-4">
-        <Button onClick={onBack} variant="outline" size="lg" className="flex-1" disabled={isValidating}>
+        <Button
+          onClick={onBack}
+          variant="outline"
+          size="lg"
+          className="flex-1"
+          disabled={isValidating}
+        >
           Back
         </Button>
-        <Button onClick={handleNext} size="lg" className="flex-[2]" disabled={isValidating || !data.photo}>
+        <Button
+          onClick={handleNext}
+          size="lg"
+          className="flex-[2]"
+          disabled={isValidating || !data.photo}
+        >
           {isValidating ? "Validating..." : "Next"}
         </Button>
       </div>

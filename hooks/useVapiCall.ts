@@ -7,7 +7,10 @@ interface UseVapiCallProps {
   onTranscriptComplete: (transcript: string) => void;
 }
 
-export function useVapiCall({ assistantId, onTranscriptComplete }: UseVapiCallProps) {
+export function useVapiCall({
+  assistantId,
+  onTranscriptComplete,
+}: UseVapiCallProps) {
   const [state, setState] = useState<VoiceState>("idle");
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -137,5 +140,6 @@ export function useVapiCall({ assistantId, onTranscriptComplete }: UseVapiCallPr
     startCall,
     stopCall,
     retry,
+    setState,
   };
 }

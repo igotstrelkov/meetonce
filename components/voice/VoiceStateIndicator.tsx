@@ -1,6 +1,11 @@
 import { CheckCircle2, Loader2, Mic } from "lucide-react";
 
-export type VoiceState = "idle" | "recording" | "processing" | "complete" | "error";
+export type VoiceState =
+  | "idle"
+  | "recording"
+  | "processing"
+  | "complete"
+  | "error";
 
 interface VoiceStateIndicatorProps {
   state: VoiceState;
@@ -8,7 +13,11 @@ interface VoiceStateIndicatorProps {
   canProceed?: boolean;
 }
 
-export function VoiceStateIndicator({ state, error, canProceed }: VoiceStateIndicatorProps) {
+export function VoiceStateIndicator({
+  state,
+  error,
+  canProceed,
+}: VoiceStateIndicatorProps) {
   if (state === "complete" || canProceed) {
     return (
       <div className="text-center">
@@ -20,7 +29,7 @@ export function VoiceStateIndicator({ state, error, canProceed }: VoiceStateIndi
       </div>
     );
   }
-  
+
   if (state === "idle") {
     return (
       <div className="text-center text-gray-600">
@@ -29,16 +38,16 @@ export function VoiceStateIndicator({ state, error, canProceed }: VoiceStateIndi
     );
   }
 
+  // Interview in progress
+
   if (state === "recording") {
     return (
       <div className="text-center">
         <div className="flex items-center justify-center gap-2 text-red-500">
           <Mic className="w-5 h-5 animate-pulse" />
-          <span className="font-medium">
-            Recording...
-          </span>
+          <span className="font-medium">Listening...</span>
         </div>
-        <p className="text-sm text-gray-600 mt-1">Speak with AI matchmaker</p>
+        <p className="text-sm text-gray-600 mt-1">Please speak clearly</p>
       </div>
     );
   }
@@ -50,7 +59,9 @@ export function VoiceStateIndicator({ state, error, canProceed }: VoiceStateIndi
           <Loader2 className="w-5 h-5 animate-spin" />
           <span className="font-medium">Processing your interview...</span>
         </div>
-        <p className="text-sm text-gray-600 mt-1">This will just take a moment</p>
+        <p className="text-sm text-gray-600 mt-1">
+          This will just take a moment
+        </p>
       </div>
     );
   }
@@ -61,7 +72,9 @@ export function VoiceStateIndicator({ state, error, canProceed }: VoiceStateIndi
         <div className="flex items-center justify-center gap-2 text-red-600">
           <span className="font-medium">Error</span>
         </div>
-        <p className="text-sm text-red-600 mt-1">{error || "Something went wrong"}</p>
+        <p className="text-sm text-red-600 mt-1">
+          {error || "Something went wrong"}
+        </p>
       </div>
     );
   }

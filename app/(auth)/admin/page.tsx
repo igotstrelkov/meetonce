@@ -50,9 +50,7 @@ export default function AdminOverviewPage() {
           <div className="text-4xl font-bold text-primary">
             {metrics.approvalRate}%
           </div>
-          <div className="text-gray-600 mb-1">
-            of users approved
-          </div>
+          <div className="text-gray-600 mb-1">of users approved</div>
         </div>
       </Card>
     </div>

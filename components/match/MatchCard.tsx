@@ -6,7 +6,12 @@ import { useMutation } from "convex/react";
 import { useState } from "react";
 import PassFeedbackForm from "./PassFeedbackForm";
 
-export default function MatchCard({ match, matchUser, isReversed, currentUserId }: any) {
+export default function MatchCard({
+  match,
+  matchUser,
+  isReversed,
+  currentUserId,
+}: any) {
   const respond = useMutation(api.matches.respondToMatch);
   const submitPassFeedback = useMutation(api.feedback.submitPassFeedback);
   const [showPassFeedback, setShowPassFeedback] = useState(false);
@@ -203,14 +208,19 @@ export default function MatchCard({ match, matchUser, isReversed, currentUserId 
             <h4 className="font-semibold mb-2">Suggested Meeting Spot:</h4>
             <div className="bg-white rounded-lg p-4">
               <p className="font-semibold">{match.suggestedVenue.name}</p>
-              <p className="text-sm text-gray-600">{match.suggestedVenue.address}</p>
-              <p className="text-sm text-gray-600 mt-1">{match.suggestedVenue.description}</p>
+              <p className="text-sm text-gray-600">
+                {match.suggestedVenue.address}
+              </p>
+              <p className="text-sm text-gray-600 mt-1">
+                {match.suggestedVenue.description}
+              </p>
             </div>
           </div>
 
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-3">
-              You'll receive an email with {matchUser?.name}'s contact information to schedule your date!
+              You'll receive an email with {matchUser?.name}'s contact
+              information to schedule your date!
             </p>
           </div>
         </div>

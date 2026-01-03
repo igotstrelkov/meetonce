@@ -1,7 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 
 export function NavBar() {
   return (
@@ -11,18 +17,22 @@ export function NavBar() {
       </div>
       <nav className="flex items-center gap-6">
         <SignedOut>
-            <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                <button className="text-sm font-medium hover:text-primary transition-colors">Log In</button>
-            </SignInButton>
-            <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
-            <Button variant="default" className="rounded-full px-6">Sign Up</Button>
-            </SignUpButton>
+          <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+            <button className="text-sm font-medium hover:text-primary transition-colors">
+              Log In
+            </button>
+          </SignInButton>
+          <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
+            <Button variant="default" className="rounded-full px-6">
+              Sign Up
+            </Button>
+          </SignUpButton>
         </SignedOut>
         <SignedIn>
-            <UserButton />
+          <UserButton />
         </SignedIn>
       </nav>
-      
+
       {/* Mobile Menu */}
       {/* <div className="md:hidden">
         <DropdownMenu>

@@ -1,6 +1,6 @@
-import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
+import { mutation, query } from "./_generated/server";
 
 export const submitPassFeedback = mutation({
   args: {
@@ -39,26 +39,28 @@ export const submitDateFeedback = mutation({
       v.literal("rescheduled")
     ),
     overallRating: v.optional(v.number()),
-    wouldMeetAgain: v.optional(v.union(
-      v.literal("yes"),
-      v.literal("maybe"),
-      v.literal("no")
-    )),
+    wouldMeetAgain: v.optional(
+      v.union(v.literal("yes"), v.literal("maybe"), v.literal("no"))
+    ),
     wentWell: v.optional(v.array(v.string())),
     wentPoorly: v.optional(v.array(v.string())),
-    conversationStartersHelpful: v.optional(v.union(
-      v.literal("very"),
-      v.literal("somewhat"),
-      v.literal("not_used"),
-      v.literal("not_helpful")
-    )),
-    venueRating: v.optional(v.union(
-      v.literal("perfect"),
-      v.literal("good"),
-      v.literal("okay"),
-      v.literal("not_good"),
-      v.literal("went_elsewhere")
-    )),
+    conversationStartersHelpful: v.optional(
+      v.union(
+        v.literal("very"),
+        v.literal("somewhat"),
+        v.literal("not_used"),
+        v.literal("not_helpful")
+      )
+    ),
+    venueRating: v.optional(
+      v.union(
+        v.literal("perfect"),
+        v.literal("good"),
+        v.literal("okay"),
+        v.literal("not_good"),
+        v.literal("went_elsewhere")
+      )
+    ),
     additionalThoughts: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -73,8 +75,8 @@ export const submitDateFeedback = mutation({
     if (args.wouldMeetAgain === "yes") {
       const otherFeedback = await ctx.db
         .query("dateOutcomes")
-        .withIndex("by_match", q => q.eq("matchId", args.matchId))
-        .filter(q => q.neq(q.field("userId"), args.userId))
+        .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+        .filter((q) => q.neq(q.field("userId"), args.userId))
         .first();
 
       if (otherFeedback?.wouldMeetAgain === "yes") {
@@ -87,19 +89,27 @@ export const submitDateFeedback = mutation({
 
         if (user && matchUser) {
           // Send contact info to both users
-          await ctx.scheduler.runAfter(0, internal.emails.sendSecondDateContactEmail, {
-            to: user.email,
-            userName: user.name,
-            matchName: matchUser.name,
-            matchEmail: matchUser.email,
-          });
+          await ctx.scheduler.runAfter(
+            0,
+            internal.emails.sendSecondDateContactEmail,
+            {
+              to: user.email,
+              userName: user.name,
+              matchName: matchUser.name,
+              matchEmail: matchUser.email,
+            }
+          );
 
-          await ctx.scheduler.runAfter(0, internal.emails.sendSecondDateContactEmail, {
-            to: matchUser.email,
-            userName: matchUser.name,
-            matchName: user.name,
-            matchEmail: user.email,
-          });
+          await ctx.scheduler.runAfter(
+            0,
+            internal.emails.sendSecondDateContactEmail,
+            {
+              to: matchUser.email,
+              userName: matchUser.name,
+              matchName: user.name,
+              matchEmail: user.email,
+            }
+          );
         }
       }
     }
@@ -111,8 +121,8 @@ export const getFeedbackForMatch = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("dateOutcomes")
-      .withIndex("by_match", q => q.eq("matchId", args.matchId))
-      .filter(q => q.eq(q.field("userId"), args.userId))
+      .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+      .filter((q) => q.eq(q.field("userId"), args.userId))
       .first();
   },
 });

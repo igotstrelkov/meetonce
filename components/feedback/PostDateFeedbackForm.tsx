@@ -43,8 +43,10 @@ export default function PostDateFeedbackForm({
         overallRating: formData.overallRating || undefined,
         wouldMeetAgain: formData.wouldMeetAgain as any,
         wentWell: formData.wentWell.length > 0 ? formData.wentWell : undefined,
-        wentPoorly: formData.wentPoorly.length > 0 ? formData.wentPoorly : undefined,
-        conversationStartersHelpful: formData.conversationStartersHelpful as any,
+        wentPoorly:
+          formData.wentPoorly.length > 0 ? formData.wentPoorly : undefined,
+        conversationStartersHelpful:
+          formData.conversationStartersHelpful as any,
         venueRating: formData.venueRating as any,
         additionalThoughts: formData.additionalThoughts || undefined,
       });
@@ -58,19 +60,19 @@ export default function PostDateFeedbackForm({
   };
 
   const toggleWentWell = (option: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       wentWell: prev.wentWell.includes(option)
-        ? prev.wentWell.filter(o => o !== option)
+        ? prev.wentWell.filter((o) => o !== option)
         : [...prev.wentWell, option],
     }));
   };
 
   const toggleWentPoorly = (option: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       wentPoorly: prev.wentPoorly.includes(option)
-        ? prev.wentPoorly.filter(o => o !== option)
+        ? prev.wentPoorly.filter((o) => o !== option)
         : [...prev.wentPoorly, option],
     }));
   };
@@ -79,7 +81,9 @@ export default function PostDateFeedbackForm({
     <div className="space-y-6 bg-white rounded-lg p-6 shadow-lg">
       <div>
         <h2 className="text-2xl font-bold mb-2">How did it go?</h2>
-        <p className="text-gray-600">Your feedback helps us make better matches</p>
+        <p className="text-gray-600">
+          Your feedback helps us make better matches
+        </p>
       </div>
 
       {/* Q1: Did date happen? */}
@@ -89,7 +93,9 @@ export default function PostDateFeedbackForm({
         </Label>
         <RadioGroup
           value={formData.dateHappened}
-          onValueChange={(value) => setFormData(prev => ({ ...prev, dateHappened: String(value) }))}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, dateHappened: String(value) }))
+          }
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="yes" id="yes" />
@@ -123,7 +129,9 @@ export default function PostDateFeedbackForm({
                 <button
                   key={rating}
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, overallRating: rating }))}
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, overallRating: rating }))
+                  }
                   className={`w-12 h-12 rounded-lg text-lg transition-all ${
                     formData.overallRating === rating
                       ? "bg-pink-600 text-white scale-110"
@@ -143,11 +151,19 @@ export default function PostDateFeedbackForm({
             </Label>
             <RadioGroup
               value={formData.wouldMeetAgain}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, wouldMeetAgain: String(value) }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  wouldMeetAgain: String(value),
+                }))
+              }
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="yes" id="meet-yes" />
-                <Label htmlFor="meet-yes" className="text-green-600 font-semibold">
+                <Label
+                  htmlFor="meet-yes"
+                  className="text-green-600 font-semibold"
+                >
                   Yes! I'd love a second date
                 </Label>
               </div>
@@ -196,7 +212,10 @@ export default function PostDateFeedbackForm({
                     checked={formData.wentPoorly.includes(option)}
                     onCheckedChange={() => toggleWentPoorly(option)}
                   />
-                  <Label htmlFor={`poorly-${option}`} className="cursor-pointer">
+                  <Label
+                    htmlFor={`poorly-${option}`}
+                    className="cursor-pointer"
+                  >
                     {option}
                   </Label>
                 </div>
@@ -211,7 +230,12 @@ export default function PostDateFeedbackForm({
             </Label>
             <RadioGroup
               value={formData.conversationStartersHelpful}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, conversationStartersHelpful: String(value) }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  conversationStartersHelpful: String(value),
+                }))
+              }
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="very" id="starters-very" />
@@ -239,7 +263,9 @@ export default function PostDateFeedbackForm({
             </Label>
             <RadioGroup
               value={formData.venueRating}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, venueRating: String(value) }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, venueRating: String(value) }))
+              }
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="perfect" id="venue-perfect" />
@@ -271,7 +297,12 @@ export default function PostDateFeedbackForm({
             </Label>
             <Textarea
               value={formData.additionalThoughts}
-              onChange={(e) => setFormData(prev => ({ ...prev, additionalThoughts: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  additionalThoughts: e.target.value,
+                }))
+              }
               placeholder="Tell us anything else about your experience..."
               className="min-h-[100px]"
             />

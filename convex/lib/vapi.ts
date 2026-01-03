@@ -172,7 +172,8 @@ SUCCESS CRITERIA:
     provider: "11labs",
     voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel - warm female voice
   },
-  firstMessage: "Hi! I'm here to help you create an amazing MeetOnce profile. I'll ask you some questions about yourself, and we'll use your answers to write a bio that truly represents who you are. This should take about 5-10 minutes. Ready to get started?",
+  firstMessage:
+    "Hi! I'm here to help you create an amazing MeetOnce profile. I'll ask you some questions about yourself, and we'll use your answers to write a bio that truly represents who you are. This should take about 5-10 minutes. Ready to get started?",
   endCallFunctionEnabled: true,
   endCallPhrases: ["I have everything I need", "That's all I need"],
 };
@@ -341,9 +342,13 @@ SUCCESS CRITERIA:
     provider: "11labs",
     voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel - warm female voice
   },
-  firstMessage: "Great! Now let's talk about what you're looking for in a partner. What qualities matter most to you?",
+  firstMessage:
+    "Great! Now let's talk about what you're looking for in a partner. What qualities matter most to you?",
   endCallFunctionEnabled: true,
-  endCallPhrases: ["I understand what you're looking for", "Perfect! I have that"],
+  endCallPhrases: [
+    "I understand what you're looking for",
+    "Perfect! I have that",
+  ],
 };
 
 /**

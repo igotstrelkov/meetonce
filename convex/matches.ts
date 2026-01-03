@@ -11,7 +11,7 @@ export const getCurrentMatch = query({
     // Check if user has a match this week
     const matchAsUser = await ctx.db
       .query("weeklyMatches")
-      .withIndex("by_user_and_week", q =>
+      .withIndex("by_user_and_week", (q) =>
         q.eq("userId", args.userId).eq("weekOf", weekOf)
       )
       .first();
@@ -35,7 +35,7 @@ export const getCurrentMatch = query({
     // Check if user is the match (reversed)
     const matchAsMatch = await ctx.db
       .query("weeklyMatches")
-      .withIndex("by_match_user_and_week", q =>
+      .withIndex("by_match_user_and_week", (q) =>
         q.eq("matchUserId", args.userId).eq("weekOf", weekOf)
       )
       .first();
@@ -99,7 +99,9 @@ export const respondToMatch = mutation({
     if (!match) throw new Error("Match not found");
 
     const fieldToUpdate = args.isReversed ? "matchResponse" : "userResponse";
-    const timestampField = args.isReversed ? "matchRespondedAt" : "userRespondedAt";
+    const timestampField = args.isReversed
+      ? "matchRespondedAt"
+      : "userRespondedAt";
 
     // Update response
     await ctx.db.patch(args.matchId, {
@@ -122,7 +124,8 @@ export const respondToMatch = mutation({
       const matchUser = await ctx.db.get(updatedMatch!.matchUserId);
 
       if (user && matchUser) {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const appUrl =
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
         // Send email to user
         await ctx.scheduler.runAfter(0, internal.emails.sendMutualMatchEmail, {

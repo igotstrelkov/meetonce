@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { INTERESTS } from "@/lib/constants";
+import { useState } from "react";
 import StepWrapper from "./StepWrapper";
 
 interface InterestsStepProps {
@@ -14,12 +14,17 @@ interface InterestsStepProps {
   onBack: () => void;
 }
 
-export default function InterestsStep({ data, updateData, onNext, onBack }: InterestsStepProps) {
+export default function InterestsStep({
+  data,
+  updateData,
+  onNext,
+  onBack,
+}: InterestsStepProps) {
   const [error, setError] = useState("");
 
   const toggleInterest = (interest: string) => {
     const newInterests = data.interests.includes(interest)
-      ? data.interests.filter(i => i !== interest)
+      ? data.interests.filter((i) => i !== interest)
       : [...data.interests, interest];
 
     updateData({ interests: newInterests });

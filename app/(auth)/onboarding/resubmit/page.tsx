@@ -106,14 +106,16 @@ export default function ResubmitPage() {
 
   return (
     <div className="max-w-xl mx-auto space-y-8 px-4">
-      <div className="max-w-2xl mx-auto"> 
+      <div className="max-w-2xl mx-auto">
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">
               Step {currentStep} of 2
             </span>
-            <span className="text-sm text-gray-500">{Math.round((currentStep / 2) * 100)}%</span>
+            <span className="text-sm text-gray-500">
+              {Math.round((currentStep / 2) * 100)}%
+            </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
@@ -126,8 +128,12 @@ export default function ResubmitPage() {
         {/* Rejection Reason */}
         {currentUser.accountRejectionReason && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <h3 className="font-semibold text-yellow-900 mb-1">Previous Feedback</h3>
-            <p className="text-sm text-yellow-800">{currentUser.accountRejectionReason}</p>
+            <h3 className="font-semibold text-yellow-900 mb-1">
+              Previous Feedback
+            </h3>
+            <p className="text-sm text-yellow-800">
+              {currentUser.accountRejectionReason}
+            </p>
           </div>
         )}
 

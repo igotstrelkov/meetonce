@@ -1,6 +1,12 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
-import { action, internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import {
+  action,
+  internalMutation,
+  internalQuery,
+  mutation,
+  query,
+} from "./_generated/server";
 import { generateEmbedding } from "./lib/openrouter";
 import { makeMatchKey } from "./lib/utils";
 
@@ -10,7 +16,7 @@ export const getUserByClerkId = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", q => q.eq("clerkId", args.clerkId))
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
       .first();
   },
 });
@@ -25,7 +31,7 @@ export const getCurrentUser = query({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", q => q.eq("clerkId", identity.subject))
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .first();
 
     if (!user) {
@@ -36,7 +42,7 @@ export const getCurrentUser = query({
       ...user,
       photoUrl: user.photoStorageId
         ? await ctx.storage.getUrl(user.photoStorageId)
-        : null
+        : null,
     };
   },
 });
@@ -72,7 +78,7 @@ export const internalCreateUser = internalMutation({
     // Check if user already exists
     const existingUser = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", q => q.eq("clerkId", args.clerkId))
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
       .first();
 
     if (existingUser) {
@@ -101,7 +107,11 @@ export const internalCreateUser = internalMutation({
       isAdmin: false,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      matchKey: makeMatchKey({ accountStatus: "pending", vacationMode: false, gender: args.gender }),
+      matchKey: makeMatchKey({
+        accountStatus: "pending",
+        vacationMode: false,
+        gender: args.gender,
+      }),
     });
 
     return userId;
@@ -180,23 +190,31 @@ export const updateProfile = action({
     minAge: v.optional(v.number()),
     maxAge: v.optional(v.number()),
   },
-  
+
   handler: async (ctx, args) => {
     // If profile text changed, regenerate embedding
     let embedding: number[] | undefined;
-    
-    if (args.name || args.age || args.bio || args.lookingFor || args.interests) {
-       // We need to fetch the user to get current data for the embedding text
-       // But actions can't use ctx.db. So we might need to query first or pass all data.
-       // For simplicity, let's just make a quick query to get the current user data
-       // Note: In Actions, we use ctx.runQuery
-       const user = await ctx.runQuery(internal.users.getUserInternal, { userId: args.userId });
-       
-       if (!user) throw new Error("User not found");
 
-       const profileText = `${args.bio}\n\nLooking for ${args.lookingFor}`;
+    if (
+      args.name ||
+      args.age ||
+      args.bio ||
+      args.lookingFor ||
+      args.interests
+    ) {
+      // We need to fetch the user to get current data for the embedding text
+      // But actions can't use ctx.db. So we might need to query first or pass all data.
+      // For simplicity, let's just make a quick query to get the current user data
+      // Note: In Actions, we use ctx.runQuery
+      const user = await ctx.runQuery(internal.users.getUserInternal, {
+        userId: args.userId,
+      });
 
-        embedding = await generateEmbedding(profileText);
+      if (!user) throw new Error("User not found");
+
+      const profileText = `${args.bio}\n\nLooking for ${args.lookingFor}`;
+
+      embedding = await generateEmbedding(profileText);
     }
 
     await ctx.runMutation(internal.users.internalUpdateProfile, {
@@ -211,13 +229,17 @@ export const getUserInternal = internalQuery({
   returns: v.union(v.any(), v.null()),
   handler: async (ctx, args) => {
     return await ctx.db.get(args.userId);
-  }
+  },
 });
 
 export const updateAccountStatus = mutation({
   args: {
     userId: v.id("users"),
-    accountStatus: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
+    accountStatus: v.union(
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("rejected")
+    ),
     attractivenessRating: v.optional(v.number()),
     accountRejectionReason: v.optional(v.string()),
   },
@@ -233,7 +255,11 @@ export const updateAccountStatus = mutation({
     await ctx.db.patch(userId, {
       ...updates,
       updatedAt: Date.now(),
-      matchKey: makeMatchKey({ accountStatus: args.accountStatus, vacationMode: user.vacationMode, gender: user.gender }),
+      matchKey: makeMatchKey({
+        accountStatus: args.accountStatus,
+        vacationMode: user.vacationMode,
+        gender: user.gender,
+      }),
     });
 
     return userId;
@@ -243,7 +269,11 @@ export const updateAccountStatus = mutation({
 export const internalUpdateAccountStatus = internalMutation({
   args: {
     userId: v.id("users"),
-    accountStatus: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
+    accountStatus: v.union(
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("rejected")
+    ),
     attractivenessRating: v.optional(v.number()),
     accountRejectionReason: v.optional(v.string()),
   },
@@ -259,7 +289,11 @@ export const internalUpdateAccountStatus = internalMutation({
     await ctx.db.patch(userId, {
       ...updates,
       updatedAt: Date.now(),
-      matchKey: makeMatchKey({ accountStatus: args.accountStatus, vacationMode: user.vacationMode, gender: user.gender }),
+      matchKey: makeMatchKey({
+        accountStatus: args.accountStatus,
+        vacationMode: user.vacationMode,
+        gender: user.gender,
+      }),
     });
 
     return userId;
@@ -281,13 +315,15 @@ export const setVacationMode = mutation({
       throw new Error("User not found");
     }
 
-
-
     await ctx.db.patch(userId, {
       vacationMode,
       vacationUntil,
       updatedAt: Date.now(),
-      matchKey: makeMatchKey({ accountStatus: user.accountStatus, vacationMode, gender: user.gender }),
+      matchKey: makeMatchKey({
+        accountStatus: user.accountStatus,
+        vacationMode,
+        gender: user.gender,
+      }),
     });
 
     return userId;
@@ -314,7 +350,7 @@ export const isUserAdmin = query({
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", q => q.eq("clerkId", args.clerkId))
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
       .first();
 
     return user?.isAdmin ?? false;
@@ -350,7 +386,11 @@ export const deleteUser = internalMutation({
 
 export const updateUserPhotos = mutation({
   args: {
-    type: v.union(v.literal("photo"), v.literal("document"), v.literal("update")),
+    type: v.union(
+      v.literal("photo"),
+      v.literal("document"),
+      v.literal("update")
+    ),
     photoStorageId: v.optional(v.string()),
     verificationDocStorageId: v.optional(v.string()),
   },
@@ -370,7 +410,7 @@ export const updateUserPhotos = mutation({
     if (args.type === "update") {
       const user = await ctx.db
         .query("users")
-        .withIndex("by_clerk_id", q => q.eq("clerkId", identity.subject))
+        .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
         .first();
 
       if (!user) {
@@ -383,7 +423,11 @@ export const updateUserPhotos = mutation({
         accountStatus: "pending",
         accountResubmissionCount: (user.accountResubmissionCount || 0) + 1,
         updatedAt: Date.now(),
-        matchKey: makeMatchKey({ accountStatus: "pending", vacationMode: user.vacationMode, gender: user.gender }),
+        matchKey: makeMatchKey({
+          accountStatus: "pending",
+          vacationMode: user.vacationMode,
+          gender: user.gender,
+        }),
       });
 
       return "Updated successfully";

@@ -1,15 +1,16 @@
 "use client";
 
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { useQuery } from "convex/react";
 
 export default function MatchDetailsModal({
   matchId,
@@ -24,9 +25,7 @@ export default function MatchDetailsModal({
     return (
       <Dialog open={true} onOpenChange={onClose}>
         <DialogContent>
-          <div className="py-8 text-center text-gray-500">
-            Loading match details...
-          </div>
+          <LoadingSpinner />
         </DialogContent>
       </Dialog>
     );
@@ -90,7 +89,9 @@ export default function MatchDetailsModal({
             <h3 className="font-semibold mb-2">Suggested Venue</h3>
             <div className="text-sm">
               <div className="font-medium">{match.suggestedVenue.name}</div>
-              <div className="text-gray-600">{match.suggestedVenue.address}</div>
+              <div className="text-gray-600">
+                {match.suggestedVenue.address}
+              </div>
               <div className="text-gray-600 mt-1">
                 {match.suggestedVenue.description}
               </div>
@@ -100,7 +101,7 @@ export default function MatchDetailsModal({
           {/* User Responses */}
           <div className="grid grid-cols-2 gap-4">
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-3">{user?.name}'s Response</h3>
+              <h3 className="font-semibold mb-3">{`${user?.name}'s Response`}</h3>
               <ResponseBadge response={match.userResponse} />
               {match.userRespondedAt && (
                 <div className="text-xs text-gray-500 mt-2">
@@ -120,7 +121,9 @@ export default function MatchDetailsModal({
             </div>
 
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-3">{matchUser?.name}'s Response</h3>
+              <h3 className="font-semibold mb-3">
+                {`${matchUser?.name}'s Response`}
+              </h3>
               <ResponseBadge response={match.matchResponse} />
               {match.matchRespondedAt && (
                 <div className="text-xs text-gray-500 mt-2">
@@ -167,7 +170,8 @@ export default function MatchDetailsModal({
                       🎉 SUCCESS STORY! Both want a second date!
                     </div>
                     <div className="text-sm text-green-600 mt-1">
-                      This counts toward the Mutual Interest Rate (PRIMARY METRIC)
+                      This counts toward the Mutual Interest Rate (PRIMARY
+                      METRIC)
                     </div>
                   </div>
                 )}

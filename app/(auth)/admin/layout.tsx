@@ -7,7 +7,6 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   // TODO: Check if user is admin in database using useQuery(api.users.isUserAdmin)
   // For now, allow all authenticated users
 

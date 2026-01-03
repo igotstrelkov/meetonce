@@ -1,5 +1,6 @@
 "use client";
 
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
@@ -18,9 +19,8 @@ import MatchDetailsModal from "./MatchDetailsModal";
 
 export default function MatchesAdminPage() {
   const [selectedWeek, setSelectedWeek] = useState<string>("all");
-  const [selectedMatch, setSelectedMatch] = useState<Id<"weeklyMatches"> | null>(
-    null
-  );
+  const [selectedMatch, setSelectedMatch] =
+    useState<Id<"weeklyMatches"> | null>(null);
 
   const weeks = useQuery(api.admin.getWeeksWithMatches);
   const stats = useQuery(api.admin.getMatchStats);
@@ -30,11 +30,7 @@ export default function MatchesAdminPage() {
   });
 
   if (!matches || !stats || !weeks) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-pulse text-gray-500">Loading matches...</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
@@ -48,29 +44,23 @@ export default function MatchesAdminPage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <MetricCard
-          title="Total Matches"
-          value={stats.totalMatches}
-        />
+        <MetricCard title="Total Matches" value={stats.totalMatches} />
         <MetricCard
           title="Mutual Matches"
           value={stats.mutualMatches}
           subtitle={`${stats.mutualMatchRate}% rate`}
         />
-        <MetricCard
-          title="Dates Completed"
-          value={stats.datesCompleted}
-        />
-        <MetricCard
-          title="Both Passed"
-          value={stats.bothPassedCount}
-        />
+        <MetricCard title="Dates Completed" value={stats.datesCompleted} />
+        <MetricCard title="Both Passed" value={stats.bothPassedCount} />
       </div>
 
       {/* Week Filter */}
       <div className="flex items-center gap-4">
         <label className="text-sm font-medium">Filter by week:</label>
-        <Select value={selectedWeek} onValueChange={(value) => value && setSelectedWeek(value)}>
+        <Select
+          value={selectedWeek}
+          onValueChange={(value) => value && setSelectedWeek(value)}
+        >
           <SelectTrigger className="w-[200px]">
             <SelectValue />
           </SelectTrigger>

@@ -30,11 +30,11 @@ export function VoiceInterviewCard({
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Get assistant ID from environment variables or prop
-  const assistantId = providedAssistantId || (
-    type === "bio"
+  const assistantId =
+    providedAssistantId ||
+    (type === "bio"
       ? process.env.NEXT_PUBLIC_VAPI_BIO_ASSISTANT_ID
-      : process.env.NEXT_PUBLIC_VAPI_PREFERENCES_ASSISTANT_ID
-  );
+      : process.env.NEXT_PUBLIC_VAPI_PREFERENCES_ASSISTANT_ID);
 
   const processTranscript = useAction(api.voice.processTranscript);
 
@@ -55,19 +55,20 @@ export function VoiceInterviewCard({
     }
   };
 
-  const { state, error, startCall, retry } = useVapiCall({
+  const { state, error, startCall, retry, setState } = useVapiCall({
     assistantId: assistantId || "",
     onTranscriptComplete: handleTranscriptComplete,
   });
 
   const currentState = isProcessing ? "processing" : state;
-  const isWaveformActive = currentState === "recording" || currentState === "processing";
+  const isWaveformActive =
+    currentState === "recording" || currentState === "processing";
 
   if (!assistantId) {
     return (
       <Card className="p-8">
         <div className="space-y-6 h-[268px] items-center justify-center text-center">
-          <LoadingSpinner/>
+          <LoadingSpinner />
         </div>
       </Card>
     );
@@ -76,31 +77,27 @@ export function VoiceInterviewCard({
   return (
     <Card className="p-8">
       <div className="space-y-6 h-[268px]">
-        
-        
         {!assistantId ? (
-            <LoadingSpinner/>
+          <LoadingSpinner />
         ) : (
-        <>
-        <VoiceWaveform isActive={isWaveformActive} />
+          <>
+            <VoiceWaveform isActive={isWaveformActive} />
 
-        <VoiceStateIndicator
-          state={currentState}
-          error={error || undefined}
-          canProceed={canProceed}
-        />
+            <VoiceStateIndicator
+              state={currentState}
+              error={error || undefined}
+              canProceed={canProceed}
+            />
 
-        <VoiceControls
-          state={currentState}
-          onStart={startCall}
-          onRetry={retry}
-          disabled={!assistantId || isProcessing}
-          canProceed={canProceed}
-        />
-        </>
-      )}
-
-        
+            <VoiceControls
+              state={currentState}
+              onStart={startCall}
+              onRetry={retry}
+              disabled={!assistantId || isProcessing}
+              canProceed={canProceed}
+            />
+          </>
+        )}
       </div>
     </Card>
   );

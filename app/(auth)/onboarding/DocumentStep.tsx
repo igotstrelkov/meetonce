@@ -15,7 +15,12 @@ interface DocumentStepProps {
   onSubmit: () => void;
 }
 
-export default function DocumentStep({ data, updateData, onBack, onSubmit }: DocumentStepProps) {
+export default function DocumentStep({
+  data,
+  updateData,
+  onBack,
+  onSubmit,
+}: DocumentStepProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -125,8 +130,12 @@ export default function DocumentStep({ data, updateData, onBack, onSubmit }: Doc
                 <FileText size={40} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Processing document...</h3>
-                <p className="text-sm text-gray-500 mt-1">Optimizing image quality</p>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Processing document...
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Optimizing image quality
+                </p>
               </div>
               <div className="inline-flex items-center text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
                 <span className="animate-spin mr-2">⚙️</span>
@@ -162,8 +171,12 @@ export default function DocumentStep({ data, updateData, onBack, onSubmit }: Doc
                 <FileText size={40} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Upload Document</h3>
-                <p className="text-sm text-gray-500 mt-1">Tap to select from library</p>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Upload Document
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Tap to select from library
+                </p>
               </div>
               <div className="inline-flex items-center text-xs text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
                 <ImageIcon size={12} className="mr-1.5" />
@@ -173,7 +186,11 @@ export default function DocumentStep({ data, updateData, onBack, onSubmit }: Doc
           )}
         </div>
 
-        {error && <p className="text-sm text-center text-red-600 font-medium bg-red-50 py-2 rounded-lg max-w-sm mx-auto">{error}</p>}
+        {error && (
+          <p className="text-sm text-center text-red-600 font-medium bg-red-50 py-2 rounded-lg max-w-sm mx-auto">
+            {error}
+          </p>
+        )}
 
         {/* Guidelines */}
         <div className="bg-white border rounded-xl p-4 space-y-3 max-w-sm mx-auto">
@@ -182,16 +199,19 @@ export default function DocumentStep({ data, updateData, onBack, onSubmit }: Doc
           </h3>
           <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
             <div className="flex items-center space-x-2">
-              <span className="text-green-500">✓</span> <span>Clear & readable</span>
+              <span className="text-green-500">✓</span>{" "}
+              <span>Clear & readable</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-green-500">✓</span> <span>Full document</span>
+              <span className="text-green-500">✓</span>{" "}
+              <span>Full document</span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-green-500">✓</span> <span>Not expired</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-green-500">✓</span> <span>Good lighting</span>
+              <span className="text-green-500">✓</span>{" "}
+              <span>Good lighting</span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-red-500">✕</span> <span>No blur</span>
@@ -207,11 +227,26 @@ export default function DocumentStep({ data, updateData, onBack, onSubmit }: Doc
       </div>
 
       <div className="flex gap-3 pt-4">
-        <Button onClick={onBack} variant="outline" size="lg" className="flex-1" disabled={isSubmitting || isProcessing}>
+        <Button
+          onClick={onBack}
+          variant="outline"
+          size="lg"
+          className="flex-1"
+          disabled={isSubmitting || isProcessing}
+        >
           Back
         </Button>
-        <Button onClick={handleSubmit} size="lg" className="flex-[2]" disabled={isSubmitting || isProcessing || !data.verificationDoc}>
-          {isSubmitting ? "Submitting..." : isProcessing ? "Processing..." : "Complete Profile"}
+        <Button
+          onClick={handleSubmit}
+          size="lg"
+          className="flex-[2]"
+          disabled={isSubmitting || isProcessing || !data.verificationDoc}
+        >
+          {isSubmitting
+            ? "Submitting..."
+            : isProcessing
+              ? "Processing..."
+              : "Complete Profile"}
         </Button>
       </div>
     </StepWrapper>

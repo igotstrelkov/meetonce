@@ -1,4 +1,4 @@
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
@@ -31,13 +31,11 @@ interface OpenRouterRequest {
   max_tokens?: number;
 }
 
-export async function callOpenRouter(
-  request: OpenRouterRequest
-): Promise<any> {
+export async function callOpenRouter(request: OpenRouterRequest): Promise<any> {
   const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
       "Content-Type": "application/json",
       "HTTP-Referer": process.env.OPENROUTER_SITE_URL ?? "",
       "X-Title": process.env.OPENROUTER_APP_NAME ?? "",
@@ -57,7 +55,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   const response = await fetch(`${OPENROUTER_BASE_URL}/embeddings`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -88,7 +86,7 @@ export async function callWithRetry(
 
       if (error.message.includes("429")) {
         console.log(`Rate limited, retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         delay *= 2;
         continue;
       }
@@ -97,7 +95,8 @@ export async function callWithRetry(
         console.log("Model unavailable, using fallback...");
         return await callOpenRouter({
           ...request,
-          model: process.env.FALLBACK_MODEL ?? "meta-llama/llama-3-8b-instruct:free"
+          model:
+            process.env.FALLBACK_MODEL ?? "meta-llama/llama-3-8b-instruct:free",
         });
       }
 

@@ -127,7 +127,8 @@
 
 /* Voice waveform animation */
 @keyframes wave {
-  0%, 100% {
+  0%,
+  100% {
     height: 0.5rem;
   }
   50% {

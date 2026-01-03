@@ -10,23 +10,24 @@ interface VoiceControlsProps {
   canProceed?: boolean;
 }
 
-export function VoiceControls({ state, onStart, onRetry, disabled, canProceed }: VoiceControlsProps) {
+export function VoiceControls({
+  state,
+  onStart,
+  onRetry,
+  disabled,
+  canProceed,
+}: VoiceControlsProps) {
   if (state === "complete" || canProceed) {
     return (
       <div className="flex justify-center">
-        <Button
-          onClick={onRetry}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
+        <Button onClick={onRetry} variant="outline" size="sm" className="gap-2">
           <RotateCcw className="w-4 h-4" />
           Redo Interview
         </Button>
       </div>
     );
   }
-  
+
   if (state === "idle") {
     return (
       <div className="flex justify-center">
@@ -43,30 +44,10 @@ export function VoiceControls({ state, onStart, onRetry, disabled, canProceed }:
     );
   }
 
-  // if (state === "recording" || state === "processing") {
-  //   return (
-  //     <div className="flex justify-center">
-  //       <Button
-  //         onClick={onRetry}
-  //         variant="outline"
-  //         size="lg"
-  //         className="gap-2"
-  //       >
-  //         <RotateCcw className="w-4 h-4" />
-  //         Start Over
-  //       </Button>
-  //     </div>
-  //   );
-  // }
-
   if (state === "error") {
     return (
       <div className="flex justify-center gap-3">
-        <Button
-          onClick={onRetry}
-          size="lg"
-          className="gap-2"
-        >
+        <Button onClick={onRetry} size="lg" className="gap-2">
           <RotateCcw className="w-4 h-4" />
           Try Again
         </Button>

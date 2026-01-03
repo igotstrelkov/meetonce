@@ -1,13 +1,17 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { Doc } from "./_generated/dataModel";
-import { internalAction, internalMutation, internalQuery } from "./_generated/server";
+import {
+  internalAction,
+  internalMutation,
+  internalQuery,
+} from "./_generated/server";
 import {
   analyzeCompatibility,
   formatProfile,
   generateConversationStarters,
   getWeekOfString,
-  suggestVenue
+  suggestVenue,
 } from "./lib/matching";
 import { makeMatchKey } from "./lib/utils";
 
@@ -25,7 +29,7 @@ export const getUnmatchedUsersBatch = internalQuery({
     // Get all eligible users
     const allEligible = await ctx.db
       .query("users")
-      .filter(q =>
+      .filter((q) =>
         q.and(
           q.eq(q.field("accountStatus"), "approved"),
           q.eq(q.field("vacationMode"), false)
@@ -38,14 +42,14 @@ export const getUnmatchedUsersBatch = internalQuery({
     for (const user of allEligible) {
       const hasMatch = await ctx.db
         .query("weeklyMatches")
-        .withIndex("by_user_and_week", q =>
+        .withIndex("by_user_and_week", (q) =>
           q.eq("userId", user._id).eq("weekOf", weekOf)
         )
         .first();
 
       const hasReverseMatch = await ctx.db
         .query("weeklyMatches")
-        .withIndex("by_match_user_and_week", q =>
+        .withIndex("by_match_user_and_week", (q) =>
           q.eq("matchUserId", user._id).eq("weekOf", weekOf)
         )
         .first();
@@ -88,14 +92,14 @@ export const loadAndFilterCandidates = internalQuery({
       // Check if already matched with this user (in any week)
       const previousMatch = await ctx.db
         .query("weeklyMatches")
-        .withIndex("by_user_and_match", q =>
+        .withIndex("by_user_and_match", (q) =>
           q.eq("userId", args.userId).eq("matchUserId", candidateId)
         )
         .first();
 
       const reversePreviousMatch = await ctx.db
         .query("weeklyMatches")
-        .withIndex("by_match_and_user", q =>
+        .withIndex("by_match_and_user", (q) =>
           q.eq("matchUserId", args.userId).eq("userId", candidateId)
         )
         .first();
@@ -107,23 +111,31 @@ export const loadAndFilterCandidates = internalQuery({
 
       // Filter user's age preference for candidate
       if (user.minAge && candidate.age < user.minAge) {
-        console.log(`Filtered out ${candidate.name}: too young (${candidate.age} < ${user.minAge})`);
+        console.log(
+          `Filtered out ${candidate.name}: too young (${candidate.age} < ${user.minAge})`
+        );
         continue;
       }
-      
+
       if (user.maxAge && candidate.age > user.maxAge) {
-        console.log(`Filtered out ${candidate.name}: too old (${candidate.age} > ${user.maxAge})`);
+        console.log(
+          `Filtered out ${candidate.name}: too old (${candidate.age} > ${user.maxAge})`
+        );
         continue;
       }
-      
+
       // Filter candidate's age preference for user (bidirectional check)
       if (candidate.minAge && user.age < candidate.minAge) {
-        console.log(`Filtered out ${candidate.name}: user too young for candidate`);
+        console.log(
+          `Filtered out ${candidate.name}: user too young for candidate`
+        );
         continue;
       }
-      
+
       if (candidate.maxAge && user.age > candidate.maxAge) {
-        console.log(`Filtered out ${candidate.name}: user too old for candidate`);
+        console.log(
+          `Filtered out ${candidate.name}: user too old for candidate`
+        );
         continue;
       }
     }
@@ -143,14 +155,14 @@ export const validateMatch = internalQuery({
     // Check 1: Never matched before (with pass history check)
     const previousMatchAsUser = await ctx.db
       .query("weeklyMatches")
-      .withIndex("by_user_and_match", q =>
+      .withIndex("by_user_and_match", (q) =>
         q.eq("userId", args.userId).eq("matchUserId", args.candidateId)
       )
       .first();
 
     const previousMatchAsMatch = await ctx.db
       .query("weeklyMatches")
-      .withIndex("by_match_and_user", q =>
+      .withIndex("by_match_and_user", (q) =>
         q.eq("matchUserId", args.userId).eq("userId", args.candidateId)
       )
       .first();
@@ -159,13 +171,15 @@ export const validateMatch = internalQuery({
     if (previousMatchAsUser || previousMatchAsMatch) {
       const match = previousMatchAsUser || previousMatchAsMatch;
 
-      const userResponse = match!.userId === args.userId
-        ? match!.userResponse
-        : match!.matchResponse;
+      const userResponse =
+        match!.userId === args.userId
+          ? match!.userResponse
+          : match!.matchResponse;
 
-      const candidateResponse = match!.userId === args.candidateId
-        ? match!.userResponse
-        : match!.matchResponse;
+      const candidateResponse =
+        match!.userId === args.candidateId
+          ? match!.userResponse
+          : match!.matchResponse;
 
       // Don't re-match if either person passed
       if (userResponse === "passed" || candidateResponse === "passed") {
@@ -246,15 +260,11 @@ export const weeklyMatchGeneration = internalAction({
     const weekOf = getWeekOfString();
 
     // Start the batch process
-    await ctx.scheduler.runAfter(
-      0,
-      internal.matching.runMatchingBatch,
-      {
-        skip: 0,
-        batchSize: 50,
-        weekOf
-      }
-    );
+    await ctx.scheduler.runAfter(0, internal.matching.runMatchingBatch, {
+      skip: 0,
+      batchSize: 50,
+      weekOf,
+    });
 
     console.log("✅ Batched matching process initiated");
   },
@@ -272,10 +282,11 @@ export const runMatchingBatch = internalAction({
     console.log(`📦 Processing batch: skip=${skip}, size=${batchSize}`);
 
     // Step 1: Fetch batch of unmatched users
-    const batch = await ctx.runQuery(
-      internal.matching.getUnmatchedUsersBatch,
-      { skip, limit: batchSize, weekOf }
-    );
+    const batch = await ctx.runQuery(internal.matching.getUnmatchedUsersBatch, {
+      skip,
+      limit: batchSize,
+      weekOf,
+    });
 
     if (batch.length === 0) {
       console.log("🎉 All users processed! Matching complete.");
@@ -301,7 +312,7 @@ export const runMatchingBatch = internalAction({
       const matchKey = makeMatchKey({
         accountStatus: "approved",
         vacationMode: false,
-        gender: user.interestedIn
+        gender: user.interestedIn,
       });
 
       // Step 2a: Vector search for similar users (MUST be in action!)
@@ -312,13 +323,15 @@ export const runMatchingBatch = internalAction({
         filter: (q) => q.eq("matchKey", matchKey),
       });
 
-      console.log(`Vector search found ${vectorResults.length} similar users for ${user.name}`);
+      console.log(
+        `Vector search found ${vectorResults.length} similar users for ${user.name}`
+      );
 
       // Extract IDs and filter out self
       const candidateIds = vectorResults
-        .filter(result => result._id !== user._id)
+        .filter((result) => result._id !== user._id)
         .slice(0, 100) // Top 100 by similarity
-        .map(result => result._id);
+        .map((result) => result._id);
 
       if (candidateIds.length === 0) {
         console.log(`No vector search candidates for ${user.name}`);
@@ -332,11 +345,15 @@ export const runMatchingBatch = internalAction({
       );
 
       if (candidates.length === 0) {
-        console.log(`No unmatched candidates for ${user.name} after history filter`);
+        console.log(
+          `No unmatched candidates for ${user.name} after history filter`
+        );
         continue;
       }
 
-      console.log(`${candidates.length} candidates after history filter for ${user.name}`);
+      console.log(
+        `${candidates.length} candidates after history filter for ${user.name}`
+      );
 
       // Step 2c: Analyze top 20 candidates with LLM
       const top20 = candidates.slice(0, 20);
@@ -361,19 +378,18 @@ export const runMatchingBatch = internalAction({
       let matchData = null;
       for (const item of ranked) {
         if (item.score < 70) {
-          console.log(`Skipping ${item.candidate.name} - score ${item.score} < 70`);
+          console.log(
+            `Skipping ${item.candidate.name} - score ${item.score} < 70`
+          );
           continue;
         }
 
-        const isValid = await ctx.runQuery(
-          internal.matching.validateMatch,
-          {
-            userId: user._id,
-            candidateId: item.candidate._id,
-            userRating: user.attractivenessRating,
-            candidateRating: item.candidate.attractivenessRating,
-          }
-        );
+        const isValid = await ctx.runQuery(internal.matching.validateMatch, {
+          userId: user._id,
+          candidateId: item.candidate._id,
+          userRating: user.attractivenessRating,
+          candidateRating: item.candidate.attractivenessRating,
+        });
 
         if (isValid) {
           matchData = {
@@ -411,7 +427,9 @@ export const runMatchingBatch = internalAction({
       matchedInBatch.add(user._id);
       matchedInBatch.add(matchData.matchUser._id);
 
-      console.log(`✅ Matched ${user.name} ↔ ${matchData.matchUser.name} (${matchData.score}% compatible)`);
+      console.log(
+        `✅ Matched ${user.name} ↔ ${matchData.matchUser.name} (${matchData.score}% compatible)`
+      );
     }
 
     console.log(`Batch complete. Matched ${matchedInBatch.size / 2} pairs.`);
@@ -419,15 +437,11 @@ export const runMatchingBatch = internalAction({
     // Step 3: Recursively schedule next batch if more users remain
     if (batch.length === batchSize) {
       console.log("📤 Scheduling next batch...");
-      await ctx.scheduler.runAfter(
-        0,
-        internal.matching.runMatchingBatch,
-        {
-          skip: skip + batchSize,
-          batchSize,
-          weekOf,
-        }
-      );
+      await ctx.scheduler.runAfter(0, internal.matching.runMatchingBatch, {
+        skip: skip + batchSize,
+        batchSize,
+        weekOf,
+      });
     } else {
       console.log("🏁 This was the last batch. All done!");
     }
@@ -440,15 +454,11 @@ export const testMatchingAlgorithm = internalAction({
   handler: async (ctx) => {
     console.log("🧪 Testing matching algorithm with small batch...");
 
-    await ctx.scheduler.runAfter(
-      0,
-      internal.matching.runMatchingBatch,
-      {
-        skip: 0,
-        batchSize: 5, // Small batch for testing
-        weekOf: getWeekOfString(),
-      }
-    );
+    await ctx.scheduler.runAfter(0, internal.matching.runMatchingBatch, {
+      skip: 0,
+      batchSize: 5, // Small batch for testing
+      weekOf: getWeekOfString(),
+    });
 
     console.log("✅ Test batch scheduled");
   },

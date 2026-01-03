@@ -35,7 +35,8 @@ export const processTranscript = action({
           );
           // Retry with stricter prompt
           const retryText = await processVoiceTranscript(
-            args.transcript + "\n\nIMPORTANT: The output MUST be between 100-500 words.",
+            args.transcript +
+              "\n\nIMPORTANT: The output MUST be between 100-500 words.",
             args.type
           );
           return retryText;
@@ -47,7 +48,8 @@ export const processTranscript = action({
           );
           // Retry with stricter prompt
           const retryText = await processVoiceTranscript(
-            args.transcript + "\n\nIMPORTANT: The output MUST be between 100-500 words.",
+            args.transcript +
+              "\n\nIMPORTANT: The output MUST be between 100-500 words.",
             args.type
           );
           return retryText;

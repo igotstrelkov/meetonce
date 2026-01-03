@@ -5,6 +5,7 @@ This guide explains how to seed test users into your MeetOnce database for devel
 ## Overview
 
 The seeding script creates realistic test user profiles with:
+
 - Diverse backgrounds, ages, and interests
 - AI-generated embeddings for matching
 - Automatic approval option for immediate matching
@@ -61,6 +62,7 @@ internal.seed.clearTestUsers()
 The script includes 20 pre-defined users:
 
 ### Females (10 users)
+
 - Sarah Johnson, 28 - Software engineer
 - Emma Murphy, 31 - Marketing manager
 - Aoife O'Brien, 26 - Graphic designer
@@ -73,6 +75,7 @@ The script includes 20 pre-defined users:
 - Ciara Walsh, 30 - Event planner
 
 ### Males (10 users)
+
 - Michael Chen, 29 - Data scientist
 - James Walsh, 32 - Teacher
 - Liam O'Sullivan, 27 - Fitness coach
@@ -87,11 +90,13 @@ The script includes 20 pre-defined users:
 ## Parameters
 
 ### `count` (optional)
+
 - **Type**: `number`
 - **Default**: `20` (all users)
 - **Description**: Number of users to seed from the list
 
 ### `approved` (optional)
+
 - **Type**: `boolean`
 - **Default**: `true`
 - **Description**: Auto-approve users for immediate matching
@@ -101,6 +106,7 @@ The script includes 20 pre-defined users:
 ## Test User Details
 
 All test users have:
+
 - ✅ Unique email addresses (`name@test.meetonce.com`)
 - ✅ Fake Clerk IDs (`test_name_timestamp`)
 - ✅ AI-generated embeddings (via OpenRouter API)
@@ -114,11 +120,13 @@ All test users have:
 After seeding approved users:
 
 1. **Run Weekly Match Generation**:
+
    ```bash
    internal.matching.weeklyMatchGeneration()
    ```
 
 2. **Test Specific Batch**:
+
    ```bash
    internal.matching.testMatchingAlgorithm()
    ```
@@ -136,6 +144,7 @@ internal.seed.clearTestUsers()
 ```
 
 This will:
+
 - Find all users with `@test.meetonce.com` emails
 - Delete all test users from database
 - Display deletion count in logs
@@ -149,6 +158,7 @@ This will:
 ## Common Use Cases
 
 ### 1. Testing Matching Algorithm
+
 ```bash
 # Seed users
 internal.seed.seedTestUsers({ count: 20, approved: true })
@@ -161,6 +171,7 @@ internal.seed.clearTestUsers()
 ```
 
 ### 2. Testing Admin Approval Flow
+
 ```bash
 # Seed unapproved users
 internal.seed.seedTestUsers({ count: 10, approved: false })
@@ -170,6 +181,7 @@ internal.seed.seedTestUsers({ count: 10, approved: false })
 ```
 
 ### 3. Testing with Fresh Data
+
 ```bash
 # Clear existing test users
 internal.seed.clearTestUsers()
@@ -189,18 +201,24 @@ internal.seed.seedTestUsers({ count: 20 })
 ## Troubleshooting
 
 ### "User already exists" Error
+
 Test users have timestamped Clerk IDs, so duplicates shouldn't occur. If they do:
+
 1. Run `clearTestUsers()` first
 2. Then run `seedTestUsers()` again
 
 ### No Matches Created
+
 Check that:
+
 1. Users are approved: `internal.seed.seedTestUsers({ approved: true })`
 2. Embeddings were generated successfully (check logs)
 3. Users meet matching criteria (age ranges, gender preferences)
 
 ### Embedding Generation Fails
+
 Ensure:
+
 1. `OPENROUTER_API_KEY` is set in environment variables
 2. API key has sufficient credits
 3. Network connectivity is working

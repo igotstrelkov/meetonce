@@ -68,7 +68,7 @@ export const sendPhotoRejectedEmail = internalAction({
       Your photo needs to be updated.
 
       Reason: ${args.reason}
-      ${args.guidance ? `Guidance: ${args.guidance}` : ''}
+      ${args.guidance ? `Guidance: ${args.guidance}` : ""}
 
       Upload New Photo: ${args.uploadUrl}
       ==================================

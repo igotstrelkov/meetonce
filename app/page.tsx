@@ -10,14 +10,12 @@ export default function Page() {
   const { user } = useUser();
 
   useEffect(() => {
-      // If authenticated with Clerk, redirect to dashboard
-      if (user) {
-        router.push("/dashboard");
-        return;
-      }
-    }, [user]);
+    // If authenticated with Clerk, redirect to dashboard
+    if (user) {
+      router.push("/dashboard");
+      return;
+    }
+  }, [user]);
 
-  return (
-    <LandingPage />
-  );
+  return <LandingPage />;
 }

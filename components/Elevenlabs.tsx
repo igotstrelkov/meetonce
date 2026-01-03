@@ -1,11 +1,18 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import * as React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { cn } from "@/lib/utils"
-import { Button } from "./ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card"
+import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 
 export default function ElevenlabsBlocks() {
   return (
@@ -13,11 +20,11 @@ export default function ElevenlabsBlocks() {
       <BarVisualizerDemo />
       <WaveformDemo />
     </>
-  )
+  );
 }
 
 function BarVisualizerDemo() {
-  const [state, setState] = useState<AgentState>("speaking")
+  const [state, setState] = useState<AgentState>("speaking");
 
   return (
     <>
@@ -64,25 +71,25 @@ function BarVisualizerDemo() {
         </CardFooter>
       </Card>
     </>
-  )
+  );
 }
 
 function WaveformDemo() {
-  const [active, setActive] = useState(false)
-  const [processing, setProcessing] = useState(true)
-  const [mode, setMode] = useState<"static" | "scrolling">("static")
+  const [active, setActive] = useState(false);
+  const [processing, setProcessing] = useState(true);
+  const [mode, setMode] = useState<"static" | "scrolling">("static");
   const handleToggleActive = () => {
-    setActive(!active)
+    setActive(!active);
     if (!active) {
-      setProcessing(false)
+      setProcessing(false);
     }
-  }
+  };
   const handleToggleProcessing = () => {
-    setProcessing(!processing)
+    setProcessing(!processing);
     if (!processing) {
-      setActive(false)
+      setActive(false);
     }
-  }
+  };
   return (
     <>
       <Card>
@@ -130,43 +137,45 @@ function WaveformDemo() {
         </CardFooter>
       </Card>
     </>
-  )
+  );
 }
 
 export interface AudioAnalyserOptions {
-  fftSize?: number
-  smoothingTimeConstant?: number
-  minDecibels?: number
-  maxDecibels?: number
+  fftSize?: number;
+  smoothingTimeConstant?: number;
+  minDecibels?: number;
+  maxDecibels?: number;
 }
 
 function createAudioAnalyser(
   mediaStream: MediaStream,
   options: AudioAnalyserOptions = {}
 ) {
-  const audioContext = new (window.AudioContext ||
+  const audioContext = new (
+    window.AudioContext ||
     (window as unknown as { webkitAudioContext: typeof AudioContext })
-      .webkitAudioContext)()
-  const source = audioContext.createMediaStreamSource(mediaStream)
-  const analyser = audioContext.createAnalyser()
+      .webkitAudioContext
+  )();
+  const source = audioContext.createMediaStreamSource(mediaStream);
+  const analyser = audioContext.createAnalyser();
 
-  if (options.fftSize) analyser.fftSize = options.fftSize
+  if (options.fftSize) analyser.fftSize = options.fftSize;
   if (options.smoothingTimeConstant !== undefined) {
-    analyser.smoothingTimeConstant = options.smoothingTimeConstant
+    analyser.smoothingTimeConstant = options.smoothingTimeConstant;
   }
   if (options.minDecibels !== undefined)
-    analyser.minDecibels = options.minDecibels
+    analyser.minDecibels = options.minDecibels;
   if (options.maxDecibels !== undefined)
-    analyser.maxDecibels = options.maxDecibels
+    analyser.maxDecibels = options.maxDecibels;
 
-  source.connect(analyser)
+  source.connect(analyser);
 
   const cleanup = () => {
-    source.disconnect()
-    audioContext.close()
-  }
+    source.disconnect();
+    audioContext.close();
+  };
 
-  return { analyser, audioContext, cleanup }
+  return { analyser, audioContext, cleanup };
 }
 
 /**
@@ -179,70 +188,70 @@ export function useAudioVolume(
   mediaStream?: MediaStream | null,
   options: AudioAnalyserOptions = { fftSize: 32, smoothingTimeConstant: 0 }
 ) {
-  const [volume, setVolume] = useState(0)
-  const volumeRef = useRef(0)
-  const frameId = useRef<number | undefined>(undefined)
+  const [volume, setVolume] = useState(0);
+  const volumeRef = useRef(0);
+  const frameId = useRef<number | undefined>(undefined);
 
   // Memoize options to prevent unnecessary re-renders
-  const memoizedOptions = useMemo(() => options, [options])
+  const memoizedOptions = useMemo(() => options, [options]);
 
   useEffect(() => {
     if (!mediaStream) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setVolume(0)
-      volumeRef.current = 0
-      return
+      setVolume(0);
+      volumeRef.current = 0;
+      return;
     }
 
     const { analyser, cleanup } = createAudioAnalyser(
       mediaStream,
       memoizedOptions
-    )
+    );
 
-    const bufferLength = analyser.frequencyBinCount
-    const dataArray = new Uint8Array(bufferLength)
-    let lastUpdate = 0
-    const updateInterval = 1000 / 30 // 30 FPS
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    let lastUpdate = 0;
+    const updateInterval = 1000 / 30; // 30 FPS
 
     const updateVolume = (timestamp: number) => {
       if (timestamp - lastUpdate >= updateInterval) {
-        analyser.getByteFrequencyData(dataArray)
-        let sum = 0
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
         for (let i = 0; i < dataArray.length; i++) {
-          const a = dataArray[i]
-          sum += a * a
+          const a = dataArray[i];
+          sum += a * a;
         }
-        const newVolume = Math.sqrt(sum / dataArray.length) / 255
+        const newVolume = Math.sqrt(sum / dataArray.length) / 255;
 
         // Only update state if volume changed significantly
         if (Math.abs(newVolume - volumeRef.current) > 0.01) {
-          volumeRef.current = newVolume
-          setVolume(newVolume)
+          volumeRef.current = newVolume;
+          setVolume(newVolume);
         }
-        lastUpdate = timestamp
+        lastUpdate = timestamp;
       }
-      frameId.current = requestAnimationFrame(updateVolume)
-    }
+      frameId.current = requestAnimationFrame(updateVolume);
+    };
 
-    frameId.current = requestAnimationFrame(updateVolume)
+    frameId.current = requestAnimationFrame(updateVolume);
 
     return () => {
-      cleanup()
+      cleanup();
       if (frameId.current) {
-        cancelAnimationFrame(frameId.current)
+        cancelAnimationFrame(frameId.current);
       }
-    }
-  }, [mediaStream, memoizedOptions])
+    };
+  }, [mediaStream, memoizedOptions]);
 
-  return volume
+  return volume;
 }
 
 export interface MultiBandVolumeOptions {
-  bands?: number
-  loPass?: number // Low frequency cutoff
-  hiPass?: number // High frequency cutoff
-  updateInterval?: number // Update interval in ms
-  analyserOptions?: AudioAnalyserOptions
+  bands?: number;
+  loPass?: number; // Low frequency cutoff
+  hiPass?: number; // High frequency cutoff
+  updateInterval?: number; // Update interval in ms
+  analyserOptions?: AudioAnalyserOptions;
 }
 
 const multibandDefaults: MultiBandVolumeOptions = {
@@ -251,16 +260,16 @@ const multibandDefaults: MultiBandVolumeOptions = {
   hiPass: 600,
   updateInterval: 32,
   analyserOptions: { fftSize: 2048 },
-}
+};
 
 // Memoized normalization function to avoid recreating on each render
 const normalizeDb = (value: number) => {
-  if (value === -Infinity) return 0
-  const minDb = -100
-  const maxDb = -10
-  const db = 1 - (Math.max(minDb, Math.min(maxDb, value)) * -1) / 100
-  return Math.sqrt(db)
-}
+  if (value === -Infinity) return 0;
+  const minDb = -100;
+  const maxDb = -10;
+  const db = 1 - (Math.max(minDb, Math.min(maxDb, value)) * -1) / 100;
+  return Math.sqrt(db);
+};
 
 /**
  * Hook for tracking volume across multiple frequency bands
@@ -272,91 +281,91 @@ export function useMultibandVolume(
   mediaStream?: MediaStream | null,
   options: MultiBandVolumeOptions = {}
 ) {
-  const opts = useMemo(() => ({ ...multibandDefaults, ...options }), [options])
+  const opts = useMemo(() => ({ ...multibandDefaults, ...options }), [options]);
 
   const [frequencyBands, setFrequencyBands] = useState<number[]>(() =>
     new Array(opts.bands).fill(0)
-  )
-  const bandsRef = useRef<number[]>(new Array(opts.bands).fill(0))
-  const frameId = useRef<number | undefined>(undefined)
+  );
+  const bandsRef = useRef<number[]>(new Array(opts.bands).fill(0));
+  const frameId = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     if (!mediaStream) {
-      const emptyBands = new Array(opts.bands).fill(0)
+      const emptyBands = new Array(opts.bands).fill(0);
       setTimeout(() => {
-        setFrequencyBands(emptyBands)
-      }, 0)
-      bandsRef.current = emptyBands
-      return
+        setFrequencyBands(emptyBands);
+      }, 0);
+      bandsRef.current = emptyBands;
+      return;
     }
 
     const { analyser, cleanup } = createAudioAnalyser(
       mediaStream,
       opts.analyserOptions
-    )
+    );
 
-    const bufferLength = analyser.frequencyBinCount
-    const dataArray = new Float32Array(bufferLength)
-    const sliceStart = opts.loPass!
-    const sliceEnd = opts.hiPass!
-    const sliceLength = sliceEnd - sliceStart
-    const chunkSize = Math.ceil(sliceLength / opts.bands!)
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Float32Array(bufferLength);
+    const sliceStart = opts.loPass!;
+    const sliceEnd = opts.hiPass!;
+    const sliceLength = sliceEnd - sliceStart;
+    const chunkSize = Math.ceil(sliceLength / opts.bands!);
 
-    let lastUpdate = 0
-    const updateInterval = opts.updateInterval!
+    let lastUpdate = 0;
+    const updateInterval = opts.updateInterval!;
 
     const updateVolume = (timestamp: number) => {
       if (timestamp - lastUpdate >= updateInterval) {
-        analyser.getFloatFrequencyData(dataArray)
+        analyser.getFloatFrequencyData(dataArray);
 
         // Process directly without creating intermediate arrays
-        const chunks = new Array(opts.bands!)
+        const chunks = new Array(opts.bands!);
 
         for (let i = 0; i < opts.bands!; i++) {
-          let sum = 0
-          let count = 0
-          const startIdx = sliceStart + i * chunkSize
-          const endIdx = Math.min(sliceStart + (i + 1) * chunkSize, sliceEnd)
+          let sum = 0;
+          let count = 0;
+          const startIdx = sliceStart + i * chunkSize;
+          const endIdx = Math.min(sliceStart + (i + 1) * chunkSize, sliceEnd);
 
           for (let j = startIdx; j < endIdx; j++) {
-            sum += normalizeDb(dataArray[j])
-            count++
+            sum += normalizeDb(dataArray[j]);
+            count++;
           }
 
-          chunks[i] = count > 0 ? sum / count : 0
+          chunks[i] = count > 0 ? sum / count : 0;
         }
 
         // Only update state if bands changed significantly
-        let hasChanged = false
+        let hasChanged = false;
         for (let i = 0; i < chunks.length; i++) {
           if (Math.abs(chunks[i] - bandsRef.current[i]) > 0.01) {
-            hasChanged = true
-            break
+            hasChanged = true;
+            break;
           }
         }
 
         if (hasChanged) {
-          bandsRef.current = chunks
-          setFrequencyBands(chunks)
+          bandsRef.current = chunks;
+          setFrequencyBands(chunks);
         }
 
-        lastUpdate = timestamp
+        lastUpdate = timestamp;
       }
 
-      frameId.current = requestAnimationFrame(updateVolume)
-    }
+      frameId.current = requestAnimationFrame(updateVolume);
+    };
 
-    frameId.current = requestAnimationFrame(updateVolume)
+    frameId.current = requestAnimationFrame(updateVolume);
 
     return () => {
-      cleanup()
+      cleanup();
       if (frameId.current) {
-        cancelAnimationFrame(frameId.current)
+        cancelAnimationFrame(frameId.current);
       }
-    }
-  }, [mediaStream, opts])
+    };
+  }, [mediaStream, opts]);
 
-  return frequencyBands
+  return frequencyBands;
 }
 
 type AnimationState =
@@ -365,101 +374,100 @@ type AnimationState =
   | "listening"
   | "speaking"
   | "thinking"
-  | undefined
+  | undefined;
 
 export const useBarAnimator = (
   state: AnimationState,
   columns: number,
   interval: number
 ): number[] => {
-  const indexRef = useRef(0)
-  const [currentFrame, setCurrentFrame] = useState<number[]>([])
-  const animationFrameId = useRef<number | null>(null)
+  const indexRef = useRef(0);
+  const [currentFrame, setCurrentFrame] = useState<number[]>([]);
+  const animationFrameId = useRef<number | null>(null);
 
   // Memoize sequence generation
   const sequence = useMemo(() => {
     if (state === "thinking" || state === "listening") {
-      return generateListeningSequenceBar(columns)
+      return generateListeningSequenceBar(columns);
     } else if (state === "connecting" || state === "initializing") {
-      return generateConnectingSequenceBar(columns)
+      return generateConnectingSequenceBar(columns);
     } else if (state === undefined || state === "speaking") {
-      return [new Array(columns).fill(0).map((_, idx) => idx)]
+      return [new Array(columns).fill(0).map((_, idx) => idx)];
     } else {
-      return [[]]
+      return [[]];
     }
-  }, [state, columns])
+  }, [state, columns]);
 
   useEffect(() => {
-    indexRef.current = 0
+    indexRef.current = 0;
     setTimeout(() => {
-      setCurrentFrame(sequence[0] || [])
-    }, 0)
-  }, [sequence])
+      setCurrentFrame(sequence[0] || []);
+    }, 0);
+  }, [sequence]);
 
   useEffect(() => {
-    let startTime = performance.now()
+    let startTime = performance.now();
 
     const animate = (time: DOMHighResTimeStamp) => {
-      const timeElapsed = time - startTime
+      const timeElapsed = time - startTime;
 
       if (timeElapsed >= interval) {
-        indexRef.current = (indexRef.current + 1) % sequence.length
-        setCurrentFrame(sequence[indexRef.current] || [])
-        startTime = time
+        indexRef.current = (indexRef.current + 1) % sequence.length;
+        setCurrentFrame(sequence[indexRef.current] || []);
+        startTime = time;
       }
 
-      animationFrameId.current = requestAnimationFrame(animate)
-    }
+      animationFrameId.current = requestAnimationFrame(animate);
+    };
 
-    animationFrameId.current = requestAnimationFrame(animate)
+    animationFrameId.current = requestAnimationFrame(animate);
 
     return () => {
       if (animationFrameId.current !== null) {
-        cancelAnimationFrame(animationFrameId.current)
+        cancelAnimationFrame(animationFrameId.current);
       }
-    }
-  }, [interval, sequence])
+    };
+  }, [interval, sequence]);
 
-  return currentFrame
-}
+  return currentFrame;
+};
 
 // Memoize sequence generators
 const generateConnectingSequenceBar = (columns: number): number[][] => {
-  const seq = []
+  const seq = [];
   for (let x = 0; x < columns; x++) {
-    seq.push([x, columns - 1 - x])
+    seq.push([x, columns - 1 - x]);
   }
-  return seq
-}
+  return seq;
+};
 
 const generateListeningSequenceBar = (columns: number): number[][] => {
-  const center = Math.floor(columns / 2)
-  const noIndex = -1
-  return [[center], [noIndex]]
-}
+  const center = Math.floor(columns / 2);
+  const noIndex = -1;
+  return [[center], [noIndex]];
+};
 
 export type AgentState =
   | "connecting"
   | "initializing"
   | "listening"
   | "speaking"
-  | "thinking"
+  | "thinking";
 
-export interface BarVisualizerProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface BarVisualizerProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Voice assistant state */
-  state?: AgentState
+  state?: AgentState;
   /** Number of bars to display */
-  barCount?: number
+  barCount?: number;
   /** Audio source */
-  mediaStream?: MediaStream | null
+  mediaStream?: MediaStream | null;
   /** Min/max height as percentage */
-  minHeight?: number
-  maxHeight?: number
+  minHeight?: number;
+  maxHeight?: number;
   /** Enable demo mode with fake audio data */
-  demo?: boolean
+  demo?: boolean;
   /** Align bars from center instead of bottom */
-  centerAlign?: boolean
+  centerAlign?: boolean;
 }
 
 const BarVisualizerComponent = React.forwardRef<
@@ -486,78 +494,78 @@ const BarVisualizerComponent = React.forwardRef<
       bands: barCount,
       loPass: 100,
       hiPass: 200,
-    })
+    });
 
     // Generate fake volume data for demo mode using refs to avoid state updates
-    const fakeVolumeBandsRef = useRef<number[]>(new Array(barCount).fill(0.2))
+    const fakeVolumeBandsRef = useRef<number[]>(new Array(barCount).fill(0.2));
     const [fakeVolumeBands, setFakeVolumeBands] = useState<number[]>(() =>
       new Array(barCount).fill(0.2)
-    )
-    const fakeAnimationRef = useRef<number | undefined>(undefined)
+    );
+    const fakeAnimationRef = useRef<number | undefined>(undefined);
 
     // Animate fake volume bands for speaking and listening states
     useEffect(() => {
-      if (!demo) return
+      if (!demo) return;
 
       if (state !== "speaking" && state !== "listening") {
-        const bands = new Array(barCount).fill(0.2)
-        fakeVolumeBandsRef.current = bands
+        const bands = new Array(barCount).fill(0.2);
+        fakeVolumeBandsRef.current = bands;
         setTimeout(() => {
-          setFakeVolumeBands(bands)
-        }, 0)
-        return
+          setFakeVolumeBands(bands);
+        }, 0);
+        return;
       }
 
-      let lastUpdate = 0
-      const updateInterval = 50
-      const startTime = Date.now() / 1000
+      let lastUpdate = 0;
+      const updateInterval = 50;
+      const startTime = Date.now() / 1000;
 
       const updateFakeVolume = (timestamp: number) => {
         if (timestamp - lastUpdate >= updateInterval) {
-          const time = Date.now() / 1000 - startTime
-          const newBands = new Array(barCount)
+          const time = Date.now() / 1000 - startTime;
+          const newBands = new Array(barCount);
 
           for (let i = 0; i < barCount; i++) {
-            const waveOffset = i * 0.5
-            const baseVolume = Math.sin(time * 2 + waveOffset) * 0.3 + 0.5
-            const randomNoise = Math.random() * 0.2
-            newBands[i] = Math.max(0.1, Math.min(1, baseVolume + randomNoise))
+            const waveOffset = i * 0.5;
+            const baseVolume = Math.sin(time * 2 + waveOffset) * 0.3 + 0.5;
+            const randomNoise = Math.random() * 0.2;
+            newBands[i] = Math.max(0.1, Math.min(1, baseVolume + randomNoise));
           }
 
           // Only update if values changed significantly
-          let hasChanged = false
+          let hasChanged = false;
           for (let i = 0; i < barCount; i++) {
             if (Math.abs(newBands[i] - fakeVolumeBandsRef.current[i]) > 0.05) {
-              hasChanged = true
-              break
+              hasChanged = true;
+              break;
             }
           }
 
           if (hasChanged) {
-            fakeVolumeBandsRef.current = newBands
-            setFakeVolumeBands(newBands)
+            fakeVolumeBandsRef.current = newBands;
+            setFakeVolumeBands(newBands);
           }
 
-          lastUpdate = timestamp
+          lastUpdate = timestamp;
         }
 
-        fakeAnimationRef.current = requestAnimationFrame(updateFakeVolume)
-      }
+        fakeAnimationRef.current = requestAnimationFrame(updateFakeVolume);
+      };
 
-      fakeAnimationRef.current = requestAnimationFrame(updateFakeVolume)
+      fakeAnimationRef.current = requestAnimationFrame(updateFakeVolume);
 
       return () => {
         if (fakeAnimationRef.current) {
-          cancelAnimationFrame(fakeAnimationRef.current)
+          cancelAnimationFrame(fakeAnimationRef.current);
         }
-      }
-    }, [demo, state, barCount])
+      };
+    }, [demo, state, barCount]);
 
     // Use fake or real volume data based on demo mode
     const volumeBands = useMemo(
       () => (demo ? fakeVolumeBands : realVolumeBands),
       [demo, fakeVolumeBands, realVolumeBands]
-    )
+    );
 
     // Animation sequencing
     const highlightedIndices = useBarAnimator(
@@ -570,7 +578,7 @@ const BarVisualizerComponent = React.forwardRef<
           : state === "listening"
             ? 500
             : 1000
-    )
+    );
 
     return (
       <div
@@ -591,8 +599,8 @@ const BarVisualizerComponent = React.forwardRef<
           const heightPct = Math.min(
             maxHeight,
             Math.max(minHeight, volume * 100 + 5)
-          )
-          const isHighlighted = highlightedIndices?.includes(index) ?? false
+          );
+          const isHighlighted = highlightedIndices?.includes(index) ?? false;
 
           return (
             <Bar
@@ -601,18 +609,18 @@ const BarVisualizerComponent = React.forwardRef<
               isHighlighted={isHighlighted}
               state={state}
             />
-          )
+          );
         })}
       </div>
-    )
+    );
   }
-)
+);
 
 // Memoized Bar component to prevent unnecessary re-renders
 const Bar = React.memo<{
-  heightPct: number
-  isHighlighted: boolean
-  state?: AgentState
+  heightPct: number;
+  isHighlighted: boolean;
+  state?: AgentState;
 }>(({ heightPct, isHighlighted, state }) => (
   <div
     data-highlighted={isHighlighted}
@@ -628,9 +636,9 @@ const Bar = React.memo<{
       animationDuration: state === "thinking" ? "300ms" : undefined,
     }}
   />
-))
+));
 
-Bar.displayName = "Bar"
+Bar.displayName = "Bar";
 
 // Wrap the main component with React.memo for prop comparison optimization
 const BarVisualizer = React.memo(
@@ -646,35 +654,35 @@ const BarVisualizer = React.memo(
       prevProps.centerAlign === nextProps.centerAlign &&
       prevProps.className === nextProps.className &&
       JSON.stringify(prevProps.style) === JSON.stringify(nextProps.style)
-    )
+    );
   }
-)
+);
 
-BarVisualizerComponent.displayName = "BarVisualizerComponent"
-BarVisualizer.displayName = "BarVisualizer"
+BarVisualizerComponent.displayName = "BarVisualizerComponent";
+BarVisualizer.displayName = "BarVisualizer";
 
 export type LiveWaveformProps = React.HTMLAttributes<HTMLDivElement> & {
-  active?: boolean
-  processing?: boolean
-  deviceId?: string
-  barWidth?: number
-  barHeight?: number
-  barGap?: number
-  barRadius?: number
-  barColor?: string
-  fadeEdges?: boolean
-  fadeWidth?: number
-  height?: string | number
-  sensitivity?: number
-  smoothingTimeConstant?: number
-  fftSize?: number
-  historySize?: number
-  updateRate?: number
-  mode?: "scrolling" | "static"
-  onError?: (error: Error) => void
-  onStreamReady?: (stream: MediaStream) => void
-  onStreamEnd?: () => void
-}
+  active?: boolean;
+  processing?: boolean;
+  deviceId?: string;
+  barWidth?: number;
+  barHeight?: number;
+  barGap?: number;
+  barRadius?: number;
+  barColor?: string;
+  fadeEdges?: boolean;
+  fadeWidth?: number;
+  height?: string | number;
+  sensitivity?: number;
+  smoothingTimeConstant?: number;
+  fftSize?: number;
+  historySize?: number;
+  updateRate?: number;
+  mode?: "scrolling" | "static";
+  onError?: (error: Error) => void;
+  onStreamReady?: (stream: MediaStream) => void;
+  onStreamEnd?: () => void;
+};
 export const LiveWaveform = ({
   active = false,
   processing = false,
@@ -699,71 +707,71 @@ export const LiveWaveform = ({
   className,
   ...props
 }: LiveWaveformProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const historyRef = useRef<number[]>([])
-  const analyserRef = useRef<AnalyserNode | null>(null)
-  const audioContextRef = useRef<AudioContext | null>(null)
-  const streamRef = useRef<MediaStream | null>(null)
-  const animationRef = useRef<number>(0)
-  const lastUpdateRef = useRef<number>(0)
-  const processingAnimationRef = useRef<number | null>(null)
-  const lastActiveDataRef = useRef<number[]>([])
-  const transitionProgressRef = useRef(0)
-  const staticBarsRef = useRef<number[]>([])
-  const needsRedrawRef = useRef(true)
-  const gradientCacheRef = useRef<CanvasGradient | null>(null)
-  const lastWidthRef = useRef(0)
-  const heightStyle = typeof height === "number" ? `${height}px` : height
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const historyRef = useRef<number[]>([]);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const animationRef = useRef<number>(0);
+  const lastUpdateRef = useRef<number>(0);
+  const processingAnimationRef = useRef<number | null>(null);
+  const lastActiveDataRef = useRef<number[]>([]);
+  const transitionProgressRef = useRef(0);
+  const staticBarsRef = useRef<number[]>([]);
+  const needsRedrawRef = useRef(true);
+  const gradientCacheRef = useRef<CanvasGradient | null>(null);
+  const lastWidthRef = useRef(0);
+  const heightStyle = typeof height === "number" ? `${height}px` : height;
   // Handle canvas resizing
   useEffect(() => {
-    const canvas = canvasRef.current
-    const container = containerRef.current
-    if (!canvas || !container) return
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
     const resizeObserver = new ResizeObserver(() => {
-      const rect = container.getBoundingClientRect()
-      const dpr = window.devicePixelRatio || 1
-      canvas.width = rect.width * dpr
-      canvas.height = rect.height * dpr
-      canvas.style.width = `${rect.width}px`
-      canvas.style.height = `${rect.height}px`
-      const ctx = canvas.getContext("2d")
+      const rect = container.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+      const ctx = canvas.getContext("2d");
       if (ctx) {
-        ctx.scale(dpr, dpr)
+        ctx.scale(dpr, dpr);
       }
-      gradientCacheRef.current = null
-      lastWidthRef.current = rect.width
-      needsRedrawRef.current = true
-    })
-    resizeObserver.observe(container)
-    return () => resizeObserver.disconnect()
-  }, [])
+      gradientCacheRef.current = null;
+      lastWidthRef.current = rect.width;
+      needsRedrawRef.current = true;
+    });
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, []);
   useEffect(() => {
     if (processing && !active) {
-      let time = 0
-      transitionProgressRef.current = 0
+      let time = 0;
+      transitionProgressRef.current = 0;
       const animateProcessing = () => {
-        time += 0.03
+        time += 0.03;
         transitionProgressRef.current = Math.min(
           1,
           transitionProgressRef.current + 0.02
-        )
-        const processingData = []
+        );
+        const processingData = [];
         const barCount = Math.floor(
           (containerRef.current?.getBoundingClientRect().width || 200) /
             (barWidth + barGap)
-        )
+        );
         if (mode === "static") {
-          const halfCount = Math.floor(barCount / 2)
+          const halfCount = Math.floor(barCount / 2);
           for (let i = 0; i < barCount; i++) {
-            const normalizedPosition = (i - halfCount) / halfCount
-            const centerWeight = 1 - Math.abs(normalizedPosition) * 0.4
-            const wave1 = Math.sin(time * 1.5 + normalizedPosition * 3) * 0.25
-            const wave2 = Math.sin(time * 0.8 - normalizedPosition * 2) * 0.2
-            const wave3 = Math.cos(time * 2 + normalizedPosition) * 0.15
-            const combinedWave = wave1 + wave2 + wave3
-            const processingValue = (0.2 + combinedWave) * centerWeight
-            let finalValue = processingValue
+            const normalizedPosition = (i - halfCount) / halfCount;
+            const centerWeight = 1 - Math.abs(normalizedPosition) * 0.4;
+            const wave1 = Math.sin(time * 1.5 + normalizedPosition * 3) * 0.25;
+            const wave2 = Math.sin(time * 0.8 - normalizedPosition * 2) * 0.2;
+            const wave3 = Math.cos(time * 2 + normalizedPosition) * 0.15;
+            const combinedWave = wave1 + wave2 + wave3;
+            const processingValue = (0.2 + combinedWave) * centerWeight;
+            let finalValue = processingValue;
             if (
               lastActiveDataRef.current.length > 0 &&
               transitionProgressRef.current < 1
@@ -771,107 +779,107 @@ export const LiveWaveform = ({
               const lastDataIndex = Math.min(
                 i,
                 lastActiveDataRef.current.length - 1
-              )
-              const lastValue = lastActiveDataRef.current[lastDataIndex] || 0
+              );
+              const lastValue = lastActiveDataRef.current[lastDataIndex] || 0;
               finalValue =
                 lastValue * (1 - transitionProgressRef.current) +
-                processingValue * transitionProgressRef.current
+                processingValue * transitionProgressRef.current;
             }
-            processingData.push(Math.max(0.05, Math.min(1, finalValue)))
+            processingData.push(Math.max(0.05, Math.min(1, finalValue)));
           }
         } else {
           for (let i = 0; i < barCount; i++) {
-            const normalizedPosition = (i - barCount / 2) / (barCount / 2)
-            const centerWeight = 1 - Math.abs(normalizedPosition) * 0.4
-            const wave1 = Math.sin(time * 1.5 + i * 0.15) * 0.25
-            const wave2 = Math.sin(time * 0.8 - i * 0.1) * 0.2
-            const wave3 = Math.cos(time * 2 + i * 0.05) * 0.15
-            const combinedWave = wave1 + wave2 + wave3
-            const processingValue = (0.2 + combinedWave) * centerWeight
-            let finalValue = processingValue
+            const normalizedPosition = (i - barCount / 2) / (barCount / 2);
+            const centerWeight = 1 - Math.abs(normalizedPosition) * 0.4;
+            const wave1 = Math.sin(time * 1.5 + i * 0.15) * 0.25;
+            const wave2 = Math.sin(time * 0.8 - i * 0.1) * 0.2;
+            const wave3 = Math.cos(time * 2 + i * 0.05) * 0.15;
+            const combinedWave = wave1 + wave2 + wave3;
+            const processingValue = (0.2 + combinedWave) * centerWeight;
+            let finalValue = processingValue;
             if (
               lastActiveDataRef.current.length > 0 &&
               transitionProgressRef.current < 1
             ) {
               const lastDataIndex = Math.floor(
                 (i / barCount) * lastActiveDataRef.current.length
-              )
-              const lastValue = lastActiveDataRef.current[lastDataIndex] || 0
+              );
+              const lastValue = lastActiveDataRef.current[lastDataIndex] || 0;
               finalValue =
                 lastValue * (1 - transitionProgressRef.current) +
-                processingValue * transitionProgressRef.current
+                processingValue * transitionProgressRef.current;
             }
-            processingData.push(Math.max(0.05, Math.min(1, finalValue)))
+            processingData.push(Math.max(0.05, Math.min(1, finalValue)));
           }
         }
         if (mode === "static") {
-          staticBarsRef.current = processingData
+          staticBarsRef.current = processingData;
         } else {
-          historyRef.current = processingData
+          historyRef.current = processingData;
         }
-        needsRedrawRef.current = true
+        needsRedrawRef.current = true;
         processingAnimationRef.current =
-          requestAnimationFrame(animateProcessing)
-      }
-      animateProcessing()
+          requestAnimationFrame(animateProcessing);
+      };
+      animateProcessing();
       return () => {
         if (processingAnimationRef.current) {
-          cancelAnimationFrame(processingAnimationRef.current)
+          cancelAnimationFrame(processingAnimationRef.current);
         }
-      }
+      };
     } else if (!active && !processing) {
       const hasData =
         mode === "static"
           ? staticBarsRef.current.length > 0
-          : historyRef.current.length > 0
+          : historyRef.current.length > 0;
       if (hasData) {
-        let fadeProgress = 0
+        let fadeProgress = 0;
         const fadeToIdle = () => {
-          fadeProgress += 0.03
+          fadeProgress += 0.03;
           if (fadeProgress < 1) {
             if (mode === "static") {
               staticBarsRef.current = staticBarsRef.current.map(
                 (value) => value * (1 - fadeProgress)
-              )
+              );
             } else {
               historyRef.current = historyRef.current.map(
                 (value) => value * (1 - fadeProgress)
-              )
+              );
             }
-            needsRedrawRef.current = true
-            requestAnimationFrame(fadeToIdle)
+            needsRedrawRef.current = true;
+            requestAnimationFrame(fadeToIdle);
           } else {
             if (mode === "static") {
-              staticBarsRef.current = []
+              staticBarsRef.current = [];
             } else {
-              historyRef.current = []
+              historyRef.current = [];
             }
           }
-        }
-        fadeToIdle()
+        };
+        fadeToIdle();
       }
     }
-  }, [processing, active, barWidth, barGap, mode])
+  }, [processing, active, barWidth, barGap, mode]);
   // Handle microphone setup and teardown
   useEffect(() => {
     if (!active) {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop())
-        streamRef.current = null
-        onStreamEnd?.()
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+        onStreamEnd?.();
       }
       if (
         audioContextRef.current &&
         audioContextRef.current.state !== "closed"
       ) {
-        audioContextRef.current.close()
-        audioContextRef.current = null
+        audioContextRef.current.close();
+        audioContextRef.current = null;
       }
       if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-        animationRef.current = 0
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = 0;
       }
-      return
+      return;
     }
     const setupMicrophone = async () => {
       try {
@@ -888,46 +896,46 @@ export const LiveWaveform = ({
                 noiseSuppression: true,
                 autoGainControl: true,
               },
-        })
-        streamRef.current = stream
-        onStreamReady?.(stream)
+        });
+        streamRef.current = stream;
+        onStreamReady?.(stream);
         const AudioContextConstructor =
           window.AudioContext ||
           (window as unknown as { webkitAudioContext: typeof AudioContext })
-            .webkitAudioContext
-        const audioContext = new AudioContextConstructor()
-        const analyser = audioContext.createAnalyser()
-        analyser.fftSize = fftSize
-        analyser.smoothingTimeConstant = smoothingTimeConstant
-        const source = audioContext.createMediaStreamSource(stream)
-        source.connect(analyser)
-        audioContextRef.current = audioContext
-        analyserRef.current = analyser
+            .webkitAudioContext;
+        const audioContext = new AudioContextConstructor();
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = fftSize;
+        analyser.smoothingTimeConstant = smoothingTimeConstant;
+        const source = audioContext.createMediaStreamSource(stream);
+        source.connect(analyser);
+        audioContextRef.current = audioContext;
+        analyserRef.current = analyser;
         // Clear history when starting
-        historyRef.current = []
+        historyRef.current = [];
       } catch (error) {
-        onError?.(error as Error)
+        onError?.(error as Error);
       }
-    }
-    setupMicrophone()
+    };
+    setupMicrophone();
     return () => {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop())
-        streamRef.current = null
-        onStreamEnd?.()
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+        onStreamEnd?.();
       }
       if (
         audioContextRef.current &&
         audioContextRef.current.state !== "closed"
       ) {
-        audioContextRef.current.close()
-        audioContextRef.current = null
+        audioContextRef.current.close();
+        audioContextRef.current = null;
       }
       if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-        animationRef.current = 0
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = 0;
       }
-    }
+    };
   }, [
     active,
     deviceId,
@@ -936,95 +944,95 @@ export const LiveWaveform = ({
     onError,
     onStreamReady,
     onStreamEnd,
-  ])
+  ]);
   // Animation loop
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-    let rafId: number
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    let rafId: number;
     const animate = (currentTime: number) => {
       // Render waveform
-      const rect = canvas.getBoundingClientRect()
+      const rect = canvas.getBoundingClientRect();
       // Update audio data if active
       if (active && currentTime - lastUpdateRef.current > updateRate) {
-        lastUpdateRef.current = currentTime
+        lastUpdateRef.current = currentTime;
         if (analyserRef.current) {
           const dataArray = new Uint8Array(
             analyserRef.current.frequencyBinCount
-          )
-          analyserRef.current.getByteFrequencyData(dataArray)
+          );
+          analyserRef.current.getByteFrequencyData(dataArray);
           if (mode === "static") {
             // For static mode, update bars in place
-            const startFreq = Math.floor(dataArray.length * 0.05)
-            const endFreq = Math.floor(dataArray.length * 0.4)
-            const relevantData = dataArray.slice(startFreq, endFreq)
-            const barCount = Math.floor(rect.width / (barWidth + barGap))
-            const halfCount = Math.floor(barCount / 2)
-            const newBars: number[] = []
+            const startFreq = Math.floor(dataArray.length * 0.05);
+            const endFreq = Math.floor(dataArray.length * 0.4);
+            const relevantData = dataArray.slice(startFreq, endFreq);
+            const barCount = Math.floor(rect.width / (barWidth + barGap));
+            const halfCount = Math.floor(barCount / 2);
+            const newBars: number[] = [];
             // Mirror the data for symmetric display
             for (let i = halfCount - 1; i >= 0; i--) {
               const dataIndex = Math.floor(
                 (i / halfCount) * relevantData.length
-              )
+              );
               const value = Math.min(
                 1,
                 (relevantData[dataIndex] / 255) * sensitivity
-              )
-              newBars.push(Math.max(0.05, value))
+              );
+              newBars.push(Math.max(0.05, value));
             }
             for (let i = 0; i < halfCount; i++) {
               const dataIndex = Math.floor(
                 (i / halfCount) * relevantData.length
-              )
+              );
               const value = Math.min(
                 1,
                 (relevantData[dataIndex] / 255) * sensitivity
-              )
-              newBars.push(Math.max(0.05, value))
+              );
+              newBars.push(Math.max(0.05, value));
             }
-            staticBarsRef.current = newBars
-            lastActiveDataRef.current = newBars
+            staticBarsRef.current = newBars;
+            lastActiveDataRef.current = newBars;
           } else {
             // Scrolling mode - original behavior
-            let sum = 0
-            const startFreq = Math.floor(dataArray.length * 0.05)
-            const endFreq = Math.floor(dataArray.length * 0.4)
-            const relevantData = dataArray.slice(startFreq, endFreq)
+            let sum = 0;
+            const startFreq = Math.floor(dataArray.length * 0.05);
+            const endFreq = Math.floor(dataArray.length * 0.4);
+            const relevantData = dataArray.slice(startFreq, endFreq);
             for (let i = 0; i < relevantData.length; i++) {
-              sum += relevantData[i]
+              sum += relevantData[i];
             }
-            const average = (sum / relevantData.length / 255) * sensitivity
+            const average = (sum / relevantData.length / 255) * sensitivity;
             // Add to history
-            historyRef.current.push(Math.min(1, Math.max(0.05, average)))
-            lastActiveDataRef.current = [...historyRef.current]
+            historyRef.current.push(Math.min(1, Math.max(0.05, average)));
+            lastActiveDataRef.current = [...historyRef.current];
             // Maintain history size
             if (historyRef.current.length > historySize) {
-              historyRef.current.shift()
+              historyRef.current.shift();
             }
           }
-          needsRedrawRef.current = true
+          needsRedrawRef.current = true;
         }
       }
       // Only redraw if needed
       if (!needsRedrawRef.current && !active) {
-        rafId = requestAnimationFrame(animate)
-        return
+        rafId = requestAnimationFrame(animate);
+        return;
       }
-      needsRedrawRef.current = active
-      ctx.clearRect(0, 0, rect.width, rect.height)
+      needsRedrawRef.current = active;
+      ctx.clearRect(0, 0, rect.width, rect.height);
       const computedBarColor =
         barColor ||
         (() => {
-          const style = getComputedStyle(canvas)
+          const style = getComputedStyle(canvas);
           // Try to get the computed color value directly
-          const color = style.color
-          return color || "#000"
-        })()
-      const step = barWidth + barGap
-      const barCount = Math.floor(rect.width / step)
-      const centerY = rect.height / 2
+          const color = style.color;
+          return color || "#000";
+        })();
+      const step = barWidth + barGap;
+      const barCount = Math.floor(rect.width / step);
+      const centerY = rect.height / 2;
       // Draw bars based on mode
       if (mode === "static") {
         // Static mode - bars in fixed positions
@@ -1034,38 +1042,38 @@ export const LiveWaveform = ({
             ? staticBarsRef.current
             : staticBarsRef.current.length > 0
               ? staticBarsRef.current
-              : []
+              : [];
         for (let i = 0; i < barCount && i < dataToRender.length; i++) {
-          const value = dataToRender[i] || 0.1
-          const x = i * step
-          const barHeight = Math.max(baseBarHeight, value * rect.height * 0.8)
-          const y = centerY - barHeight / 2
-          ctx.fillStyle = computedBarColor
-          ctx.globalAlpha = 0.4 + value * 0.6
+          const value = dataToRender[i] || 0.1;
+          const x = i * step;
+          const barHeight = Math.max(baseBarHeight, value * rect.height * 0.8);
+          const y = centerY - barHeight / 2;
+          ctx.fillStyle = computedBarColor;
+          ctx.globalAlpha = 0.4 + value * 0.6;
           if (barRadius > 0) {
-            ctx.beginPath()
-            ctx.roundRect(x, y, barWidth, barHeight, barRadius)
-            ctx.fill()
+            ctx.beginPath();
+            ctx.roundRect(x, y, barWidth, barHeight, barRadius);
+            ctx.fill();
           } else {
-            ctx.fillRect(x, y, barWidth, barHeight)
+            ctx.fillRect(x, y, barWidth, barHeight);
           }
         }
       } else {
         // Scrolling mode - original behavior
         for (let i = 0; i < barCount && i < historyRef.current.length; i++) {
-          const dataIndex = historyRef.current.length - 1 - i
-          const value = historyRef.current[dataIndex] || 0.1
-          const x = rect.width - (i + 1) * step
-          const barHeight = Math.max(baseBarHeight, value * rect.height * 0.8)
-          const y = centerY - barHeight / 2
-          ctx.fillStyle = computedBarColor
-          ctx.globalAlpha = 0.4 + value * 0.6
+          const dataIndex = historyRef.current.length - 1 - i;
+          const value = historyRef.current[dataIndex] || 0.1;
+          const x = rect.width - (i + 1) * step;
+          const barHeight = Math.max(baseBarHeight, value * rect.height * 0.8);
+          const y = centerY - barHeight / 2;
+          ctx.fillStyle = computedBarColor;
+          ctx.globalAlpha = 0.4 + value * 0.6;
           if (barRadius > 0) {
-            ctx.beginPath()
-            ctx.roundRect(x, y, barWidth, barHeight, barRadius)
-            ctx.fill()
+            ctx.beginPath();
+            ctx.roundRect(x, y, barWidth, barHeight, barRadius);
+            ctx.fill();
           } else {
-            ctx.fillRect(x, y, barWidth, barHeight)
+            ctx.fillRect(x, y, barWidth, barHeight);
           }
         }
       }
@@ -1073,34 +1081,34 @@ export const LiveWaveform = ({
       if (fadeEdges && fadeWidth > 0 && rect.width > 0) {
         // Cache gradient if width hasn't changed
         if (!gradientCacheRef.current || lastWidthRef.current !== rect.width) {
-          const gradient = ctx.createLinearGradient(0, 0, rect.width, 0)
-          const fadePercent = Math.min(0.3, fadeWidth / rect.width)
+          const gradient = ctx.createLinearGradient(0, 0, rect.width, 0);
+          const fadePercent = Math.min(0.3, fadeWidth / rect.width);
           // destination-out: removes destination where source alpha is high
           // We want: fade edges out, keep center solid
           // Left edge: start opaque (1) = remove, fade to transparent (0) = keep
-          gradient.addColorStop(0, "rgba(255,255,255,1)")
-          gradient.addColorStop(fadePercent, "rgba(255,255,255,0)")
+          gradient.addColorStop(0, "rgba(255,255,255,1)");
+          gradient.addColorStop(fadePercent, "rgba(255,255,255,0)");
           // Center stays transparent = keep everything
-          gradient.addColorStop(1 - fadePercent, "rgba(255,255,255,0)")
+          gradient.addColorStop(1 - fadePercent, "rgba(255,255,255,0)");
           // Right edge: fade from transparent (0) = keep to opaque (1) = remove
-          gradient.addColorStop(1, "rgba(255,255,255,1)")
-          gradientCacheRef.current = gradient
-          lastWidthRef.current = rect.width
+          gradient.addColorStop(1, "rgba(255,255,255,1)");
+          gradientCacheRef.current = gradient;
+          lastWidthRef.current = rect.width;
         }
-        ctx.globalCompositeOperation = "destination-out"
-        ctx.fillStyle = gradientCacheRef.current
-        ctx.fillRect(0, 0, rect.width, rect.height)
-        ctx.globalCompositeOperation = "source-over"
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.fillStyle = gradientCacheRef.current;
+        ctx.fillRect(0, 0, rect.width, rect.height);
+        ctx.globalCompositeOperation = "source-over";
       }
-      ctx.globalAlpha = 1
-      rafId = requestAnimationFrame(animate)
-    }
-    rafId = requestAnimationFrame(animate)
+      ctx.globalAlpha = 1;
+      rafId = requestAnimationFrame(animate);
+    };
+    rafId = requestAnimationFrame(animate);
     return () => {
       if (rafId) {
-        cancelAnimationFrame(rafId)
+        cancelAnimationFrame(rafId);
       }
-    }
+    };
   }, [
     active,
     processing,
@@ -1115,7 +1123,7 @@ export const LiveWaveform = ({
     fadeEdges,
     fadeWidth,
     mode,
-  ])
+  ]);
   return (
     <div
       className={cn("relative h-full w-full", className)}
@@ -1140,5 +1148,5 @@ export const LiveWaveform = ({
         aria-hidden="true"
       />
     </div>
-  )
-}
+  );
+};

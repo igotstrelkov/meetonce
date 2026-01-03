@@ -9,7 +9,7 @@ export const getPendingPhotos = query({
   handler: async (ctx) => {
     const users = await ctx.db
       .query("users")
-      .withIndex("by_account_status", q => q.eq("accountStatus", "pending"))
+      .withIndex("by_account_status", (q) => q.eq("accountStatus", "pending"))
       .collect();
 
     // Convert storage IDs to URLs
@@ -51,14 +51,18 @@ export const approvePhoto = mutation({
       accountStatus: "approved",
       attractivenessRating: args.rating,
       updatedAt: Date.now(),
-      matchKey: makeMatchKey({ accountStatus: "approved", vacationMode: user.vacationMode, gender: user.gender }),
+      matchKey: makeMatchKey({
+        accountStatus: "approved",
+        vacationMode: user.vacationMode,
+        gender: user.gender,
+      }),
     });
 
     // Send approval email
     await ctx.scheduler.runAfter(0, internal.emails.sendPhotoApprovedEmail, {
       to: user.email,
       userName: user.name,
-      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard`,
+      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard`,
     });
 
     console.log(`✅ Approved user ${args.userId} with rating ${args.rating}`);
@@ -83,7 +87,11 @@ export const rejectPhoto = mutation({
       accountRejectionReason: args.rejectionReason,
       accountResubmissionCount: user.accountResubmissionCount + 1,
       updatedAt: Date.now(),
-      matchKey: makeMatchKey({ accountStatus: "rejected", vacationMode: user.vacationMode, gender: user.gender }),
+      matchKey: makeMatchKey({
+        accountStatus: "rejected",
+        vacationMode: user.vacationMode,
+        gender: user.gender,
+      }),
     });
 
     // Send rejection email
@@ -92,7 +100,7 @@ export const rejectPhoto = mutation({
       userName: user.name,
       reason: args.rejectionReason,
       guidance: args.guidance,
-      uploadUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/onboarding`,
+      uploadUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/onboarding`,
     });
 
     console.log(`❌ Rejected user ${args.userId}: ${args.rejectionReason}`);
@@ -114,10 +122,14 @@ export const getPlatformMetrics = query({
     const allUsers = await ctx.db.query("users").collect();
 
     const totalUsers = allUsers.length;
-    const pendingPhotos = allUsers.filter(u => u.accountStatus === "pending").length;
-    const approvedUsers = allUsers.filter(u => u.accountStatus === "approved").length;
-    const activeUsers = allUsers.filter(u =>
-      u.accountStatus === "approved" && !u.vacationMode
+    const pendingPhotos = allUsers.filter(
+      (u) => u.accountStatus === "pending"
+    ).length;
+    const approvedUsers = allUsers.filter(
+      (u) => u.accountStatus === "approved"
+    ).length;
+    const activeUsers = allUsers.filter(
+      (u) => u.accountStatus === "approved" && !u.vacationMode
     ).length;
 
     return {
@@ -125,7 +137,8 @@ export const getPlatformMetrics = query({
       pendingPhotos,
       approvedUsers,
       activeUsers,
-      approvalRate: totalUsers > 0 ? Math.round((approvedUsers / totalUsers) * 100) : 0,
+      approvalRate:
+        totalUsers > 0 ? Math.round((approvedUsers / totalUsers) * 100) : 0,
     };
   },
 });
@@ -136,18 +149,24 @@ export const getMatchingAnalytics = query({
   handler: async (ctx) => {
     const allMatches = await ctx.db.query("weeklyMatches").collect();
     const thisWeek = getWeekOfString();
-    const thisWeeksMatches = allMatches.filter(m => m.weekOf === thisWeek);
+    const thisWeeksMatches = allMatches.filter((m) => m.weekOf === thisWeek);
 
-    const responded = thisWeeksMatches.filter(m =>
-      m.userResponse !== "pending" && m.matchResponse !== "pending"
+    const responded = thisWeeksMatches.filter(
+      (m) => m.userResponse !== "pending" && m.matchResponse !== "pending"
     );
 
-    const mutualMatches = thisWeeksMatches.filter(m => m.mutualMatch);
+    const mutualMatches = thisWeeksMatches.filter((m) => m.mutualMatch);
 
     return {
       totalMatches: thisWeeksMatches.length,
-      responseRate: thisWeeksMatches.length > 0 ? (responded.length / (thisWeeksMatches.length * 2)) * 100 : 0,
-      mutualMatchRate: responded.length > 0 ? (mutualMatches.length / responded.length) * 100 : 0,
+      responseRate:
+        thisWeeksMatches.length > 0
+          ? (responded.length / (thisWeeksMatches.length * 2)) * 100
+          : 0,
+      mutualMatchRate:
+        responded.length > 0
+          ? (mutualMatches.length / responded.length) * 100
+          : 0,
     };
   },
 });
@@ -155,25 +174,28 @@ export const getMatchingAnalytics = query({
 export const getDateOutcomeMetrics = query({
   handler: async (ctx) => {
     const outcomes = await ctx.db.query("dateOutcomes").collect();
-    const datesHappened = outcomes.filter(o => o.dateHappened === "yes");
+    const datesHappened = outcomes.filter((o) => o.dateHappened === "yes");
 
     // PRIMARY METRIC: Mutual Interest Rate
-    const mutualSecondDates = datesHappened.filter(o => {
+    const mutualSecondDates = datesHappened.filter((o) => {
       if (o.wouldMeetAgain !== "yes") return false;
 
-      const other = outcomes.find(f =>
-        f.matchId === o.matchId && f.userId !== o.userId
+      const other = outcomes.find(
+        (f) => f.matchId === o.matchId && f.userId !== o.userId
       );
       return other?.wouldMeetAgain === "yes";
     });
 
-    const mutualInterestRate = datesHappened.length > 0
-      ? (mutualSecondDates.length / datesHappened.length) * 100
-      : 0;
+    const mutualInterestRate =
+      datesHappened.length > 0
+        ? (mutualSecondDates.length / datesHappened.length) * 100
+        : 0;
 
-    const avgRating = datesHappened.length > 0
-      ? datesHappened.reduce((sum, o) => sum + (o.overallRating ?? 0), 0) / datesHappened.length
-      : 0;
+    const avgRating =
+      datesHappened.length > 0
+        ? datesHappened.reduce((sum, o) => sum + (o.overallRating ?? 0), 0) /
+          datesHappened.length
+        : 0;
 
     return {
       totalFeedback: outcomes.length,
@@ -197,7 +219,7 @@ export const getAllMatches = query({
     const matches = args.weekOf
       ? await ctx.db
           .query("weeklyMatches")
-          .withIndex("by_week", q => q.eq("weekOf", args.weekOf!))
+          .withIndex("by_week", (q) => q.eq("weekOf", args.weekOf!))
           .order("desc")
           .take(args.limit ?? 100)
       : await ctx.db
@@ -235,27 +257,27 @@ export const getMatchDetails = query({
     // Get pass reasons for both users (if they passed)
     const userPassReason = await ctx.db
       .query("passReasons")
-      .withIndex("by_match", q => q.eq("matchId", args.matchId))
-      .filter(q => q.eq(q.field("userId"), match.userId))
+      .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+      .filter((q) => q.eq(q.field("userId"), match.userId))
       .first();
 
     const matchUserPassReason = await ctx.db
       .query("passReasons")
-      .withIndex("by_match", q => q.eq("matchId", args.matchId))
-      .filter(q => q.eq(q.field("userId"), match.matchUserId))
+      .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+      .filter((q) => q.eq(q.field("userId"), match.matchUserId))
       .first();
 
     // Get date outcomes for both users (if they went on date)
     const userOutcome = await ctx.db
       .query("dateOutcomes")
-      .withIndex("by_match", q => q.eq("matchId", args.matchId))
-      .filter(q => q.eq(q.field("userId"), match.userId))
+      .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+      .filter((q) => q.eq(q.field("userId"), match.userId))
       .first();
 
     const matchUserOutcome = await ctx.db
       .query("dateOutcomes")
-      .withIndex("by_match", q => q.eq("matchId", args.matchId))
-      .filter(q => q.eq(q.field("userId"), match.matchUserId))
+      .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+      .filter((q) => q.eq(q.field("userId"), match.matchUserId))
       .first();
 
     return {
@@ -275,23 +297,29 @@ export const getMatchStats = query({
     const allMatches = await ctx.db.query("weeklyMatches").collect();
 
     const totalMatches = allMatches.length;
-    const mutualMatches = allMatches.filter(m => m.mutualMatch).length;
-    const bothResponded = allMatches.filter(m =>
-      m.userResponse !== "pending" && m.matchResponse !== "pending"
+    const mutualMatches = allMatches.filter((m) => m.mutualMatch).length;
+    const bothResponded = allMatches.filter(
+      (m) => m.userResponse !== "pending" && m.matchResponse !== "pending"
     ).length;
-    const bothPassed = allMatches.filter(m =>
-      m.userResponse === "passed" && m.matchResponse === "passed"
+    const bothPassed = allMatches.filter(
+      (m) => m.userResponse === "passed" && m.matchResponse === "passed"
     ).length;
 
     // Get date outcomes
     const dateOutcomes = await ctx.db.query("dateOutcomes").collect();
-    const datesHappened = dateOutcomes.filter(o => o.dateHappened === "yes").length;
+    const datesHappened = dateOutcomes.filter(
+      (o) => o.dateHappened === "yes"
+    ).length;
 
     return {
       totalMatches,
       mutualMatches,
-      mutualMatchRate: totalMatches > 0 ? Math.round((mutualMatches / totalMatches) * 100) : 0,
-      responseRate: totalMatches > 0 ? Math.round((bothResponded / (totalMatches * 2)) * 100) : 0,
+      mutualMatchRate:
+        totalMatches > 0 ? Math.round((mutualMatches / totalMatches) * 100) : 0,
+      responseRate:
+        totalMatches > 0
+          ? Math.round((bothResponded / (totalMatches * 2)) * 100)
+          : 0,
       bothPassedCount: bothPassed,
       datesCompleted: datesHappened,
     };
@@ -303,7 +331,7 @@ export const getWeeksWithMatches = query({
     const matches = await ctx.db.query("weeklyMatches").collect();
 
     // Get unique weeks
-    const weeks = [...new Set(matches.map(m => m.weekOf))];
+    const weeks = [...new Set(matches.map((m) => m.weekOf))];
 
     // Sort by date (most recent first)
     return weeks.sort((a, b) => b.localeCompare(a));

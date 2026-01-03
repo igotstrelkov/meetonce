@@ -32,7 +32,7 @@ export default defineSchema({
 
     // Composite field for vectorSearch filters
     matchKey: v.string(),
-    
+
     // AI Matching
     embedding: v.optional(v.array(v.float64())),
 
@@ -152,30 +152,32 @@ export default defineSchema({
       v.literal("rescheduled")
     ),
     overallRating: v.optional(v.number()),
-    wouldMeetAgain: v.optional(v.union(
-      v.literal("yes"),
-      v.literal("maybe"),
-      v.literal("no")
-    )),
+    wouldMeetAgain: v.optional(
+      v.union(v.literal("yes"), v.literal("maybe"), v.literal("no"))
+    ),
 
     // Details
     wentWell: v.optional(v.array(v.string())),
     wentPoorly: v.optional(v.array(v.string())),
 
     // Feature Feedback
-    conversationStartersHelpful: v.optional(v.union(
-      v.literal("very"),
-      v.literal("somewhat"),
-      v.literal("not_used"),
-      v.literal("not_helpful")
-    )),
-    venueRating: v.optional(v.union(
-      v.literal("perfect"),
-      v.literal("good"),
-      v.literal("okay"),
-      v.literal("not_good"),
-      v.literal("went_elsewhere")
-    )),
+    conversationStartersHelpful: v.optional(
+      v.union(
+        v.literal("very"),
+        v.literal("somewhat"),
+        v.literal("not_used"),
+        v.literal("not_helpful")
+      )
+    ),
+    venueRating: v.optional(
+      v.union(
+        v.literal("perfect"),
+        v.literal("good"),
+        v.literal("okay"),
+        v.literal("not_good"),
+        v.literal("went_elsewhere")
+      )
+    ),
 
     additionalThoughts: v.optional(v.string()),
     providedAt: v.number(),

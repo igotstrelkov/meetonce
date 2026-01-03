@@ -1,6 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, Ban, Check, Coffee, Heart, Instagram, Lightbulb, Linkedin, LogOut, MessageCircle, MessageSquare, Play, Send, ShieldCheck, Twitter } from "lucide-react";
+import {
+  ArrowRight,
+  Ban,
+  Check,
+  Coffee,
+  Heart,
+  Instagram,
+  Lightbulb,
+  Linkedin,
+  LogOut,
+  MessageCircle,
+  MessageSquare,
+  Play,
+  Send,
+  ShieldCheck,
+  Twitter,
+} from "lucide-react";
 
 export function LandingPage() {
   return (
@@ -9,7 +25,7 @@ export function LandingPage() {
         {/* Hero Section */}
         <section className="relative px-4 md:py-12 max-w-7xl mx-auto flex flex-col items-center text-center">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-background to-background blur-3xl opacity-50" />
-          
+
           <h1 className="text-4xl md:text-7xl font-bold tracking-tight mb-8 max-w-4xl leading-[1.1]">
             Tell me your type, <br />
             <span className="text-primary">I set up the date</span>
@@ -19,19 +35,28 @@ export function LandingPage() {
             <div className="flex flex-col gap-4 text-left">
               <div className="flex flex-wrap items-center gap-2 text-lg md:text-2xl font-medium text-muted-foreground">
                 <span>Find me a</span>
-                <span className="text-foreground border-b-2 border-primary/50 px-1">5'9" Architect</span>
+                <span className="text-foreground border-b-2 border-primary/50 px-1">
+                  5'9" Architect
+                </span>
                 <span>who loves</span>
-                <span className="text-foreground border-b-2 border-primary/50 px-1">Hiking & Jazz</span>
+                <span className="text-foreground border-b-2 border-primary/50 px-1">
+                  Hiking & Jazz
+                </span>
                 <span>and</span>
-                <span className="text-foreground border-b-2 border-primary/50 px-1">makes great pasta</span>
+                <span className="text-foreground border-b-2 border-primary/50 px-1">
+                  makes great pasta
+                </span>
               </div>
               <div className="flex flex-col md:flex-row gap-2 mt-4">
-                <Textarea 
+                <Textarea
                   rows={4}
-                  placeholder="Describe your ideal match..." 
+                  placeholder="Describe your ideal match..."
                   className="min-h-[3rem] text-lg bg-background/50 border-primary/20 focus-visible:ring-primary resize-none"
                 />
-                <Button size="lg" className="h-12 w-full md:w-auto px-8 text-lg rounded-xl">
+                <Button
+                  size="lg"
+                  className="h-12 w-full md:w-auto px-8 text-lg rounded-xl"
+                >
                   Start <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </div>
@@ -53,8 +78,12 @@ export function LandingPage() {
         <section className="py-16 md:py-20 bg-muted/30">
           <div className="max-w-6xl mx-auto px-4">
             <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-5xl font-bold mb-4">How It Works</h2>
-              <p className="text-lg md:text-xl text-muted-foreground">From text to date in 3 simple steps</p>
+              <h2 className="text-3xl md:text-5xl font-bold mb-4">
+                How It Works
+              </h2>
+              <p className="text-lg md:text-xl text-muted-foreground">
+                From text to date in 3 simple steps
+              </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
@@ -62,20 +91,23 @@ export function LandingPage() {
                 {
                   icon: MessageCircle,
                   title: "Tell Us Your Preference",
-                  desc: "Chat with us to define exactly what you're looking for correctly."
+                  desc: "Chat with us to define exactly what you're looking for correctly.",
                 },
                 {
                   icon: Send,
                   title: "We Email You a Date Plan",
-                  desc: "We simulate dates with matches and send you the perfect plan."
+                  desc: "We simulate dates with matches and send you the perfect plan.",
                 },
                 {
                   icon: Heart,
                   title: "You Date IRL!",
-                  desc: "Skip the small talk. Show up and enjoy a curated experience."
-                }
+                  desc: "Skip the small talk. Show up and enjoy a curated experience.",
+                },
               ].map((step, i) => (
-                <div key={i} className="flex flex-col items-center text-center p-6 rounded-2xl bg-background border border-border/50 hover:shadow-lg transition-all duration-300">
+                <div
+                  key={i}
+                  className="flex flex-col items-center text-center p-6 rounded-2xl bg-background border border-border/50 hover:shadow-lg transition-all duration-300"
+                >
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 text-primary">
                     <step.icon className="w-8 h-8" />
                   </div>
@@ -101,11 +133,15 @@ export function LandingPage() {
               { label: "Dates Arranged", value: "9,000+" },
               { label: "Success Rate", value: "69%" },
               { label: "Matches Satisfaction", value: "95%" },
-              { label: "Hours Saved", value: "50k+" }
+              { label: "Hours Saved", value: "50k+" },
             ].map((stat, i) => (
               <div key={i}>
-                <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">{stat.value}</div>
-                <div className="text-sm md:text-base opacity-80 font-medium">{stat.label}</div>
+                <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">
+                  {stat.value}
+                </div>
+                <div className="text-sm md:text-base opacity-80 font-medium">
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
@@ -120,17 +156,21 @@ export function LandingPage() {
             </div>
 
             <div className="p-8 rounded-3xl bg-muted/20 border-2 border-dashed border-border/50 text-muted-foreground/50 transition-colors hover:bg-muted/30">
-              <h3 className="text-2xl font-bold mb-6 text-muted-foreground">Other Dating Apps</h3>
+              <h3 className="text-2xl font-bold mb-6 text-muted-foreground">
+                Other Dating Apps
+              </h3>
               <ul className="space-y-4">
                 {[
                   "Endless Swiping",
                   "Repetitive Small Talk",
                   "Ghosting & Flaking",
-                  "Wasted Evenings"
+                  "Wasted Evenings",
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-3">
                     <Check className="w-5 h-5 opacity-50" />
-                    <span className="decoration-destructive/30 decoration-2">{item}</span>
+                    <span className="decoration-destructive/30 decoration-2">
+                      {item}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -140,7 +180,9 @@ export function LandingPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
                 MeetOnce
-                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">New</span>
+                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
+                  New
+                </span>
               </h3>
               <ul className="space-y-4">
                 {[
@@ -148,7 +190,7 @@ export function LandingPage() {
                   "Curated Matches Only",
                   "High Intent Users",
                   "1000+ Identity Simulations",
-                  "Zero Wasted Time"
+                  "Zero Wasted Time",
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-3 font-medium">
                     <div className="flex-shrink-0 w-6 h-6 rounded-full border bg-secondary flex items-center justify-center">
@@ -160,10 +202,14 @@ export function LandingPage() {
               </ul>
               <div className="mt-8 pt-8 border-t border-primary/10">
                 <div className="flex items-baseline gap-2">
-                   <div className="text-4xl font-bold text-foreground">1,000</div>
-                   <div className="text-sm font-medium">Simulations</div>
+                  <div className="text-4xl font-bold text-foreground">
+                    1,000
+                  </div>
+                  <div className="text-sm font-medium">Simulations</div>
                 </div>
-                <div className="text-sm text-muted-foreground">Ran per potential match to ensure quality</div>
+                <div className="text-sm text-muted-foreground">
+                  Ran per potential match to ensure quality
+                </div>
               </div>
             </div>
           </div>
@@ -173,21 +219,33 @@ export function LandingPage() {
         <section className="py-16 md:py-20 bg-muted/30">
           <div className="max-w-6xl mx-auto px-4">
             <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Our Safety Measures</h2>
-            <p className="text-lg md:text-xl text-muted-foreground">
-              MeetOnce is specifically designed to create a safe and comfortable space.
-            </p>
+              <h2 className="text-3xl md:text-5xl font-bold mb-4">
+                Our Safety Measures
+              </h2>
+              <p className="text-lg md:text-xl text-muted-foreground">
+                MeetOnce is specifically designed to create a safe and
+                comfortable space.
+              </p>
             </div>
 
             <div className="bg-background rounded-3xl p-8 md:p-12 shadow-sm border border-border/40 text-left">
               <div className="grid gap-6">
                 {[
                   { icon: ShieldCheck, text: "Daters are all verified" },
-                  { icon: Lightbulb, text: "Offer tips for dating safely before you go" },
-                  { icon: Coffee, text: "Safe coffee shops with our team looking out for you" },
-                  { icon: LogOut, text: "Leave whenever you feel uncomfortable" },
+                  {
+                    icon: Lightbulb,
+                    text: "Offer tips for dating safely before you go",
+                  },
+                  {
+                    icon: Coffee,
+                    text: "Safe coffee shops with our team looking out for you",
+                  },
+                  {
+                    icon: LogOut,
+                    text: "Leave whenever you feel uncomfortable",
+                  },
                   { icon: Ban, text: "Ghosters can never participate again" },
-                  { icon: MessageSquare, text: "A support team available" }
+                  { icon: MessageSquare, text: "A support team available" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-4">
                     <div className="flex-shrink-0 mt-0.5 text-orange-500">
@@ -203,40 +261,56 @@ export function LandingPage() {
 
         {/* FAQ Section */}
         <section className="py-16 md:py-20 bg-muted/30">
-        
           <div className="max-w-6xl mx-auto px-4">
             <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">FAQ</h2>
-            <p className="text-lg md:text-xl text-muted-foreground">What you need to know about MeetOnce</p>
+              <h2 className="text-3xl md:text-5xl font-bold mb-4">FAQ</h2>
+              <p className="text-lg md:text-xl text-muted-foreground">
+                What you need to know about MeetOnce
+              </p>
             </div>
             <div className="space-y-4">
               {[
                 {
                   q: "How MeetOnce works?",
-                  a: "MeetOnce curates dates for you without requiring you to swipe or chat with anyone. After submitting your information, MeetOnce will text you a date plan that includes the time, place, and details of your match. The date will take place around the campus you're currently near."
+                  a: "MeetOnce curates dates for you without requiring you to swipe or chat with anyone. After submitting your information, MeetOnce will text you a date plan that includes the time, place, and details of your match. The date will take place around the campus you're currently near.",
                 },
                 {
                   q: "What will I know about my match before the date?",
-                  a: "Once we find a good match for you, you'll get a poster with their photos and a short explanation of why you'd be a great pair. You'll also get a scheduler to share your availability for the week. After both of you fill it out, we'll arrange the date time, place, and give you a few dating tips to help it go smoothly."
+                  a: "Once we find a good match for you, you'll get a poster with their photos and a short explanation of why you'd be a great pair. You'll also get a scheduler to share your availability for the week. After both of you fill it out, we'll arrange the date time, place, and give you a few dating tips to help it go smoothly.",
                 },
                 {
                   q: "What if I can't make it last minute?",
-                  a: "If you really can't make it last minute, please cancel by texting your match asap to prevent being banned from future experiences."
+                  a: "If you really can't make it last minute, please cancel by texting your match asap to prevent being banned from future experiences.",
                 },
                 {
                   q: "Where do the dates happen?",
-                  a: "Dates take place at carefully selected on-campus spots to ensure a safe and enjoyable experience."
+                  a: "Dates take place at carefully selected on-campus spots to ensure a safe and enjoyable experience.",
                 },
                 {
                   q: "How often can I go on a MeetOnce date?",
-                  a: "As long as you're not already in the process of a date or banned for ghosting, we can always sign you up for more dates. However, we might pause matching during school holidays when fewer students are around."
-                }
+                  a: "As long as you're not already in the process of a date or banned for ghosting, we can always sign you up for more dates. However, we might pause matching during school holidays when fewer students are around.",
+                },
               ].map((item, i) => (
-                <details key={i} className="group bg-background rounded-2xl border border-border/50 overflow-hidden">
+                <details
+                  key={i}
+                  className="group bg-background rounded-2xl border border-border/50 overflow-hidden"
+                >
                   <summary className="flex items-center justify-between p-6 cursor-pointer list-none font-bold text-lg hover:bg-muted/30 transition-colors">
                     {item.q}
                     <div className="flex-shrink-0 ml-4 transition-transform group-open:rotate-180">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-primary"><path d="m6 9 6 6 6-6"/></svg>
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="w-5 h-5 text-primary"
+                      >
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
                     </div>
                   </summary>
                   <div className="px-4 pb-6 text-muted-foreground leading-relaxed">
@@ -246,8 +320,6 @@ export function LandingPage() {
               ))}
             </div>
           </div>
-          
-          
         </section>
       </main>
 
@@ -258,21 +330,45 @@ export function LandingPage() {
             <span className="text-xl font-bold">MeetOnce</span>
             {/* <span className="text-sm text-muted-foreground">© 2025</span> */}
           </div>
-          
+
           <div className="flex items-center gap-8">
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Terms</a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Privacy</a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Cookies</a>
+            <a
+              href="#"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Terms
+            </a>
+            <a
+              href="#"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Privacy
+            </a>
+            <a
+              href="#"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Cookies
+            </a>
           </div>
 
           <div className="flex items-center gap-4">
-            <a href="#" className="p-2 rounded-full hover:bg-muted transition-colors">
+            <a
+              href="#"
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+            >
               <Instagram className="w-5 h-5" />
             </a>
-            <a href="#" className="p-2 rounded-full hover:bg-muted transition-colors">
+            <a
+              href="#"
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+            >
               <Twitter className="w-5 h-5" />
             </a>
-            <a href="#" className="p-2 rounded-full hover:bg-muted transition-colors">
+            <a
+              href="#"
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+            >
               <Linkedin className="w-5 h-5" />
             </a>
           </div>

@@ -43,9 +43,12 @@ export default function DashboardPage() {
     return (
       <div className="flex h-[60vh] w-full items-center justify-center">
         <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold text-gray-900">User Profile Not Found</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            User Profile Not Found
+          </h2>
           <p className="text-gray-600">
-            We couldn't locate your profile data. You may need to complete the onboarding process.
+            We couldn't locate your profile data. You may need to complete the
+            onboarding process.
           </p>
           <Button onClick={() => router.push("/onboarding")}>
             Complete Onboarding
@@ -61,7 +64,8 @@ export default function DashboardPage() {
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
           <h2 className="text-2xl font-bold mb-2">Profile Needs Update</h2>
           <p className="text-gray-700 mb-4">
-            {currentUser.accountRejectionReason || "Your profile didn't meet our quality standards."}
+            {currentUser.accountRejectionReason ||
+              "Your profile didn't meet our quality standards."}
           </p>
           <Button onClick={() => router.push("/onboarding/resubmit")}>
             Resubmit Profile
@@ -73,12 +77,13 @@ export default function DashboardPage() {
 
   if (currentUser.accountStatus === "pending") {
     return (
-      <div >
+      <div>
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
           <h2 className="text-2xl font-bold mb-2">Profile Under Review</h2>
           <p className="text-gray-700">
-            Your profile is being reviewed by our team. You'll receive an email within 24 hours
-            when your profile is approved or if we need a different photo.
+            Your profile is being reviewed by our team. You'll receive an email
+            within 24 hours when your profile is approved or if we need a
+            different photo.
           </p>
         </div>
       </div>
@@ -90,20 +95,18 @@ export default function DashboardPage() {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
         <h2 className="text-2xl font-bold mb-2">No Match This Week</h2>
         <p className="text-gray-700">
-          We're still looking for your perfect match. New matches are released every Monday morning!
+          We're still looking for your perfect match. New matches are released
+          every Monday morning!
         </p>
       </div>
     );
   }
-  
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Your Weekly Match</h1>
-        <p className="text-gray-600">
-          Respond by Friday 11:59pm
-        </p>
+        <p className="text-gray-600">Respond by Friday 11:59pm</p>
       </div>
 
       <MatchCard

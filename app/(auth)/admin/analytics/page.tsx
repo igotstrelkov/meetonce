@@ -1,5 +1,6 @@
 "use client";
 
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Card } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
@@ -9,11 +10,7 @@ export default function AnalyticsPage() {
   const outcomeMetrics = useQuery(api.admin.getDateOutcomeMetrics);
 
   if (!matchingMetrics || !outcomeMetrics) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-pulse text-gray-500">Loading analytics...</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (

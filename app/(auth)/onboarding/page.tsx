@@ -6,10 +6,10 @@ import { useAction, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BioVoiceStep from "./BioVoiceStep";
-import PreferencesVoiceStep from "./PreferencesVoiceStep";
 import DocumentStep from "./DocumentStep";
 import InterestsStep from "./InterestsStep";
 import PhotoStep from "./PhotoStep";
+import PreferencesVoiceStep from "./PreferencesVoiceStep";
 import ProfileStep from "./ProfileStep";
 
 export default function OnboardingPage() {
@@ -39,11 +39,11 @@ export default function OnboardingPage() {
   });
 
   const updateFormData = (data: Partial<typeof formData>) => {
-    setFormData(prev => ({ ...prev, ...data }));
+    setFormData((prev) => ({ ...prev, ...data }));
   };
 
-  const nextStep = () => setCurrentStep(prev => prev + 1);
-  const prevStep = () => setCurrentStep(prev => prev - 1);
+  const nextStep = () => setCurrentStep((prev) => prev + 1);
+  const prevStep = () => setCurrentStep((prev) => prev - 1);
 
   const handleSubmit = async () => {
     if (!user) return;
@@ -105,9 +105,7 @@ export default function OnboardingPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold">Create Your Profile</h1>
-          <div className="text-sm text-gray-600">
-            Step {currentStep} of 6
-          </div>
+          <div className="text-sm text-gray-600">Step {currentStep} of 6</div>
         </div>
 
         {/* Progress Bar */}
@@ -119,7 +117,7 @@ export default function OnboardingPage() {
         </div>
       </div>
 
-      <div >
+      <div>
         {currentStep === 1 && (
           <ProfileStep
             data={formData}

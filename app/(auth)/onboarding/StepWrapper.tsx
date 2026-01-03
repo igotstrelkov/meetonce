@@ -6,7 +6,11 @@ interface StepWrapperProps {
   children: ReactNode;
 }
 
-export default function StepWrapper({ title, description, children }: StepWrapperProps) {
+export default function StepWrapper({
+  title,
+  description,
+  children,
+}: StepWrapperProps) {
   return (
     <div className="space-y-6">
       <div>

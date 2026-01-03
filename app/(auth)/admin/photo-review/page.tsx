@@ -2,7 +2,12 @@
 
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/convex/_generated/api";
 import { REJECTION_CATEGORIES } from "@/lib/constants";
@@ -93,7 +98,7 @@ export default function PhotoReviewPage() {
   };
 
   // 1. Loading State
-    if (pendingPhotos === undefined) {
+  if (pendingPhotos === undefined) {
     return <LoadingSpinner />;
   }
 
@@ -118,123 +123,131 @@ export default function PhotoReviewPage() {
             <p className="text-gray-600">All photos have been reviewed</p>
           </div>
         </div>
-      ): (
-      <>
-      <div>
-        {/* Display both selfie and verification document */}
-        <div className="flex gap-6 justify-center mb-6">
-          {/* Selfie */}
-          <div className="flex-1 max-w-md">
-            <h3 className="text-sm font-semibold mb-2 text-center">Profile Photo</h3>
-            {currentPhoto.photoUrl ? (
-              <img
-                src={currentPhoto.photoUrl}
-                alt="User photo"
-                className="w-full h-96 object-cover rounded-lg"
-              />
-            ) : (
-              <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">No photo uploaded</p>
+      ) : (
+        <>
+          <div>
+            {/* Display both selfie and verification document */}
+            <div className="flex gap-6 justify-center mb-6">
+              {/* Selfie */}
+              <div className="flex-1 max-w-md">
+                <h3 className="text-sm font-semibold mb-2 text-center">
+                  Profile Photo
+                </h3>
+                {currentPhoto.photoUrl ? (
+                  <img
+                    src={currentPhoto.photoUrl}
+                    alt="User photo"
+                    className="w-full h-96 object-cover rounded-lg"
+                  />
+                ) : (
+                  <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <p className="text-gray-500">No photo uploaded</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Verification Document */}
-          <div className="flex-1 max-w-md">
-            <h3 className="text-sm font-semibold mb-2 text-center">
-              Verification Document
-            </h3>
-            {currentPhoto.verificationDocUrl ? (
-              <img
-                src={currentPhoto.verificationDocUrl}
-                alt="Verification document"
-                className="w-full h-96 object-contain rounded-lg bg-gray-50"
-              />
-            ) : (
-              <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">No document uploaded</p>
+              {/* Verification Document */}
+              <div className="flex-1 max-w-md">
+                <h3 className="text-sm font-semibold mb-2 text-center">
+                  Verification Document
+                </h3>
+                {currentPhoto.verificationDocUrl ? (
+                  <img
+                    src={currentPhoto.verificationDocUrl}
+                    alt="Verification document"
+                    className="w-full h-96 object-contain rounded-lg bg-gray-50"
+                  />
+                ) : (
+                  <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <p className="text-gray-500">No document uploaded</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        <div className="text-center mb-6">
-          <h3 className="text-2xl font-bold">{currentPhoto.name}, {currentPhoto.age}</h3>
-          <p className="text-gray-600">{currentPhoto.location}</p>
-          <p className="text-sm text-gray-500 mt-2">
-            Resubmissions: {currentPhoto.accountResubmissionCount}
-          </p>
-        </div>
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold">
+                {currentPhoto.name}, {currentPhoto.age}
+              </h3>
+              <p className="text-gray-600">{currentPhoto.location}</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Resubmissions: {currentPhoto.accountResubmissionCount}
+              </p>
+            </div>
 
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2">About Them</h3>
-          <p className="text-gray-700 leading-relaxed">{currentPhoto?.bio}</p>
-        </div>
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">About Them</h3>
+              <p className="text-gray-700 leading-relaxed">
+                {currentPhoto?.bio}
+              </p>
+            </div>
 
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2">Looking For</h3>
-          <p className="text-gray-700 leading-relaxed">{currentPhoto?.lookingFor}</p>
-        </div>
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Looking For</h3>
+              <p className="text-gray-700 leading-relaxed">
+                {currentPhoto?.lookingFor}
+              </p>
+            </div>
 
-        {/* Step 1: Decision (Approve or Reject) */}
-      {step === "decision" && (
-        <div className="p-4">
-          {/* <h3 className="text-xl font-bold mb-4">
+            {/* Step 1: Decision (Approve or Reject) */}
+            {step === "decision" && (
+              <div className="p-4">
+                {/* <h3 className="text-xl font-bold mb-4">
             Step 1: Approve or Reject?
           </h3> */}
-          <div className="flex gap-4 justify-center">
-            <Button
-              onClick={handleApproveDecision}
-              size="lg"
-              className="bg-green-600 hover:bg-green-700 text-lg px-8 py-6"
-            >
-              ✓ Approve (A)
-            </Button>
-            <Button
-              onClick={() => setShowRejectModal(true)}
-              size="lg"
-              variant="destructive"
-              className="text-lg px-8 py-6"
-            >
-              ✗ Reject (R)
-            </Button>
+                <div className="flex gap-4 justify-center">
+                  <Button
+                    onClick={handleApproveDecision}
+                    size="lg"
+                    className="bg-green-600 hover:bg-green-700 text-lg px-8 py-6"
+                  >
+                    ✓ Approve (A)
+                  </Button>
+                  <Button
+                    onClick={() => setShowRejectModal(true)}
+                    size="lg"
+                    variant="destructive"
+                    className="text-lg px-8 py-6"
+                  >
+                    ✗ Reject (R)
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-600 text-center mt-4">
+                  Keyboard: Press A to approve, R to reject
+                </p>
+              </div>
+            )}
+
+            {/* Step 2: Rating (Only if Approved) */}
+            {step === "rating" && (
+              <div>
+                <h3 className="text-xl font-bold mb-4">
+                  Step 2: Rate Attractiveness (1-10)
+                </h3>
+                <div className="flex gap-2 justify-center">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => handleFinalApprove(num)}
+                      className={`w-14 h-14 rounded-lg text-lg font-bold transition-all ${
+                        selectedRating === num
+                          ? "bg-primary text-white scale-110"
+                          : "bg-gray-200 hover:bg-gray-300"
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-600 text-center mt-4">
+                  Keyboard: Press 1-9 or 0 (for 10)
+                </p>
+              </div>
+            )}
           </div>
-          <p className="text-sm text-gray-600 text-center mt-4">
-            Keyboard: Press A to approve, R to reject
-          </p>
-        </div>
+        </>
       )}
 
-      {/* Step 2: Rating (Only if Approved) */}
-      {step === "rating" && (
-        <div>
-          <h3 className="text-xl font-bold mb-4">
-            Step 2: Rate Attractiveness (1-10)
-          </h3>
-          <div className="flex gap-2 justify-center">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-              <button
-                key={num}
-                onClick={() => handleFinalApprove(num)}
-                className={`w-14 h-14 rounded-lg text-lg font-bold transition-all ${
-                  selectedRating === num
-                    ? "bg-primary text-white scale-110"
-                    : "bg-gray-200 hover:bg-gray-300"
-                }`}
-              >
-                {num}
-              </button>
-            ))}
-          </div>
-          <p className="text-sm text-gray-600 text-center mt-4">
-            Keyboard: Press 1-9 or 0 (for 10)
-          </p>
-        </div>
-      )}
-      </div>
-</>)}
-
-      
       {/* Rejection Modal */}
       <Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
         <DialogContent>
@@ -292,6 +305,5 @@ export default function PhotoReviewPage() {
         </DialogContent>
       </Dialog>
     </div>
-    
   );
 }

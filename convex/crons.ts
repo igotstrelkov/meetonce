@@ -9,7 +9,7 @@ crons.weekly(
   {
     dayOfWeek: "sunday",
     hourUTC: 23,
-    minuteUTC: 0
+    minuteUTC: 0,
   },
   internal.matching.weeklyMatchGeneration
 );
