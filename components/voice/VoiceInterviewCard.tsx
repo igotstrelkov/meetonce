@@ -28,6 +28,7 @@ export function VoiceInterviewCard({
   canProceed,
 }: VoiceInterviewCardProps) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [hasRetried, setHasRetried] = useState(false);
 
   // Get assistant ID from environment variables or prop
   const assistantId =
@@ -46,6 +47,7 @@ export function VoiceInterviewCard({
     try {
       setIsProcessing(true);
       const processedText = await processTranscript({ transcript, type });
+      setHasRetried(false); // Reset retry flag on successful completion
       onComplete(transcript, processedText);
     } catch (error: any) {
       console.error("Failed to process transcript:", error);
@@ -60,9 +62,17 @@ export function VoiceInterviewCard({
     onTranscriptComplete: handleTranscriptComplete,
   });
 
+  const handleRetry = () => {
+    setHasRetried(true);
+    retry();
+  };
+
   const currentState = isProcessing ? "processing" : state;
   const isWaveformActive =
     currentState === "recording" || currentState === "processing";
+
+  // Override canProceed if user has explicitly clicked retry
+  const effectiveCanProceed = hasRetried ? false : canProceed;
 
   if (!assistantId) {
     return (
@@ -86,15 +96,15 @@ export function VoiceInterviewCard({
             <VoiceStateIndicator
               state={currentState}
               error={error || undefined}
-              canProceed={canProceed}
+              canProceed={effectiveCanProceed}
             />
 
             <VoiceControls
               state={currentState}
               onStart={startCall}
-              onRetry={retry}
+              onRetry={handleRetry}
               disabled={!assistantId || isProcessing}
-              canProceed={canProceed}
+              canProceed={effectiveCanProceed}
             />
           </>
         )}

@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 MeetOnce is an AI-powered dating platform that eliminates endless swiping by delivering **one carefully curated match per week**. The platform uses semantic matching (OpenAI embeddings + GPT-4) combined with manual photo rating to create high-quality, compatible matches.
 
 ### Core Value Proposition
+
 - **No Swiping**: One curated match per week delivered via email
 - **Quality Over Quantity**: Deep compatibility analysis, not just photos
 - **AI-Powered Matching**: Semantic matching using OpenAI embeddings + GPT-4
@@ -14,24 +15,34 @@ MeetOnce is an AI-powered dating platform that eliminates endless swiping by del
 - **Manual Curation**: Every photo and profile reviewed before going live
 
 ### Key User Flow
+
 1. User signs up via Clerk authentication → Redirected to `/onboarding`
-2. User completes 4-step onboarding wizard (Profile → Bio → Interests → Photo) → User created in Convex → Redirected to `/dashboard`
-3. Admin manually reviews photo in `/admin/photo-review`: **Two-step process** (Approve/Reject decision → Rate 1-10 attractiveness scale)
-4. User sees "Profile Under Review" message on `/dashboard` until photo is approved
-5. Sunday 11pm: Weekly batch matching runs (6-stage AI pipeline)
-6. Monday 9am: Users receive one curated match via email
-7. Users view match on `/dashboard`: See full profile, compatibility score, and explanation
-8. Users respond "Interested" or "Pass" by Friday 11:59pm (optional pass feedback with 6 categories)
-9. If mutual match: Conversation starters + suggested venue revealed on dashboard
-10. Post-date feedback (8 questions) determines algorithm success
+2. User completes 6-step onboarding wizard:
+   - **Step 1**: Profile (name, age, gender, location)
+   - **Step 2**: Bio Voice Interview (5-7 min Vapi conversation → GPT-4 processed bio)
+   - **Step 3**: Preferences Voice Interview (4-6 min Vapi conversation → GPT-4 processed preferences)
+   - **Step 4**: Interests selection
+   - **Step 5**: Photo upload (with face detection)
+   - **Step 6**: Document verification upload
+3. User created in Convex → Redirected to `/dashboard`
+4. Admin manually reviews photo in `/admin/photo-review`: **Two-step process** (Approve/Reject decision → Rate 1-10 attractiveness scale)
+5. User sees "Profile Under Review" message on `/dashboard` until photo is approved
+6. Sunday 11pm: Weekly batch matching runs (6-stage AI pipeline)
+7. Monday 9am: Users receive one curated match via email
+8. Users view match on `/dashboard`: See full profile, compatibility score, and explanation
+9. Users respond "Interested" or "Pass" by Friday 11:59pm (optional pass feedback with 6 categories)
+10. If mutual match: Conversation starters + suggested venue revealed on dashboard
+11. Post-date feedback (8 questions) determines algorithm success
 
 ### Success Metrics (Primary KPI)
+
 - **Mutual Interest Rate**: ≥30% (both users want second date after meeting)
 - This validates the entire matching algorithm quality
 
 ## Development Commands
 
 ### Running the Application
+
 ```bash
 npm run dev          # Start development server on http://localhost:3000
 npm run build        # Build for production
@@ -40,7 +51,9 @@ npm run lint         # Run ESLint
 ```
 
 ### Convex Backend
+
 Convex functions are located in `convex/` directory. The Convex CLI is used to manage backend:
+
 ```bash
 npx convex dev       # Run Convex backend in development mode
 npx convex deploy    # Deploy Convex functions
@@ -51,11 +64,13 @@ npx convex docs      # Launch Convex documentation
 ## Architecture
 
 ### Tech Stack
+
 - **Framework**: Next.js 16 (App Router with React Server Components)
 - **Authentication**: Clerk (session-based, OAuth support)
 - **Backend/Database**: Convex (serverless DB + functions + scheduled jobs + file storage)
 - **Email**: Resend with React Email templates
 - **AI**: OpenRouter API (proxies OpenAI text-embedding-3-small for embeddings, GPT-4o for analysis)
+- **Voice Interviews**: Vapi (AI voice agents for bio/preferences collection with real-time transcription)
 - **Photo Tools**: ✅ face-api.js (browser-based face detection) + browser-image-compression (implemented)
 - **UI Components**: shadcn/ui with base-maia style preset
 - **Styling**: Tailwind CSS v4
@@ -65,6 +80,7 @@ npx convex docs      # Launch Convex documentation
 ### Key Architecture Patterns
 
 **Provider Hierarchy** (app/layout.tsx):
+
 ```
 ClerkProvider
   └─ ConvexClientProvider (Convex + Clerk integration)
@@ -73,6 +89,7 @@ ClerkProvider
 ```
 
 **Authentication Flow**:
+
 - Clerk middleware protects routes in `proxy.ts` (`/onboarding`, `/dashboard`, `/admin`)
 - Unauthenticated users trying to access protected routes are redirected to Clerk sign-in
 - ConvexClientProvider bridges Clerk auth with Convex backend
@@ -80,6 +97,7 @@ ClerkProvider
 - JWT issuer domain configured in `convex/auth.config.ts`
 
 **Route Structure**:
+
 - `/` - Public landing page (shows LandingPage component, redirects authenticated users to `/dashboard`)
 - `/dashboard` - Protected dashboard (requires authentication via Clerk middleware)
 - `/onboarding` - Protected onboarding wizard (requires authentication, redirects to `/dashboard` after completion)
@@ -93,6 +111,7 @@ ClerkProvider
 - Admin access controlled by `isAdmin` boolean field in users table
 
 **Convex Functions**:
+
 - **Queries**: Read-only database operations (e.g., `api.users.getCurrentUser`)
 - **Mutations**: Write operations to database (e.g., `api.users.generateUploadUrl`)
 - **Actions**: Can use external APIs via `fetch()` (e.g., `api.users.createUser` calls OpenRouter for embeddings)
@@ -107,17 +126,20 @@ ClerkProvider
 Implemented as batched Convex actions for scalability. Processes users in batches of 50 to prevent timeouts.
 
 **Architecture**:
+
 - **Actions**: Orchestrate process, perform vector search, make LLM calls to OpenRouter
 - **Queries**: Load user batches, filter candidates by match history
 - **Mutations**: Save matches to database
 - **Batching**: Recursive scheduling via `ctx.scheduler.runAfter()` chains batches together
 
 **Critical Constraints**:
+
 - **One match per week per user** (enforced via in-batch Set tracking)
 - **Pass history respected**: If either person passed before, they will NEVER be matched again
 - **Never match same pair twice** (compound index validation in both directions)
 
 **6-Stage Pipeline** (per user):
+
 1. **Vector Search** (Action): `ctx.vectorSearch()` finds top 256 similar users by embedding cosine similarity. **100x faster than manual calculation, scales to thousands**
 2. **Fast Filter** (Query): Load full documents, filter by accountStatus='approved', vacationMode=false, match/pass history
 3. **Deep Analysis** (Action): GPT-4 analyzes top 20 filtered candidates for compatibility (0-100 score + explanation)
@@ -126,21 +148,119 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 6. **Save** (Mutation): Write match record to weeklyMatches table
 
 **Pass History Tracking**:
+
 - Checks both `by_user_and_match` and `by_match_and_user` indexes
 - If `userResponse="passed"` OR `matchResponse="passed"` → Never re-match
 - Respects user preferences and improves algorithm over time
 
 **Progressive Disclosure Pattern**:
+
 - Before mutual match: Show compatibility score + explanation + full profiles
 - **Hidden until mutual match**: Conversation starters + suggested venue
 - This prevents venue bias and focuses decision on compatibility
 
+**Voice Interview System** (Steps 2-3 of onboarding):
+
+**Architecture**:
+- **Client**: @vapi-ai/web SDK integrated via custom `useVapiCall` hook
+- **Server**: Convex actions for transcript processing via GPT-4o
+- **Visualization**: Real-time audio waveform with agent speaking detection
+- **Processing**: Raw transcript → GPT-4o optimization → semantic-rich bio/preferences
+
+**Two-Stage Interview Flow**:
+
+1. **Bio Interview (Step 2)** - 5-7 minutes
+   - Vapi assistant conducts conversational interview
+   - Topics: Work, lifestyle, hobbies, personality, values, unique details
+   - Goal: Extract 8-10 specific semantic keywords (activities, places, interests)
+   - Output: 100-500 word bio optimized for vector matching
+
+2. **Preferences Interview (Step 3)** - 4-6 minutes
+   - Vapi assistant explores ideal partner qualities
+   - Topics: Core values, lifestyle compatibility, communication style, relationship vision, deal-breakers
+   - Goal: Extract 6-8 specific traits with behavioral examples
+   - Output: 100-500 word preferences optimized for vector matching
+
+**Key Components**:
+
+- **VoiceInterviewCard** (`components/voice/VoiceInterviewCard.tsx`): Main interview orchestrator
+  - Manages interview state (idle, recording, processing, complete, error)
+  - Handles retry logic with state reset
+  - Integrates waveform, controls, and status indicator
+
+- **useVapiCall** (`hooks/useVapiCall.ts`): Custom hook for Vapi SDK
+  - Manages Vapi client lifecycle
+  - Tracks agent state (idle, connecting, listening, speaking)
+  - Collects transcript from message events
+  - Handles call start/end, speech start/end events
+
+- **LiveWaveform** (`components/Elevenlabs.tsx`): Real-time audio visualization
+  - Visualizes user microphone input during recording
+  - Animates when AI agent is speaking (distinct wave patterns)
+  - Shows processing state with calm transition waves
+
+- **VoiceControls** (`components/voice/VoiceControls.tsx`): Interview control buttons
+  - Start Interview button (idle state)
+  - Redo Interview button (complete state)
+  - Try Again button (error state)
+
+- **VoiceStateIndicator** (`components/voice/VoiceStateIndicator.tsx`): Status messages
+  - Idle: "Ready to start the interview?"
+  - Recording: "Listening..." (with animated mic icon)
+  - Processing: "Processing your interview..." (with spinner)
+  - Complete: "Interview complete! Ready to continue"
+  - Error: Custom error message display
+
+**Transcript Processing Pipeline**:
+
+1. **Voice Collection**: Vapi assistant conducts interview, collects raw transcript
+2. **Transcript Completion**: useVapiCall hook triggers `onTranscriptComplete` callback
+3. **GPT-4 Processing**: Convex action calls OpenRouter with specialized prompts
+4. **Validation**: Word count check (100-500 words), retry if out of range
+5. **Storage**: Processed text saved to formData state
+6. **User Creation**: Final bio/preferences text used for embedding generation
+
+**GPT-4 Processing Prompts**:
+
+- **Bio Prompt**: Converts raw transcript to compelling first-person bio
+  - Focus: Specific nouns, observable behaviors, semantic keywords
+  - Avoids: Generic traits like "fun", "nice", "love to laugh"
+  - Example transformation: "I like music" → "DJ house music at Brooklyn warehouses on weekends"
+
+- **Preferences Prompt**: Converts raw transcript to clear relationship preferences
+  - Focus: Specific traits, behavioral examples, relationship dynamics
+  - Distinguishes: Must-haves vs nice-to-haves
+  - Positive framing: "no drama" → "emotionally mature, handles conflict calmly"
+
+**Vapi Assistant Configuration**:
+
+- **Bio Assistant**: Configured in Vapi dashboard, ID stored in `NEXT_PUBLIC_VAPI_BIO_ASSISTANT_ID`
+  - Model: GPT-4o with warm, empathetic system prompt
+  - Voice: ElevenLabs Rachel (warm female voice)
+  - Interview approach: Conversational, not interrogative
+  - Success criteria: 8-10 specific nouns, observable behaviors, unique details
+
+- **Preferences Assistant**: Configured in Vapi dashboard, ID stored in `NEXT_PUBLIC_VAPI_PREFERENCES_ASSISTANT_ID`
+  - Model: GPT-4o with thoughtful relationship coach prompt
+  - Voice: ElevenLabs Rachel (warm female voice)
+  - Interview approach: Non-judgmental, balances idealism with realism
+  - Success criteria: 6-8 traits with examples, must-haves distinction, positive framing
+
+**Benefits**:
+
+- **Higher Quality Data**: Voice interviews extract 3-4x more semantic detail than text forms
+- **Better Matching**: Specific, differentiated traits enable more accurate vector matching
+- **User Experience**: Natural conversation vs tedious form filling
+- **Semantic Optimization**: Prompts engineered to generate embedding-friendly text
+- **Efficiency**: 10-15 min total vs 30+ min typing detailed bio/preferences
+
 **Post-Date Feedback System** (`/feedback/[matchId]`):
+
 - **PRIMARY METRIC**: "Would you want to see them again?" (yes/maybe/no)
 - **8-Question Form**:
-  1. Did the date happen? * (yes/cancelled_by_them/cancelled_by_me/rescheduled)
-  2. Overall rating * (1-5 stars, conditional on date happening)
-  3. Would meet again? * (yes/maybe/no - **THE PRIMARY METRIC**)
+  1. Did the date happen? \* (yes/cancelled_by_them/cancelled_by_me/rescheduled)
+  2. Overall rating \* (1-5 stars, conditional on date happening)
+  3. Would meet again? \* (yes/maybe/no - **THE PRIMARY METRIC**)
   4. What went well? (multi-select: great conversation, lots in common, good chemistry, attractive, funny, genuine)
   5. What didn't go well? (optional multi-select: awkward silences, nothing in common, no chemistry, not as described, late/unreliable, inappropriate behavior)
   6. Conversation starters helpful? (very/somewhat/not_used/not_helpful)
@@ -152,6 +272,7 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 - Success KPI: ≥30% mutual interest rate (both want second date)
 
 **Match Display & Response Flow** (`/dashboard`):
+
 - Queries `getCurrentMatch` to get current week's match (checks both user and matchUser directions)
 - Displays different states based on user status:
   - `accountStatus = "pending"` → "Profile Under Review" message
@@ -180,12 +301,16 @@ app/
       ├─ dashboard/
       │   └─ page.tsx        # Match display dashboard (shows current week's match)
       ├─ onboarding/
-      │   ├─ page.tsx        # Onboarding orchestrator
+      │   ├─ page.tsx        # Onboarding orchestrator (6 steps)
       │   ├─ ProfileStep.tsx # Step 1: Basic info
-      │   ├─ BioStep.tsx     # Step 2: Bio and looking for
-      │   ├─ InterestsStep.tsx # Step 3: Interest selection
-      │   ├─ PhotoStep.tsx   # Step 4: Photo upload
+      │   ├─ BioVoiceStep.tsx # Step 2: Bio voice interview
+      │   ├─ PreferencesVoiceStep.tsx # Step 3: Preferences voice interview
+      │   ├─ InterestsStep.tsx # Step 4: Interest selection
+      │   ├─ PhotoStep.tsx   # Step 5: Photo upload
+      │   ├─ DocumentStep.tsx # Step 6: Document verification
       │   └─ StepWrapper.tsx # Reusable step wrapper
+      ├─ resubmit/
+      │   └─ page.tsx        # Photo/document resubmission for rejected users
       ├─ feedback/
       │   └─ [matchId]/
       │       └─ page.tsx    # Post-date feedback form (8 questions, PRIMARY METRIC tracking)
@@ -205,12 +330,21 @@ components/
   ├─ ConvexClientProvider.tsx  # Convex + Clerk integration
   ├─ header.tsx               # Navigation with auth buttons
   ├─ landing-page.tsx         # Main landing page component
+  ├─ Elevenlabs.tsx           # LiveWaveform component with agent speaking visualization
+  ├─ voice/
+  │   ├─ VoiceInterviewCard.tsx # Main voice interview orchestrator
+  │   ├─ VoiceWaveform.tsx    # CSS-only waveform visualization (fallback)
+  │   ├─ VoiceControls.tsx    # Interview control buttons (start/retry)
+  │   └─ VoiceStateIndicator.tsx # Status indicator (idle/recording/processing/complete/error)
   ├─ match/
   │   ├─ MatchCard.tsx        # Match profile display with response buttons
   │   └─ PassFeedbackForm.tsx # Optional pass feedback (6 categories)
   ├─ feedback/
   │   └─ PostDateFeedbackForm.tsx # 8-question post-date feedback (PRIMARY METRIC)
   └─ ui/                      # shadcn/ui components (dialog, textarea, card, radio-group, checkbox, etc.)
+
+hooks/
+  └─ useVapiCall.ts           # Custom hook for Vapi SDK integration
 
 convex/
   ├─ auth.config.ts     # Clerk JWT configuration
@@ -222,8 +356,10 @@ convex/
   ├─ matches.ts         # Match display queries (getCurrentMatch, getMatchById) and response mutations
   ├─ feedback.ts        # Post-date feedback mutations (submitPassFeedback, submitDateFeedback, getFeedbackForMatch)
   ├─ emails.ts          # Email actions (sendWeeklyMatchEmail, sendMutualMatchEmail, sendSecondDateContactEmail)
+  ├─ voice.ts           # Voice interview actions (processTranscript)
   ├─ lib/
-  │   ├─ openrouter.ts  # OpenRouter API integration
+  │   ├─ openrouter.ts  # OpenRouter API integration + voice transcript processing (processVoiceTranscript)
+  │   ├─ vapi.ts        # Vapi assistant ID management (getOrCreateAssistant)
   │   ├─ matching.ts    # Matching helpers (compatibility analysis, conversation starters)
   │   └─ cosine.ts      # Vector similarity calculations (legacy - now uses native vector search)
   └─ _generated/        # Auto-generated Convex types
@@ -239,13 +375,16 @@ proxy.ts                # Clerk middleware for route protection
 ```
 
 ### Import Aliases
+
 TypeScript path aliases configured in `tsconfig.json`:
+
 - `@/` → Root directory
 - Use: `import { cn } from "@/lib/utils"`
 
 ### Database Schema (Core Tables)
 
 **users**:
+
 - **Authentication**: `clerkId`, `email`
 - **Profile**: `name`, `age`, `gender`, `location`, `bio` (500-1000 words), `lookingFor`, `interests` (array)
 - **Photo & Review**:
@@ -262,6 +401,7 @@ TypeScript path aliases configured in `tsconfig.json`:
 - **Vector Search Index**: `by_embedding` (vectorField: "embedding", dimensions: 1536, filterFields: ["accountStatus", "vacationMode", "gender"])
 
 **weeklyMatches**:
+
 - **Match Participants**: `userId`, `matchUserId`, `weekOf` (string, e.g., '2024-12-16')
 - **AI Analysis**:
   - `compatibilityScore` (number, 0-100)
@@ -281,6 +421,7 @@ TypeScript path aliases configured in `tsconfig.json`:
 - **Indexes**: `by_user_and_match`, `by_match_and_user` (prevent duplicate matches), `by_user`, `by_week`, `by_user_and_week`, `by_match_user_and_week`
 
 **passReasons**:
+
 - **Fields**: `userId`, `matchId`, `matchUserId`, `weekOf`
 - **Reason**: 7 categories ('too_far' | 'lifestyle' | 'attraction' | 'profile' | 'dealbreaker' | 'no_chemistry' | 'skipped')
 - **Timestamp**: `providedAt`
@@ -288,6 +429,7 @@ TypeScript path aliases configured in `tsconfig.json`:
 - **Indexes**: `by_user`, `by_match`, `by_reason`
 
 **dateOutcomes**:
+
 - **CRITICAL for algorithm validation**: Post-date feedback
 - **Relational**: `matchId`, `userId`, `matchUserId`, `weekOf`
 - **Core Feedback**:
@@ -304,7 +446,9 @@ TypeScript path aliases configured in `tsconfig.json`:
 - **Indexes**: `by_match`, `by_user`, `by_date_happened`, `by_would_meet_again`
 
 ### Environment Variables
+
 Required in `.env.local`:
+
 ```
 CONVEX_DEPLOYMENT=                      # Convex deployment ID
 NEXT_PUBLIC_CONVEX_URL=                 # Public Convex URL
@@ -316,22 +460,34 @@ EMBEDDING_MODEL=                        # Optional: OpenAI embedding model (defa
 RESEND_API_KEY=                         # Resend email API key
 NEXT_PUBLIC_APP_URL=                    # App URL for email links (default: http://localhost:3000)
 GOOGLE_PLACES_API_KEY=                  # Google Places API (venue selection)
+NEXT_PUBLIC_VAPI_BIO_ASSISTANT_ID=      # Vapi assistant ID for bio interviews (client-side)
+NEXT_PUBLIC_VAPI_PREFERENCES_ASSISTANT_ID= # Vapi assistant ID for preferences interviews (client-side)
+NEXT_PUBLIC_VAPI_PUBLIC_KEY=            # Vapi public key for client SDK
 ```
 
+**Vapi Configuration**:
+- Vapi assistants are configured in the Vapi dashboard (not via API)
+- Assistant IDs are stored as environment variables and read directly by client components
+- System prompts, voice settings, and conversation flow managed in Vapi dashboard
+- See `convex/lib/vapi.ts` for detailed assistant prompt specifications
+
 **Email Configuration**:
-- Emails are sent from `MeetOnce <matches@meetonce.app>`
+
+- Emails are sent from `MeetOnce <admin@meetonce.co>`
 - Domain must be verified in Resend dashboard before production use
 - Update sender address in `convex/emails.ts` if using different domain
 
 ## UI Development
 
 **shadcn/ui Configuration**:
+
 - Style preset: `base-maia`
 - Components installed in `components/ui/`
 - Add components: `npx shadcn@latest add [component]`
 - Icon library: lucide-react
 
 **Utility Functions**:
+
 - `cn()`: Merge Tailwind classes with conflict resolution
 - `getWeekOfString()`: Get current week's Monday as ISO string
 - `getMondayMorning9am()`: Next Monday 9am timestamp
@@ -340,6 +496,7 @@ GOOGLE_PLACES_API_KEY=                  # Google Places API (venue selection)
 ## Critical Business Rules
 
 ### Photo Review & Ratings
+
 - **Two-step process**:
   1. **Step 1: Approve/Reject Decision** - Admin decides if photo meets quality standards (keyboard shortcuts: A = approve, R = reject)
   2. **Step 2: Attractiveness Rating** - If approved, admin rates 1-10 on attractiveness scale (keyboard shortcuts: 1-9, 0 for 10)
@@ -349,6 +506,7 @@ GOOGLE_PLACES_API_KEY=                  # Google Places API (venue selection)
 - 8 rejection reasons: poor quality, face obscured, group photo, inappropriate, heavily filtered, poor lighting, face not visible, other
 
 ### Matching Constraints
+
 - **One match per week per user** (strictly enforced via in-batch Set tracking)
 - **Never match same pair twice** (compound index validation in both directions)
 - **Pass history respected**: If either person passed previously, they will NEVER be matched again
@@ -359,20 +517,24 @@ GOOGLE_PLACES_API_KEY=                  # Google Places API (venue selection)
 - Batched processing: 50 users per batch to prevent timeouts and scale to thousands
 
 **Testing the matching algorithm**:
+
 - Manual trigger: Run `internal.matching.testMatchingAlgorithm` in Convex dashboard
 - Processes small batch (5 users) for testing
 - Production: Runs automatically every Sunday at 11pm UTC via cron job
 
 ### Response Deadlines
+
 - Match sent: Monday 9am
 - Response deadline: Friday 11:59pm
 - Post-deadline responses rejected
 - If both pass: No contact info shared, wait for next Monday
 
 ### Email Templates
+
 Built with React Email + Resend. Email integration is **ACTIVE** using Resend API.
 
 **Implemented Templates** (`emails/` directory):
+
 1. ✅ **PhotoApproved.tsx** - Account approved, profile is live
 2. ✅ **PhotoRejected.tsx** - Account rejected with reason + optional guidance
 3. ✅ **WeeklyMatch.tsx** - Weekly match delivery (Monday 9am)
@@ -380,17 +542,20 @@ Built with React Email + Resend. Email integration is **ACTIVE** using Resend AP
 5. ✅ **SecondDateContact.tsx** - Mutual second-date interest (contact info sharing)
 
 **Email Functions** (`convex/emails.ts`):
+
 - All 5 email functions use Resend with `react:` parameter for React Email templates
 - Error handling with try-catch and console logging
-- From address: `MeetOnce <matches@meetonce.app>`
+- From address: `MeetOnce <admin@meetonce.co>`
 - Uses environment variable `RESEND_API_KEY`
 
 **Email Triggers**:
+
 - Photo approval/rejection → `convex/admin.ts` (approvePhoto, rejectPhoto mutations)
 - Mutual match → `convex/matches.ts` (respondToMatch mutation, sent to BOTH users)
 - Second date contact → `convex/feedback.ts` (submitDateFeedback mutation, sent to BOTH users)
 
 **Planned Templates** (not yet implemented):
+
 - Account submitted for review confirmation
 - Match passed notification
 - Date confirmation with calendar invite
@@ -399,9 +564,11 @@ Built with React Email + Resend. Email integration is **ACTIVE** using Resend AP
 - Missed match reminder (Saturday if no response)
 
 ### Photo Validation System
+
 **Client-side photo processing** implemented in `PhotoStep.tsx` with automatic face detection and image optimization.
 
 **Validation Pipeline** (4 steps, runs on photo upload):
+
 1. **File Validation**: Type check (must be image), size check (10MB max before compression)
 2. **Face Detection**: face-api.js TinyFaceDetector + FaceLandmark68Net models
    - ❌ No face detected → Error: "No face detected. Please upload a clear photo showing your face."
@@ -415,11 +582,13 @@ Built with React Email + Resend. Email integration is **ACTIVE** using Resend AP
 4. **Storage**: Compressed file uploaded to Convex storage
 
 **Model Files** (`public/models/`):
+
 - `tiny_face_detector_model-*` (189KB + 2.9KB manifest)
 - `face_landmark_68_model-*` (348KB + 7.7KB manifest)
 - Models loaded on component mount, graceful degradation if loading fails
 
 **User Experience**:
+
 - Loading state: "Analyzing photo... Detecting face and optimizing"
 - Validation happens immediately after file selection
 - Clear error messages for validation failures
@@ -427,21 +596,25 @@ Built with React Email + Resend. Email integration is **ACTIVE** using Resend AP
 - Buttons disabled during validation
 
 **Benefits**:
+
 - Reduces admin photo review workload (filters out group photos and non-face images)
 - Saves storage costs (1MB max vs 10MB original)
 - Improves upload speed (smaller file size)
 - Better user experience (immediate feedback vs waiting for admin rejection)
 
 ### Admin Dashboard (/admin)
+
 Protected route (Clerk authentication + `isAdmin=true` required). Four tabs with auto-refresh every 30 seconds:
 
 **Tab 1: Platform Overview** (`/admin`)
+
 - User growth, photo queue status (alerts if >50 pending), matching performance
 - **Critical metrics**: Date completion rate (≥80%), mutual interest rate (≥30%), second date request rate
 - Alert system for issues: mutual interest <20%, photo queue >50, completion rate <70%
 - Metrics displayed: Total users, pending photos, approval rate, average rating (admin only)
 
 **Tab 2: Photo Review Queue** (`/admin/photo-review`) - **PRIMARY ADMIN TASK**
+
 - **Two-step workflow**:
   1. **Decision Step**: Approve (A key) or Reject (R key)
   2. **Rating Step**: If approved, rate 1-10 attractiveness (1-9 keys, 0 for 10)
@@ -452,6 +625,7 @@ Protected route (Clerk authentication + `isAdmin=true` required). Four tabs with
 - Goal: Review within 24 hours of submission
 
 **Tab 3: Matches** (`/admin/matches`)
+
 - **All Matches View**: See all weekly matches with filters by week
 - **Stats Overview**: Total matches, mutual matches (%), dates completed, both passed count
 - **Week Filter Dropdown**: Filter matches by specific week or view all
@@ -470,6 +644,7 @@ Protected route (Clerk authentication + `isAdmin=true` required). Four tabs with
   - **SUCCESS STORY indicator** if both want second date (PRIMARY METRIC)
 
 **Tab 4: Analytics Deep Dive** (`/admin/analytics`)
+
 - **Matching Performance Card**:
   - This week's matches count
   - Response rate (% of users who responded)
@@ -499,9 +674,11 @@ Protected route (Clerk authentication + `isAdmin=true` required). Four tabs with
 - **Target metrics**: 30%+ mutual interest rate (both want second date), 80%+ date completion rate
 
 ### Convex Storage Pattern
+
 Photo management follows a consistent storage ID → URL conversion pattern:
 
 **Storage (Write)**:
+
 ```typescript
 // Store only the storage ID in database
 const uploadUrl = await generateUploadUrl();
@@ -513,12 +690,13 @@ const result = await fetch(uploadUrl, {
 const { storageId } = await result.json();
 
 await ctx.db.insert("users", {
-  photoStorageId: storageId,  // Store ID, not URL
+  photoStorageId: storageId, // Store ID, not URL
   // ... other fields
 });
 ```
 
 **Retrieval (Read)**:
+
 ```typescript
 // Convert storage ID to URL in queries
 const users = await ctx.db.query("users").collect();
@@ -533,6 +711,7 @@ const usersWithUrls = await Promise.all(
 ```
 
 **Why this pattern?**:
+
 - Storage IDs are permanent references (e.g., `kg282te5bctnsvzj644af8k4x97y06y0`)
 - URLs are temporary and expire (contain time-limited tokens)
 - Always store IDs in database, convert to URLs in queries for display
@@ -548,10 +727,11 @@ To grant admin access to a user:
    - Edit the user and set `isAdmin: true`
 
 2. **Using Convex Function** (recommended for automation):
+
    ```typescript
    // In Convex dashboard or via mutation call
    await ctx.runMutation(api.users.makeUserAdmin, {
-     userId: ctx.db.normalizeId("users", "user_id_here")
+     userId: ctx.db.normalizeId("users", "user_id_here"),
    });
    ```
 
@@ -561,6 +741,7 @@ To grant admin access to a user:
    - If access denied, verify `isAdmin` field is `true` in database
 
 **Security Notes**:
+
 - Admin routes protected by Clerk middleware + `isAdmin` flag check
 - Admin functions (`convex/admin.ts`) should verify admin status in handler
 - Never expose admin functions to non-admin users via API
@@ -569,11 +750,13 @@ To grant admin access to a user:
 ### Email Integration
 
 **Email System** (Resend + React Email):
+
 - Email templates located in `emails/` directory (React Email components)
 - Email sending functions in `convex/emails.ts` as internal actions
 - Templates use `@react-email/components` for responsive, accessible emails
 
 **Available Email Functions**:
+
 1. `sendWeeklyMatchEmail`: Notify user of their weekly match (Monday 9am)
    - Args: to, userName, matchName, matchAge, matchUrl
    - Template: `emails/WeeklyMatch.tsx`
@@ -588,12 +771,14 @@ To grant admin access to a user:
    - **This validates the PRIMARY METRIC**
 
 **Email Configuration**:
+
 - Set `RESEND_API_KEY` in `.env.local`
-- Update sender domain in email functions (currently: `matches@yourdomain.com`)
+- Update sender domain in email functions (currently: `admin@yourdomain.com`)
 - All email functions currently log to console (uncomment Resend code to send real emails)
 - Email templates use pink (#ec4899) brand color matching platform theme
 
 **Integration Points**:
+
 - Weekly matching cron job should call `sendWeeklyMatchEmail` after creating matches
 - Mutual match detection in `convex/matches.ts` should call `sendMutualMatchEmail`
 - Date feedback submission in `convex/feedback.ts` should call `sendSecondDateContactEmail`

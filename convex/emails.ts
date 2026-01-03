@@ -33,7 +33,7 @@ export const sendPhotoApprovedEmail = internalAction({
 
     try {
       await resend.emails.send({
-        from: "MeetOnce <matches@meetonce.app>",
+        from: "MeetOnce <admin@meetonce.co>",
         to: args.to,
         subject: "✅ Your Profile is Live!",
         react: PhotoApproved({
@@ -79,7 +79,7 @@ export const sendPhotoRejectedEmail = internalAction({
 
     try {
       await resend.emails.send({
-        from: "MeetOnce <matches@meetonce.app>",
+        from: "MeetOnce <admin@meetonce.co>",
         to: args.to,
         subject: "Photo Review Update",
         react: PhotoRejected({
@@ -128,7 +128,7 @@ export const sendWeeklyMatchEmail = internalAction({
 
     try {
       await resend.emails.send({
-        from: "MeetOnce <matches@meetonce.app>",
+        from: "MeetOnce <admin@meetonce.co>",
         to: args.to,
         subject: `Your Weekly Match: ${args.matchName}!`,
         react: WeeklyMatch({
@@ -184,7 +184,7 @@ export const sendMutualMatchEmail = internalAction({
 
     try {
       await resend.emails.send({
-        from: "MeetOnce <matches@meetonce.app>",
+        from: "MeetOnce <admin@meetonce.co>",
         to: args.to,
         subject: `🎉 It's a Match with ${args.matchName}!`,
         react: MutualMatch({
@@ -233,7 +233,7 @@ export const sendSecondDateContactEmail = internalAction({
 
     try {
       await resend.emails.send({
-        from: "MeetOnce <matches@meetonce.app>",
+        from: "MeetOnce <admin@meetonce.co>",
         to: args.to,
         subject: `🎉 ${args.matchName} wants a second date too!`,
         react: SecondDateContact({
