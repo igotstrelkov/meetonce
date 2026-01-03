@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { SignInButton } from "@clerk/nextjs";
 import {
   ArrowRight,
   Ban,
@@ -53,12 +54,14 @@ export function LandingPage() {
                   placeholder="Describe your ideal match..."
                   className="min-h-[3rem] text-lg bg-background/50 border-primary/20 focus-visible:ring-primary resize-none"
                 />
-                <Button
-                  size="lg"
-                  className="h-12 w-full md:w-auto px-8 text-lg rounded-xl"
-                >
-                  Start <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
+                <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                  <Button
+                    size="lg"
+                    className="h-12 w-full md:w-auto px-8 text-lg rounded-xl"
+                  >
+                    Start <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </SignInButton>
               </div>
             </div>
           </div>
