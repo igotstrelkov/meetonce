@@ -71,7 +71,6 @@ export default defineSchema({
     // AI Analysis
     compatibilityScore: v.number(),
     explanation: v.string(),
-    conversationStarters: v.array(v.string()),
 
     // Venue
     suggestedVenue: v.object({
@@ -161,14 +160,6 @@ export default defineSchema({
     wentPoorly: v.optional(v.array(v.string())),
 
     // Feature Feedback
-    conversationStartersHelpful: v.optional(
-      v.union(
-        v.literal("very"),
-        v.literal("somewhat"),
-        v.literal("not_used"),
-        v.literal("not_helpful")
-      )
-    ),
     venueRating: v.optional(
       v.union(
         v.literal("perfect"),

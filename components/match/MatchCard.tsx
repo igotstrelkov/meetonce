@@ -148,20 +148,6 @@ export default function MatchCard({
         </CardContent>
       </Card>
 
-      {/* Conversation Starters Teaser */}
-      {!match.mutualMatch && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 text-center justify-center">
-              <MessageCircle className="w-5 h-5 text-primary" />
-              <p className="text-sm font-medium text-muted-foreground">
-                3 conversation starters waiting if you both match
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Why We Matched You */}
       <Card>
         <CardHeader>

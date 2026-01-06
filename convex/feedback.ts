@@ -44,14 +44,6 @@ export const submitDateFeedback = mutation({
     ),
     wentWell: v.optional(v.array(v.string())),
     wentPoorly: v.optional(v.array(v.string())),
-    conversationStartersHelpful: v.optional(
-      v.union(
-        v.literal("very"),
-        v.literal("somewhat"),
-        v.literal("not_used"),
-        v.literal("not_helpful")
-      )
-    ),
     venueRating: v.optional(
       v.union(
         v.literal("perfect"),

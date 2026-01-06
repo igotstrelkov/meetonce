@@ -26,7 +26,6 @@ export default function PostDateFeedbackForm({
     wouldMeetAgain: "",
     wentWell: [] as string[],
     wentPoorly: [] as string[],
-    conversationStartersHelpful: "",
     venueRating: "",
     additionalThoughts: "",
   });
@@ -45,8 +44,6 @@ export default function PostDateFeedbackForm({
         wentWell: formData.wentWell.length > 0 ? formData.wentWell : undefined,
         wentPoorly:
           formData.wentPoorly.length > 0 ? formData.wentPoorly : undefined,
-        conversationStartersHelpful:
-          formData.conversationStartersHelpful as any,
         venueRating: formData.venueRating as any,
         additionalThoughts: formData.additionalThoughts || undefined,
       });
@@ -223,43 +220,10 @@ export default function PostDateFeedbackForm({
             </div>
           </div>
 
-          {/* Q6: Conversation starters */}
+          {/* Q6: Venue rating */}
           <div className="space-y-2">
             <Label className="text-lg font-semibold">
-              6. Were the conversation starters helpful?
-            </Label>
-            <RadioGroup
-              value={formData.conversationStartersHelpful}
-              onValueChange={(value) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  conversationStartersHelpful: String(value),
-                }))
-              }
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="very" id="starters-very" />
-                <Label htmlFor="starters-very">Very helpful</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="somewhat" id="starters-somewhat" />
-                <Label htmlFor="starters-somewhat">Somewhat helpful</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="not_used" id="starters-not" />
-                <Label htmlFor="starters-not">Didn't use them</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="not_helpful" id="starters-nope" />
-                <Label htmlFor="starters-nope">Not helpful</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Q7: Venue rating */}
-          <div className="space-y-2">
-            <Label className="text-lg font-semibold">
-              7. How was the suggested venue?
+              6. How was the suggested venue?
             </Label>
             <RadioGroup
               value={formData.venueRating}
@@ -290,10 +254,10 @@ export default function PostDateFeedbackForm({
             </RadioGroup>
           </div>
 
-          {/* Q8: Additional thoughts */}
+          {/* Q7: Additional thoughts */}
           <div className="space-y-2">
             <Label className="text-lg font-semibold">
-              8. Any additional thoughts? (optional)
+              7. Any additional thoughts? (optional)
             </Label>
             <Textarea
               value={formData.additionalThoughts}

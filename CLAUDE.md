@@ -11,7 +11,7 @@ MeetOnce is an AI-powered dating platform that eliminates endless swiping by del
 - **No Swiping**: One curated match per week delivered via email
 - **Quality Over Quantity**: Deep compatibility analysis, not just photos
 - **AI-Powered Matching**: Semantic matching using OpenAI embeddings + GPT-4
-- **Premium Concierge**: Platform handles matching, real-time chat, conversation starters
+- **Premium Concierge**: Platform handles matching and real-time chat
 - **Manual Curation**: Every photo and profile reviewed before going live
 
 ### Key User Flow
@@ -33,7 +33,7 @@ MeetOnce is an AI-powered dating platform that eliminates endless swiping by del
 9. Users respond "Interested" or "Pass" by Friday 11:59pm (optional pass feedback with 6 categories)
 10. If mutual match: "Open Chat" button appears on dashboard → Full-screen real-time chat
 11. Users chat to plan their date (chat active until Friday 11:59pm)
-12. Post-date feedback (8 questions) determines algorithm success
+12. Post-date feedback (7 questions) determines algorithm success
 
 ### Success Metrics (Primary KPI)
 
@@ -103,7 +103,7 @@ ClerkProvider
 - `/dashboard` - Protected dashboard (requires authentication via Clerk middleware)
 - `/onboarding` - Protected onboarding wizard (requires authentication, redirects to `/dashboard` after completion)
 - `/chat/[matchId]` - Protected full-screen chat page (requires mutual match, real-time messaging until Friday 11:59pm)
-- `/feedback/[matchId]` - Protected post-date feedback form (8 questions tracking PRIMARY METRIC)
+- `/feedback/[matchId]` - Protected post-date feedback form (7 questions tracking PRIMARY METRIC)
 - `/admin` - Protected admin dashboard (requires authentication + admin flag in database)
   - `/admin` - Platform overview with metrics
   - `/admin/photo-review` - Two-step photo review queue (PRIMARY ADMIN TASK)
@@ -146,7 +146,7 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 2. **Fast Filter** (Query): Load full documents, filter by accountStatus='approved', vacationMode=false, match/pass history
 3. **Deep Analysis** (Action): GPT-4 analyzes top 20 filtered candidates for compatibility (0-100 score + explanation)
 4. **Validation** (Query): Check attractiveness ±2, compatibility ≥70, pass history in both directions
-5. **Package** (Action): Generate conversation starters + venue suggestion via LLM
+5. **Package** (Action): Generate venue suggestion via LLM
 6. **Save** (Mutation): Write match record to weeklyMatches table
 
 **Pass History Tracking**:
@@ -158,12 +158,13 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 **Progressive Disclosure Pattern**:
 
 - Before mutual match: Show compatibility score + explanation + full profiles
-- **Hidden until mutual match**: Real-time chat with conversation starters
+- **Hidden until mutual match**: Real-time chat
 - This focuses decision on compatibility, then enables direct communication to plan the date
 
 **Voice Interview System** (Steps 2-3 of onboarding):
 
 **Architecture**:
+
 - **Client**: @vapi-ai/web SDK integrated via custom `useVapiCall` hook
 - **Server**: Convex actions for transcript processing via GPT-4o
 - **Visualization**: Real-time audio waveform with agent speaking detection
@@ -259,6 +260,7 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 **Real-Time Chat System** (`/chat/[matchId]`):
 
 **Architecture**:
+
 - **Client**: Convex reactive queries with real-time subscriptions
 - **Backend**: Convex queries (read messages) and mutations (write messages, mark as read, flag messages)
 - **Storage**: messages table with optimized indexes for fast queries
@@ -345,18 +347,17 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 **Post-Date Feedback System** (`/feedback/[matchId]`):
 
 - **PRIMARY METRIC**: "Would you want to see them again?" (yes/maybe/no)
-- **8-Question Form**:
+- **7-Question Form**:
   1. Did the date happen? \* (yes/cancelled_by_them/cancelled_by_me/rescheduled)
   2. Overall rating \* (1-5 stars, conditional on date happening)
   3. Would meet again? \* (yes/maybe/no - **THE PRIMARY METRIC**)
   4. What went well? (multi-select: great conversation, lots in common, good chemistry, attractive, funny, genuine)
   5. What didn't go well? (optional multi-select: awkward silences, nothing in common, no chemistry, not as described, late/unreliable, inappropriate behavior)
-  6. Conversation starters helpful? (very/somewhat/not_used/not_helpful)
-  7. Venue rating? (perfect/good/okay/not_good/went_elsewhere)
-  8. Additional thoughts? (optional text area)
+  6. Venue rating? (perfect/good/okay/not_good/went_elsewhere)
+  7. Additional thoughts? (optional text area)
 - **Mutual Second-Date Detection**: If both users answer "yes" to Q3, system logs mutual interest (TODO: send contact info email)
 - Form submission saves to `dateOutcomes` table with `providedAt` timestamp
-- Conditional rendering: Questions 2-8 only show if user selects "yes" to Q1
+- Conditional rendering: Questions 2-7 only show if user selects "yes" to Q1
 - Success KPI: ≥30% mutual interest rate (both want second date)
 
 **Match Display & Response Flow** (`/dashboard`):
@@ -374,7 +375,7 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 - **Mutual Match Reveal**:
   - "Open Chat" button appears on match card
   - Routes to `/chat/[matchId]` full-screen chat page
-  - Real-time messaging with conversation starters
+  - Real-time messaging enabled
   - Chat active until Friday 11:59pm (match expiry)
   - Celebration message displayed
 - All photo storage IDs converted to URLs via `ctx.storage.getUrl()` in queries
@@ -406,7 +407,7 @@ app/
       │       └─ page.tsx    # Full-screen real-time chat page (requires mutual match)
       ├─ feedback/
       │   └─ [matchId]/
-      │       └─ page.tsx    # Post-date feedback form (8 questions, PRIMARY METRIC tracking)
+      │       └─ page.tsx    # Post-date feedback form (7 questions, PRIMARY METRIC tracking)
       └─ admin/
           ├─ layout.tsx      # Admin layout with navigation
           ├─ AdminNav.tsx    # Admin tab navigation component (4 tabs)
@@ -438,7 +439,7 @@ components/
   │   ├─ MessageInput.tsx     # Message input with character counter
   │   └─ ChatExpiredBanner.tsx # Expiry banner with feedback link
   ├─ feedback/
-  │   └─ PostDateFeedbackForm.tsx # 8-question post-date feedback (PRIMARY METRIC)
+  │   └─ PostDateFeedbackForm.tsx # 7-question post-date feedback (PRIMARY METRIC)
   └─ ui/                      # shadcn/ui components (dialog, textarea, card, radio-group, checkbox, etc.)
 
 hooks/
@@ -459,7 +460,7 @@ convex/
   ├─ lib/
   │   ├─ openrouter.ts  # OpenRouter API integration + voice transcript processing (processVoiceTranscript)
   │   ├─ vapi.ts        # Vapi assistant ID management (getOrCreateAssistant)
-  │   ├─ matching.ts    # Matching helpers (compatibility analysis, conversation starters)
+  │   ├─ matching.ts    # Matching helpers (compatibility analysis, venue suggestions)
   │   └─ cosine.ts      # Vector similarity calculations (legacy - now uses native vector search)
   └─ _generated/        # Auto-generated Convex types
 
@@ -505,7 +506,6 @@ TypeScript path aliases configured in `tsconfig.json`:
 - **AI Analysis**:
   - `compatibilityScore` (number, 0-100)
   - `explanation` (string, 2-3 warm paragraphs)
-  - `conversationStarters` (array of 3 strings)
 - **Venue**: `suggestedVenue` (object with name, address, placeId, description)
 - **Responses**:
   - `userResponse`, `matchResponse` ('pending' | 'interested' | 'passed')
@@ -539,7 +539,6 @@ TypeScript path aliases configured in `tsconfig.json`:
   - `wentWell` (optional array - positive aspects)
   - `wentPoorly` (optional array - negative aspects)
 - **Feature Feedback**:
-  - `conversationStartersHelpful` (optional: 'very' | 'somewhat' | 'not_used' | 'not_helpful')
   - `venueRating` (optional: 'perfect' | 'good' | 'okay' | 'not_good' | 'went_elsewhere')
 - **Additional**: `additionalThoughts` (optional string), `providedAt` (timestamp), `feedbackProvided` (boolean)
 - **Indexes**: `by_match`, `by_user`, `by_date_happened`, `by_would_meet_again`
@@ -580,6 +579,7 @@ NEXT_PUBLIC_VAPI_PUBLIC_KEY=            # Vapi public key for client SDK
 ```
 
 **Vapi Configuration**:
+
 - Vapi assistants are configured in the Vapi dashboard (not via API)
 - Assistant IDs are stored as environment variables and read directly by client components
 - System prompts, voice settings, and conversation flow managed in Vapi dashboard
@@ -875,10 +875,10 @@ To grant admin access to a user:
    - Args: to, userName, matchName, matchAge, matchUrl
    - Template: `emails/WeeklyMatch.tsx`
 
-2. `sendMutualMatchEmail`: Celebrate mutual match with conversation starters
-   - Args: to, userName, matchName, conversationStarters, matchUrl
+2. `sendMutualMatchEmail`: Celebrate mutual match and encourage chat
+   - Args: to, userName, matchName, matchUrl
    - Sent when both users respond "interested"
-   - Directs users to in-app chat (no venue suggestion)
+   - Directs users to in-app chat
 
 3. `sendSecondDateContactEmail`: Share contact info when both want second date
    - Args: to, userName, matchName, matchEmail

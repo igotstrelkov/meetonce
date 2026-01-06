@@ -62,7 +62,7 @@ export const approvePhoto = mutation({
     await ctx.scheduler.runAfter(0, internal.emails.sendPhotoApprovedEmail, {
       to: user.email,
       userName: user.name,
-      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard`,
+      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
     });
 
     console.log(`✅ Approved user ${args.userId} with rating ${args.rating}`);
@@ -100,7 +100,7 @@ export const rejectPhoto = mutation({
       userName: user.name,
       reason: args.rejectionReason,
       guidance: args.guidance,
-      uploadUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/onboarding`,
+      uploadUrl: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding`,
     });
 
     console.log(`❌ Rejected user ${args.userId}: ${args.rejectionReason}`);

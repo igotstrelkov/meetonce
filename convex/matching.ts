@@ -9,7 +9,6 @@ import {
 import {
   analyzeCompatibility,
   formatProfile,
-  generateConversationStarters,
   getWeekOfString,
   suggestVenue,
 } from "./lib/matching";
@@ -212,7 +211,6 @@ export const saveMatch = internalMutation({
     weekOf: v.string(),
     compatibilityScore: v.number(),
     explanation: v.string(),
-    conversationStarters: v.array(v.string()),
     suggestedVenue: v.object({
       name: v.string(),
       address: v.string(),
@@ -230,7 +228,6 @@ export const saveMatch = internalMutation({
       weekOf: args.weekOf,
       compatibilityScore: args.compatibilityScore,
       explanation: args.explanation,
-      conversationStarters: args.conversationStarters,
       suggestedVenue: args.suggestedVenue,
 
       // Responses
@@ -406,11 +403,7 @@ export const runMatchingBatch = internalAction({
         continue;
       }
 
-      // Step 2e: Generate additional content (LLM calls)
-      const starters = await generateConversationStarters(
-        formatProfile(user),
-        formatProfile(matchData.matchUser)
-      );
+      // Step 2e: Generate venue suggestion
       const venue = await suggestVenue(user.location);
 
       // Step 2f: Save match via mutation
@@ -420,7 +413,6 @@ export const runMatchingBatch = internalAction({
         weekOf,
         compatibilityScore: matchData.score,
         explanation: matchData.explanation,
-        conversationStarters: starters,
         suggestedVenue: venue,
       });
 

@@ -11,14 +11,12 @@ import {
 interface MutualMatchProps {
   userName: string;
   matchName: string;
-  conversationStarters: string[];
   matchUrl: string;
 }
 
 export default function MutualMatch({
   userName,
   matchName,
-  conversationStarters,
   matchUrl,
 }: MutualMatchProps) {
   return (
@@ -37,15 +35,6 @@ export default function MutualMatch({
               Exciting news! {matchName} is interested too! You both want to meet,
               so it's time to plan your date.
             </Text>
-
-            <div style={sectionBox}>
-              <Text style={sectionTitle}>💬 Conversation Starters</Text>
-              {conversationStarters.map((starter, i) => (
-                <Text key={i} style={listItem}>
-                  {i + 1}. {starter}
-                </Text>
-              ))}
-            </div>
 
             <div style={sectionBox}>
               <Text style={sectionTitle}>💬 Start Chatting Now!</Text>
@@ -93,12 +82,6 @@ const sectionTitle = {
   fontWeight: "bold" as const,
   color: "#831843",
   marginBottom: "12px",
-};
-const listItem = {
-  fontSize: "14px",
-  color: "#9f1239",
-  marginBottom: "8px",
-  lineHeight: "20px",
 };
 const venueNameStyle = {
   fontSize: "16px",

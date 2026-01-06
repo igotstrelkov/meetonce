@@ -37,8 +37,8 @@ export async function callOpenRouter(request: OpenRouterRequest): Promise<any> {
     headers: {
       Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": process.env.OPENROUTER_SITE_URL ?? "",
-      "X-Title": process.env.OPENROUTER_APP_NAME ?? "",
+      "HTTP-Referer": process.env.OPENROUTER_SITE_URL!,
+      "X-Title": process.env.OPENROUTER_APP_NAME!,
     },
     body: JSON.stringify(request),
   });
@@ -59,7 +59,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.EMBEDDING_MODEL ?? "openai/text-embedding-3-small",
+      model: process.env.EMBEDDING_MODEL!,
       input: text,
     }),
   });
@@ -95,8 +95,7 @@ export async function callWithRetry(
         console.log("Model unavailable, using fallback...");
         return await callOpenRouter({
           ...request,
-          model:
-            process.env.FALLBACK_MODEL ?? "meta-llama/llama-3-8b-instruct:free",
+          model: process.env.FALLBACK_MODEL!,
         });
       }
 
@@ -234,7 +233,7 @@ OUTPUT FORMAT: Single flowing narrative, 100-500 words, optimized for semantic v
   };
 
   const response = await callOpenRouter({
-    model: "openai/gpt-4o",
+    model: process.env.ANALYSIS_MODEL!,
     messages: [
       {
         role: "system",

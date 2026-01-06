@@ -72,18 +72,6 @@ export default function MatchDetailsModal({
             </p>
           </div>
 
-          {/* Conversation Starters */}
-          <div>
-            <h3 className="font-semibold mb-2">Conversation Starters</h3>
-            <ul className="text-sm space-y-1">
-              {match.conversationStarters.map((starter: string, i: number) => (
-                <li key={i} className="text-gray-700">
-                  • {starter}
-                </li>
-              ))}
-            </ul>
-          </div>
-
           {/* Suggested Venue */}
           <div>
             <h3 className="font-semibold mb-2">Suggested Venue</h3>

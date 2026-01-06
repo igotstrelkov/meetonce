@@ -151,7 +151,6 @@ export const sendMutualMatchEmail = internalAction({
     to: v.string(),
     userName: v.string(),
     matchName: v.string(),
-    conversationStarters: v.array(v.string()),
     matchUrl: v.string(),
   },
   handler: async (ctx, args) => {
@@ -163,9 +162,6 @@ export const sendMutualMatchEmail = internalAction({
       Hi ${args.userName},
 
       Great news! ${args.matchName} is interested too!
-
-      Conversation Starters:
-      ${args.conversationStarters.map((s, i) => `${i + 1}. ${s}`).join("\n")}
 
       Match Details: ${args.matchUrl}
 
@@ -184,7 +180,6 @@ export const sendMutualMatchEmail = internalAction({
         react: MutualMatch({
           userName: args.userName,
           matchName: args.matchName,
-          conversationStarters: args.conversationStarters,
           matchUrl: args.matchUrl,
         }),
       });

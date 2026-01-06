@@ -124,15 +124,13 @@ export const respondToMatch = mutation({
       const matchUser = await ctx.db.get(updatedMatch!.matchUserId);
 
       if (user && matchUser) {
-        const appUrl =
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
         // Send email to user
         await ctx.scheduler.runAfter(0, internal.emails.sendMutualMatchEmail, {
           to: user.email,
           userName: user.name,
           matchName: matchUser.name,
-          conversationStarters: updatedMatch!.conversationStarters,
           matchUrl: `${appUrl}/dashboard`,
         });
 
@@ -141,7 +139,6 @@ export const respondToMatch = mutation({
           to: matchUser.email,
           userName: matchUser.name,
           matchName: user.name,
-          conversationStarters: updatedMatch!.conversationStarters,
           matchUrl: `${appUrl}/dashboard`,
         });
       }

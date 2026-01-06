@@ -75,7 +75,7 @@ You MUST respond with valid JSON in this exact format:
 }`;
 
   const response = await callWithRetry({
-    model: process.env.ANALYSIS_MODEL ?? "openai/gpt-4o",
+    model: process.env.ANALYSIS_MODEL!,
     messages: [{ role: "user", content: prompt }],
     response_format: {
       type: "json_schema",
@@ -193,7 +193,7 @@ You MUST respond with valid JSON in this exact format:
 }`;
 
   const response = await callWithRetry({
-    model: process.env.ANALYSIS_MODEL ?? "openai/gpt-4o",
+    model: process.env.ANALYSIS_MODEL!,
     messages: [{ role: "user", content: prompt }],
     response_format: {
       type: "json_schema",
