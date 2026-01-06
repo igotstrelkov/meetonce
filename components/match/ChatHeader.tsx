@@ -23,8 +23,12 @@ export function ChatHeader({
   return (
     <div className="flex items-center justify-between pb-4 border-b">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ChevronLeft className="w-5 h-5" />
+        <Button
+          variant="ghost"
+          className="h-12 w-12 p-0 mr-2"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-8 h-8" />
         </Button>
         {matchUserPhotoUrl ? (
           <Image
