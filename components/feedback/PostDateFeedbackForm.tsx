@@ -78,7 +78,7 @@ export default function PostDateFeedbackForm({
   };
 
   return (
-    <div className="space-y-6 bg-white rounded-lg p-6 shadow-lg">
+    <div className="space-y-6 bg-orange-50 border-2 border-primary rounded-lg p-6 shadow-sm">
       <div>
         <h2 className="text-2xl font-bold mb-2">How did it go?</h2>
         <p className="text-gray-600">
@@ -134,7 +134,7 @@ export default function PostDateFeedbackForm({
                   }
                   className={`w-12 h-12 rounded-lg text-lg transition-all ${
                     formData.overallRating === rating
-                      ? "bg-pink-600 text-white scale-110"
+                      ? "bg-primary text-white scale-110"
                       : "bg-gray-200 hover:bg-gray-300"
                   }`}
                 >

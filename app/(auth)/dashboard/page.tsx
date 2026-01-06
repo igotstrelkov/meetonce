@@ -106,7 +106,7 @@ export default function DashboardPage() {
     <div>
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Your Weekly Match</h1>
-        <p className="text-gray-600">Respond by Friday 11:59pm</p>
+        <p className="text-gray-600">Expires Friday at 11:59 PM</p>
       </div>
 
       <MatchCard

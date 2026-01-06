@@ -14,4 +14,14 @@ crons.weekly(
   internal.matching.weeklyMatchGeneration
 );
 
+// Run daily at 3 AM UTC to clean up expired messages
+crons.daily(
+  "cleanup-expired-messages",
+  {
+    hourUTC: 3,
+    minuteUTC: 0,
+  },
+  internal.chat.cleanupExpiredMessages
+);
+
 export default crons;

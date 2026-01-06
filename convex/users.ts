@@ -47,6 +47,23 @@ export const getCurrentUser = query({
   },
 });
 
+export const getUser = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      return null;
+    }
+
+    return {
+      ...user,
+      photoUrl: user.photoStorageId
+        ? await ctx.storage.getUrl(user.photoStorageId)
+        : null,
+    };
+  },
+});
+
 export const generateUploadUrl = mutation({
   args: {},
   returns: v.string(),

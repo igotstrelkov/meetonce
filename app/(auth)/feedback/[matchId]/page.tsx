@@ -6,15 +6,17 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
+import { use } from "react";
 
 export default function FeedbackPage({
   params,
 }: {
-  params: { matchId: string };
+  params: Promise<{ matchId: string }>;
 }) {
   const router = useRouter();
   const { user: clerkUser } = useUser();
-  const matchId = params.matchId as Id<"weeklyMatches">;
+  const { matchId: rawMatchId } = use(params);
+  const matchId = rawMatchId as Id<"weeklyMatches">;
 
   // Load match data
   const matchData = useQuery(api.matches.getMatchById, { matchId });
@@ -54,7 +56,7 @@ export default function FeedbackPage({
           </p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="text-pink-600 hover:text-pink-700 font-semibold"
+            className="text-orange-600 hover:text-orange-700 font-semibold"
           >
             ← Back to Dashboard
           </button>

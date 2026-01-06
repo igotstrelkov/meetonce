@@ -12,8 +12,6 @@ interface MutualMatchProps {
   userName: string;
   matchName: string;
   conversationStarters: string[];
-  venueName: string;
-  venueAddress: string;
   matchUrl: string;
 }
 
@@ -21,8 +19,6 @@ export default function MutualMatch({
   userName,
   matchName,
   conversationStarters,
-  venueName,
-  venueAddress,
   matchUrl,
 }: MutualMatchProps) {
   return (
@@ -52,22 +48,21 @@ export default function MutualMatch({
             </div>
 
             <div style={sectionBox}>
-              <Text style={sectionTitle}>📍 Suggested Meeting Spot</Text>
-              <Text style={venueNameStyle}>{venueName}</Text>
-              <Text style={venueAddressStyle}>{venueAddress}</Text>
+              <Text style={sectionTitle}>💬 Start Chatting Now!</Text>
               <Text style={venueNote}>
-                This is a great spot for a first date - casual atmosphere and
-                convenient location for both of you!
+                You can now chat directly in the app! Head to your dashboard to
+                start the conversation and plan your date together. Chat is
+                active until Friday at 11:59 PM.
               </Text>
             </div>
 
             <Button style={button} href={matchUrl}>
-              View Match Details
+              Start Chatting Now
             </Button>
 
             <Text style={footer}>
-              We'll send you both contact information separately so you can
-              coordinate your schedules. Have a wonderful date!
+              Use the in-app chat to coordinate your schedules and plan your
+              perfect date. Have a wonderful time getting to know each other!
             </Text>
           </Section>
         </Container>

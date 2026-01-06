@@ -1,3 +1,4 @@
+import { Doc } from "../_generated/dataModel";
 import { callWithRetry } from "./openrouter";
 
 export async function analyzeCompatibility(
@@ -251,8 +252,8 @@ export async function suggestVenue(location: string): Promise<{
   };
 }
 
-export function formatProfile(user: any): string {
-  return `${user.bio}\n\nLooking for ${user.lookingFor}`;
+export function formatProfile(user: Doc<"users">): string {
+  return `My name is ${user.name}.\n${user.bio}\n\nI am looking for ${user.lookingFor}`;
 }
 
 export function getWeekOfString(): string {

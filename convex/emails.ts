@@ -152,8 +152,6 @@ export const sendMutualMatchEmail = internalAction({
     userName: v.string(),
     matchName: v.string(),
     conversationStarters: v.array(v.string()),
-    venueName: v.string(),
-    venueAddress: v.string(),
     matchUrl: v.string(),
   },
   handler: async (ctx, args) => {
@@ -169,13 +167,9 @@ export const sendMutualMatchEmail = internalAction({
       Conversation Starters:
       ${args.conversationStarters.map((s, i) => `${i + 1}. ${s}`).join("\n")}
 
-      Suggested Venue:
-      ${args.venueName}
-      ${args.venueAddress}
-
       Match Details: ${args.matchUrl}
 
-      We'll send you both contact information to schedule your date!
+      Start chatting now in the app to plan your date!
       ================================
     `);
 
@@ -191,8 +185,6 @@ export const sendMutualMatchEmail = internalAction({
           userName: args.userName,
           matchName: args.matchName,
           conversationStarters: args.conversationStarters,
-          venueName: args.venueName,
-          venueAddress: args.venueAddress,
           matchUrl: args.matchUrl,
         }),
       });

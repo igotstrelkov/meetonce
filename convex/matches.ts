@@ -133,8 +133,6 @@ export const respondToMatch = mutation({
           userName: user.name,
           matchName: matchUser.name,
           conversationStarters: updatedMatch!.conversationStarters,
-          venueName: updatedMatch!.suggestedVenue.name,
-          venueAddress: updatedMatch!.suggestedVenue.address,
           matchUrl: `${appUrl}/dashboard`,
         });
 
@@ -144,8 +142,6 @@ export const respondToMatch = mutation({
           userName: matchUser.name,
           matchName: user.name,
           conversationStarters: updatedMatch!.conversationStarters,
-          venueName: updatedMatch!.suggestedVenue.name,
-          venueAddress: updatedMatch!.suggestedVenue.address,
           matchUrl: `${appUrl}/dashboard`,
         });
       }

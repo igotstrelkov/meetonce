@@ -16,7 +16,7 @@ export default function PassFeedbackForm({
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
 
   return (
-    <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+    <div className="bg-orange-50 border-2 border-primary rounded-lg p-6 space-y-4">
       <h3 className="font-semibold">Help us understand (optional)</h3>
       <p className="text-sm text-gray-600">
         This helps us make better matches in the future
@@ -30,7 +30,7 @@ export default function PassFeedbackForm({
             disabled={isSubmitting}
             className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${
               selectedReason === reason.value
-                ? "bg-gray-800 text-white"
+                ? "border-2 border-primary bg-white"
                 : "bg-white hover:bg-gray-100 border border-gray-200"
             } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
           >
@@ -42,7 +42,6 @@ export default function PassFeedbackForm({
       <div className="flex gap-2">
         <Button
           onClick={() => onSubmit(selectedReason || undefined)}
-          variant="outline"
           className="flex-1"
           disabled={isSubmitting}
         >

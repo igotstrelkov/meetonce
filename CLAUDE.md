@@ -11,7 +11,7 @@ MeetOnce is an AI-powered dating platform that eliminates endless swiping by del
 - **No Swiping**: One curated match per week delivered via email
 - **Quality Over Quantity**: Deep compatibility analysis, not just photos
 - **AI-Powered Matching**: Semantic matching using OpenAI embeddings + GPT-4
-- **Premium Concierge**: Platform handles matching, venue selection, conversation starters
+- **Premium Concierge**: Platform handles matching, real-time chat, conversation starters
 - **Manual Curation**: Every photo and profile reviewed before going live
 
 ### Key User Flow
@@ -31,8 +31,9 @@ MeetOnce is an AI-powered dating platform that eliminates endless swiping by del
 7. Monday 9am: Users receive one curated match via email
 8. Users view match on `/dashboard`: See full profile, compatibility score, and explanation
 9. Users respond "Interested" or "Pass" by Friday 11:59pm (optional pass feedback with 6 categories)
-10. If mutual match: Conversation starters + suggested venue revealed on dashboard
-11. Post-date feedback (8 questions) determines algorithm success
+10. If mutual match: "Open Chat" button appears on dashboard → Full-screen real-time chat
+11. Users chat to plan their date (chat active until Friday 11:59pm)
+12. Post-date feedback (8 questions) determines algorithm success
 
 ### Success Metrics (Primary KPI)
 
@@ -101,6 +102,7 @@ ClerkProvider
 - `/` - Public landing page (shows LandingPage component, redirects authenticated users to `/dashboard`)
 - `/dashboard` - Protected dashboard (requires authentication via Clerk middleware)
 - `/onboarding` - Protected onboarding wizard (requires authentication, redirects to `/dashboard` after completion)
+- `/chat/[matchId]` - Protected full-screen chat page (requires mutual match, real-time messaging until Friday 11:59pm)
 - `/feedback/[matchId]` - Protected post-date feedback form (8 questions tracking PRIMARY METRIC)
 - `/admin` - Protected admin dashboard (requires authentication + admin flag in database)
   - `/admin` - Platform overview with metrics
@@ -156,8 +158,8 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 **Progressive Disclosure Pattern**:
 
 - Before mutual match: Show compatibility score + explanation + full profiles
-- **Hidden until mutual match**: Conversation starters + suggested venue
-- This prevents venue bias and focuses decision on compatibility
+- **Hidden until mutual match**: Real-time chat with conversation starters
+- This focuses decision on compatibility, then enables direct communication to plan the date
 
 **Voice Interview System** (Steps 2-3 of onboarding):
 
@@ -254,6 +256,92 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 - **Semantic Optimization**: Prompts engineered to generate embedding-friendly text
 - **Efficiency**: 10-15 min total vs 30+ min typing detailed bio/preferences
 
+**Real-Time Chat System** (`/chat/[matchId]`):
+
+**Architecture**:
+- **Client**: Convex reactive queries with real-time subscriptions
+- **Backend**: Convex queries (read messages) and mutations (write messages, mark as read, flag messages)
+- **Storage**: messages table with optimized indexes for fast queries
+- **Cleanup**: Daily cron job deletes messages from expired matches (>7 days old)
+
+**Chat Flow**:
+
+1. **Mutual Match Detection** - Both users respond "interested"
+2. **Chat Activation** - "Open Chat" button appears on match card
+3. **Full-Screen Chat** - Routes to `/chat/[matchId]` dedicated page
+4. **Real-Time Messaging** - Convex subscriptions for live updates (no polling)
+5. **Time-Limited** - Chat active until Friday 11:59pm (match expiry)
+6. **Read Receipts** - Messages marked as read when viewing chat
+7. **Message Cleanup** - Deleted 7 days after expiry
+
+**Key Components**:
+
+- **ChatInterface** (`components/match/ChatInterface.tsx`): Main orchestrator
+  - Manages Convex real-time subscriptions
+  - Auto-marks messages as read when viewing
+  - Shows expired banner after Friday 11:59pm
+  - Full-screen layout (calc(100dvh - 120px))
+
+- **ChatHeader** (`components/match/ChatHeader.tsx`): User info and timer
+  - Match user's name and photo
+  - Countdown timer to Friday 11:59pm
+  - Unread message badge
+  - Back button navigation
+
+- **MessageList** (`components/match/MessageList.tsx`): Message display
+  - Auto-scroll to bottom on new messages
+  - Date separators (Today, Yesterday, date)
+  - Read receipts ("Read" indicator)
+  - Message bubbles (sender left, current user right)
+
+- **MessageInput** (`components/match/MessageInput.tsx`): Send interface
+  - Textarea with 1000 char limit
+  - Character counter (red when over limit)
+  - Enter to send, Shift+Enter for new line
+  - Disabled after expiry
+
+- **ChatExpiredBanner** (`components/match/ChatExpiredBanner.tsx`): Expiry state
+  - Shown after Friday 11:59pm
+  - Link to post-date feedback form
+  - Messages remain read-only for 7 days
+
+**Convex Functions** (`convex/chat.ts`):
+
+1. **getMessages** (query): Load messages with pagination (50 per page)
+   - Verifies user is part of match
+   - Returns messages with sender info (name, photoUrl)
+   - Sorted by sentAt timestamp
+
+2. **getUnreadCount** (query): Count unread messages
+   - Counts where receiverId = current user AND readAt = null
+   - Displayed in chat header badge
+
+3. **sendMessage** (mutation): Send new message
+   - Validates mutual match exists
+   - Checks match hasn't expired
+   - Validates content (1-1000 chars)
+   - Inserts message with sentAt timestamp
+
+4. **markMessagesAsRead** (mutation): Mark as read
+   - Updates all unread messages for current user
+   - Sets readAt = now
+
+5. **flagMessage** (mutation): Flag inappropriate content
+   - Sets flagged = true with reason
+   - TODO: Admin notification system
+
+6. **cleanupExpiredMessages** (internalMutation): Daily cleanup
+   - Runs at 3 AM UTC daily
+   - Deletes messages from matches expired >7 days ago
+
+**Benefits**:
+
+- **Direct Communication**: Users coordinate dates directly (no venue suggestions)
+- **Real-Time Experience**: Convex subscriptions enable instant message delivery
+- **Privacy**: Messages deleted after 7 days (not permanent)
+- **Safety**: Flagging system for inappropriate content
+- **Mobile-Optimized**: Full-screen layout with dynamic viewport height
+
 **Post-Date Feedback System** (`/feedback/[matchId]`):
 
 - **PRIMARY METRIC**: "Would you want to see them again?" (yes/maybe/no)
@@ -284,8 +372,10 @@ Implemented as batched Convex actions for scalability. Processes users in batche
   - "Pass" button → Shows optional feedback form with 6 categories
   - Responses trigger mutual match detection (both = "interested" → `mutualMatch = true`)
 - **Mutual Match Reveal**:
-  - Conversation starters (array of 3) revealed
-  - Suggested venue (name, address, placeId, description) revealed
+  - "Open Chat" button appears on match card
+  - Routes to `/chat/[matchId]` full-screen chat page
+  - Real-time messaging with conversation starters
+  - Chat active until Friday 11:59pm (match expiry)
   - Celebration message displayed
 - All photo storage IDs converted to URLs via `ctx.storage.getUrl()` in queries
 
@@ -311,6 +401,9 @@ app/
       │   └─ StepWrapper.tsx # Reusable step wrapper
       ├─ resubmit/
       │   └─ page.tsx        # Photo/document resubmission for rejected users
+      ├─ chat/
+      │   └─ [matchId]/
+      │       └─ page.tsx    # Full-screen real-time chat page (requires mutual match)
       ├─ feedback/
       │   └─ [matchId]/
       │       └─ page.tsx    # Post-date feedback form (8 questions, PRIMARY METRIC tracking)
@@ -338,7 +431,12 @@ components/
   │   └─ VoiceStateIndicator.tsx # Status indicator (idle/recording/processing/complete/error)
   ├─ match/
   │   ├─ MatchCard.tsx        # Match profile display with response buttons
-  │   └─ PassFeedbackForm.tsx # Optional pass feedback (6 categories)
+  │   ├─ PassFeedbackForm.tsx # Optional pass feedback (6 categories)
+  │   ├─ ChatInterface.tsx    # Main chat orchestrator with real-time subscriptions
+  │   ├─ ChatHeader.tsx       # Chat header with user info and countdown timer
+  │   ├─ MessageList.tsx      # Scrollable message list with auto-scroll
+  │   ├─ MessageInput.tsx     # Message input with character counter
+  │   └─ ChatExpiredBanner.tsx # Expiry banner with feedback link
   ├─ feedback/
   │   └─ PostDateFeedbackForm.tsx # 8-question post-date feedback (PRIMARY METRIC)
   └─ ui/                      # shadcn/ui components (dialog, textarea, card, radio-group, checkbox, etc.)
@@ -348,12 +446,13 @@ hooks/
 
 convex/
   ├─ auth.config.ts     # Clerk JWT configuration
-  ├─ schema.ts          # Database schema (4 tables: users, weeklyMatches, passReasons, dateOutcomes)
-  ├─ crons.ts           # Scheduled jobs (weekly matching on Sunday 11pm)
+  ├─ schema.ts          # Database schema (5 tables: users, weeklyMatches, passReasons, dateOutcomes, messages)
+  ├─ crons.ts           # Scheduled jobs (weekly matching on Sunday 11pm, message cleanup daily 3am)
   ├─ users.ts           # User CRUD operations + admin functions
   ├─ admin.ts           # Admin queries: photo review, platform metrics, analytics, all matches
   ├─ matching.ts        # Batched matching algorithm (actions, queries, mutations)
   ├─ matches.ts         # Match display queries (getCurrentMatch, getMatchById) and response mutations
+  ├─ chat.ts            # Real-time chat queries (getMessages, getUnreadCount) and mutations (sendMessage, markMessagesAsRead, flagMessage)
   ├─ feedback.ts        # Post-date feedback mutations (submitPassFeedback, submitDateFeedback, getFeedbackForMatch)
   ├─ emails.ts          # Email actions (sendWeeklyMatchEmail, sendMutualMatchEmail, sendSecondDateContactEmail)
   ├─ voice.ts           # Voice interview actions (processTranscript)
@@ -444,6 +543,21 @@ TypeScript path aliases configured in `tsconfig.json`:
   - `venueRating` (optional: 'perfect' | 'good' | 'okay' | 'not_good' | 'went_elsewhere')
 - **Additional**: `additionalThoughts` (optional string), `providedAt` (timestamp), `feedbackProvided` (boolean)
 - **Indexes**: `by_match`, `by_user`, `by_date_happened`, `by_would_meet_again`
+
+**messages**:
+
+- **CRITICAL for real-time chat**: In-app messaging system for mutual matches
+- **Relational**: `matchId`, `senderId`, `receiverId`
+- **Message Data**:
+  - `content` (string, max 1000 chars)
+  - `sentAt` (timestamp)
+  - `readAt` (optional timestamp for read receipts)
+- **Safety Features**:
+  - `flagged` (boolean - for admin review)
+  - `flaggedReason` (optional string - reason for flagging)
+- **Purpose**: Real-time communication between mutual matches until Friday 11:59pm (match expiry)
+- **Cleanup**: Messages deleted 7 days after match expiry via daily cron job
+- **Indexes**: `by_match` (matchId, sentAt), `by_match_and_receiver` (matchId, receiverId), `by_sender` (senderId), `by_flagged` (flagged)
 
 ### Environment Variables
 
@@ -761,9 +875,10 @@ To grant admin access to a user:
    - Args: to, userName, matchName, matchAge, matchUrl
    - Template: `emails/WeeklyMatch.tsx`
 
-2. `sendMutualMatchEmail`: Celebrate mutual match with conversation starters and venue
-   - Args: to, userName, matchName, conversationStarters, venueName, venueAddress
+2. `sendMutualMatchEmail`: Celebrate mutual match with conversation starters
+   - Args: to, userName, matchName, conversationStarters, matchUrl
    - Sent when both users respond "interested"
+   - Directs users to in-app chat (no venue suggestion)
 
 3. `sendSecondDateContactEmail`: Share contact info when both want second date
    - Args: to, userName, matchName, matchEmail
@@ -779,6 +894,6 @@ To grant admin access to a user:
 
 **Integration Points**:
 
-- Weekly matching cron job should call `sendWeeklyMatchEmail` after creating matches
-- Mutual match detection in `convex/matches.ts` should call `sendMutualMatchEmail`
-- Date feedback submission in `convex/feedback.ts` should call `sendSecondDateContactEmail`
+- Weekly matching cron job calls `sendWeeklyMatchEmail` after creating matches
+- Mutual match detection in `convex/matches.ts` calls `sendMutualMatchEmail` (both users get email)
+- Date feedback submission in `convex/feedback.ts` calls `sendSecondDateContactEmail` (if both want second date)

@@ -187,4 +187,19 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_date_happened", ["dateHappened"])
     .index("by_would_meet_again", ["wouldMeetAgain"]),
+
+  messages: defineTable({
+    matchId: v.id("weeklyMatches"),
+    senderId: v.id("users"),
+    receiverId: v.id("users"),
+    content: v.string(),
+    sentAt: v.number(),
+    readAt: v.optional(v.number()),
+    flagged: v.boolean(),
+    flaggedReason: v.optional(v.string()),
+  })
+    .index("by_match", ["matchId", "sentAt"])
+    .index("by_match_and_receiver", ["matchId", "receiverId"])
+    .index("by_sender", ["senderId"])
+    .index("by_flagged", ["flagged"]),
 });
