@@ -1,10 +1,14 @@
 "use client";
 
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
-import { ChevronDown, ChevronUp, MessageCircle } from "lucide-react";
+import { Heart, MapPin, MessageCircle, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PassFeedbackForm from "./PassFeedbackForm";
@@ -28,7 +32,7 @@ export default function MatchCard({
   const [showPassFeedback, setShowPassFeedback] = useState(false);
   const [hasResponded, setHasResponded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const myResponse = isReversed ? match.matchResponse : match.userResponse;
   const theirResponse = isReversed ? match.userResponse : match.matchResponse;
@@ -89,101 +93,148 @@ export default function MatchCard({
 
   return (
     <div className="space-y-6">
-      {/* Profile Photo */}
+      {/* Profile Photo with Loading State */}
       <div className="flex justify-center">
-        <img
-          src={matchUser?.profileImage || "/avatar.png"}
-          alt={matchUser?.name}
-          className="w-96 h-96 object-cover rounded-lg shadow-lg"
-        />
+        <div className="relative w-full max-w-md">
+          {!imageLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-2xl aspect-square">
+              <LoadingSpinner size="lg" centered={false} />
+            </div>
+          )}
+          <img
+            src={matchUser?.photoUrl || "/avatar.png"}
+            alt={matchUser?.name}
+            className={`w-full aspect-square object-cover rounded-2xl shadow-lg transition-opacity duration-300 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(true)}
+          />
+        </div>
       </div>
 
-      {/* Basic Info */}
-      <div className="">
-        <h2 className="text-3xl font-bold mb-2">
-          {matchUser?.name}, {matchUser?.age}
-        </h2>
-        <p className="text-gray-600">{`${matchUser?.location}, Ireland`}</p>
-      </div>
+      {/* Profile Header */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-3xl font-bold mb-1">
+                {matchUser?.name}, {matchUser?.age}
+              </CardTitle>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <MapPin className="w-4 h-4" />
+                <span>{matchUser?.location}</span>
+              </div>
+            </div>
+            {/* <Heart className="w-6 h-6 text-primary" /> */}
+          </div>
+        </CardHeader>
+      </Card>
 
       {/* Compatibility Score */}
-      {/* <div className="bg-orange-50 border-2 border-primary rounded-lg p-4 text-center">
-        <div className="text-gray-700 text-sm mb-1">Compatibility Score</div>
-        <div className="text-4xl font-bold text-primary">
-          {match.compatibilityScore}%
-        </div>
-      </div> */}
-
-      {/* Why You Matched */}
-      <div className="border rounded-lg p-4">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between"
-        >
-          <h3 className="text-xl font-semibold">Why We Matched You</h3>
-          {isExpanded ? (
-            <ChevronUp className="w-5 h-5 text-gray-500" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-gray-500" />
-          )}
-        </button>
-        {isExpanded && (
-          <div className="text-gray-700 leading-relaxed whitespace-pre-line mt-3 animate-in fade-in slide-in-from-top-1">
-            {match.explanation}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <div className="text-sm font-medium text-muted-foreground">
+                Compatibility Score
+              </div>
+            </div>
+            <div className="text-5xl font-bold text-primary">
+              {match.compatibilityScore}%
+            </div>
           </div>
-        )}
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Full Profile */}
-      <div className="space-y-4">
-        {/* <div>
-          <h3 className="text-lg font-semibold mb-2">About {matchUser?.name}</h3>
-          <p className="text-gray-700 leading-relaxed">{matchUser?.bio}</p>
-        </div>
+      {/* Conversation Starters Teaser */}
+      {!match.mutualMatch && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 text-center justify-center">
+              <MessageCircle className="w-5 h-5 text-primary" />
+              <p className="text-sm font-medium text-muted-foreground">
+                3 conversation starters waiting if you both match
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Looking For</h3>
-          <p className="text-gray-700 leading-relaxed">{matchUser?.lookingFor}</p>
-        </div> */}
+      {/* Why We Matched You */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Why We Matched You</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+            {match.explanation}
+          </p>
+        </CardContent>
+      </Card>
 
-        {/* <div>
-          <h3 className="text-lg font-semibold mb-2">Interests</h3>
+      {/* About Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">About {matchUser?.name}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground leading-relaxed">
+            {matchUser?.bio}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Looking For Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Looking For</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground leading-relaxed">
+            {matchUser?.lookingFor}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Interests Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Interests</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="flex flex-wrap gap-2">
             {matchUser?.interests.map((interest: string) => (
-              <span
-                key={interest}
-                className="px-3 py-1 bg-gray-100 rounded-full text-sm"
-              >
+              <Badge key={interest} variant="outline">
                 {interest}
-              </span>
+              </Badge>
             ))}
           </div>
-        </div> */}
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Response Buttons or Status */}
       {myResponse === "pending" && !hasResponded && !showPassFeedback && (
-        <>
-          <div className="flex gap-4">
-            <Button
-              onClick={handleInterested}
-              size="lg"
-              className="flex-1"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Submitting..." : "I'm Interested!"}
-            </Button>
-            <Button
-              onClick={handlePass}
-              size="lg"
-              variant="outline"
-              className="flex-1"
-              disabled={isSubmitting}
-            >
-              Pass
-            </Button>
-          </div>
-        </>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Button
+            onClick={handleInterested}
+            size="lg"
+            className="flex-1"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "I'm Interested!"}
+          </Button>
+          <Button
+            onClick={handlePass}
+            size="lg"
+            variant="outline"
+            className="flex-1"
+            disabled={isSubmitting}
+          >
+            Pass
+          </Button>
+        </div>
       )}
 
       {showPassFeedback && (
@@ -195,48 +246,60 @@ export default function MatchCard({
       )}
 
       {myResponse !== "pending" && (
-        <div className="text-center">
+        <div>
           {myResponse === "interested" && theirResponse === "pending" && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-blue-800 font-semibold">
-                ✓ You're interested! Waiting for their response...
-              </p>
-            </div>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-center gap-2 text-blue-700">
+                  <Heart className="w-5 h-5" />
+                  <p className="font-semibold">
+                    You're interested! Waiting for their response...
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {myResponse === "passed" && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <p className="text-gray-700">You passed on this match.</p>
-            </div>
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground">
+                  You passed on this match.
+                </p>
+              </CardContent>
+            </Card>
           )}
         </div>
       )}
 
       {/* Mutual Match - Chat Button */}
       {match.mutualMatch && (
-        <div className="bg-orange-50 border-2 border-primary rounded-lg p-6 space-y-4">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold text-primary mb-2">
-              🎉 It's a Match!
-            </h3>
-            <p className="text-gray-700 mb-4">
-              You both are interested! Start chatting to plan your date.
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div className="text-center space-y-2">
+              <div className="text-4xl">🎉</div>
+              <h3 className="text-2xl font-bold text-primary">It's a Match!</h3>
+              <p className="text-muted-foreground">
+                You both are interested! Start chatting to plan your date.
+              </p>
+            </div>
+
+            <Separator />
+
+            <Button
+              onClick={() => router.push(`/chat/${match._id}`)}
+              size="lg"
+              className="w-full gap-2"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Open Chat
+            </Button>
+
+            <p className="text-sm text-muted-foreground text-center">
+              Chat is active until Friday at 11:59 PM
             </p>
-          </div>
-
-          <Button
-            onClick={() => router.push(`/chat/${match._id}`)}
-            size="lg"
-            className="w-full gap-2"
-          >
-            <MessageCircle className="w-5 h-5" />
-            Open Chat
-          </Button>
-
-          <p className="text-sm text-gray-600 text-center">
-            Chat is active until Friday at 11:59 PM
-          </p>
-        </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

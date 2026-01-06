@@ -42,6 +42,7 @@ export function MessageList({ messages, currentUserId }: MessageListProps) {
 
   return (
     <div ref={containerRef} className="flex-1 overflow-y-auto py-4 space-y-4">
+      {/* Message list */}
       {messages.map((message, index) => {
         const isCurrentUser = message.senderId === currentUserId;
         const showDate =
