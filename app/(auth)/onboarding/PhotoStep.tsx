@@ -67,9 +67,11 @@ export default function PhotoStep({
     setError("");
     setIsValidating(true);
 
+    // Create preview URL - must be cleaned up in all code paths
+    const previewUrl = URL.createObjectURL(file);
+
     try {
-      // Step 1: Create preview for face detection
-      const previewUrl = URL.createObjectURL(file);
+      // Step 1: Load image for face detection
       const img = new Image();
       img.src = previewUrl;
 
@@ -134,6 +136,7 @@ export default function PhotoStep({
       console.error("Photo validation error:", err);
       setError("Failed to process photo. Please try again.");
       setIsValidating(false);
+      URL.revokeObjectURL(previewUrl); // Clean up blob URL on error
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }

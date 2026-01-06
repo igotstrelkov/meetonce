@@ -19,6 +19,12 @@ export function useVapiCall({
   const vapiRef = useRef<Vapi | null>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const transcriptRef = useRef("");
+  const onTranscriptCompleteRef = useRef(onTranscriptComplete);
+
+  // Keep the ref updated
+  useEffect(() => {
+    onTranscriptCompleteRef.current = onTranscriptComplete;
+  }, [onTranscriptComplete]);
 
   // Initialize Vapi client
   useEffect(() => {
@@ -57,7 +63,7 @@ export function useVapiCall({
       // Extract final transcript
       const finalTranscript = transcriptRef.current.trim();
       if (finalTranscript) {
-        onTranscriptComplete(finalTranscript);
+        onTranscriptCompleteRef.current(finalTranscript);
         setState("complete");
       } else {
         setError("No speech detected. Please try again.");
@@ -93,7 +99,7 @@ export function useVapiCall({
         clearInterval(durationIntervalRef.current);
       }
     };
-  }, [onTranscriptComplete]);
+  }, []); // Empty dependency array - only run once on mount
 
   const startCall = useCallback(async () => {
     if (!vapiRef.current) {

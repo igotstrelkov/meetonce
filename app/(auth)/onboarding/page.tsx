@@ -4,7 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useAction, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import BioVoiceStep from "./BioVoiceStep";
 import DocumentStep from "./DocumentStep";
 import InterestsStep from "./InterestsStep";
@@ -38,14 +38,14 @@ export default function OnboardingPage() {
     verificationDoc: null as File | null,
   });
 
-  const updateFormData = (data: Partial<typeof formData>) => {
+  const updateFormData = useCallback((data: Partial<typeof formData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
-  };
+  }, []);
 
-  const nextStep = () => setCurrentStep((prev) => prev + 1);
-  const prevStep = () => setCurrentStep((prev) => prev - 1);
+  const nextStep = useCallback(() => setCurrentStep((prev) => prev + 1), []);
+  const prevStep = useCallback(() => setCurrentStep((prev) => prev - 1), []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -98,7 +98,7 @@ export default function OnboardingPage() {
       console.error("Error creating profile:", error);
       throw error;
     }
-  };
+  }, [user, formData, generateUploadUrl, createUser, router]);
 
   return (
     <div className="max-w-xl mx-auto space-y-8 px-4">
