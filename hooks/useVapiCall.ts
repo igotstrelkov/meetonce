@@ -30,7 +30,9 @@ export function useVapiCall({
   useEffect(() => {
     const publicKey = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY;
     if (!publicKey) {
-      console.error("VAPI_PUBLIC_KEY not found in environment variables");
+      console.error(
+        "NEXT_PUBLIC_VAPI_PUBLIC_KEY not found in environment variables"
+      );
       setError("Voice service configuration error");
       return;
     }
@@ -38,7 +40,11 @@ export function useVapiCall({
     // Detect iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    console.log("🔍 Device detection:", { isIOS, isSafari, userAgent: navigator.userAgent });
+    console.log("🔍 Device detection:", {
+      isIOS,
+      isSafari,
+      userAgent: navigator.userAgent,
+    });
 
     vapiRef.current = new Vapi(publicKey);
 
@@ -120,11 +126,13 @@ export function useVapiCall({
     try {
       console.log("🔍 Checking microphone permissions...");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(track => track.stop()); // Clean up test stream
+      stream.getTracks().forEach((track) => track.stop()); // Clean up test stream
       console.log("✅ Microphone access granted");
     } catch (permErr: any) {
       console.error("❌ Microphone permission denied:", permErr);
-      setError("Microphone access denied. Please allow microphone access in your browser settings.");
+      setError(
+        "Microphone access denied. Please allow microphone access in your browser settings."
+      );
       setState("error");
       return;
     }
@@ -141,15 +149,19 @@ export function useVapiCall({
       console.error("❌ Error details:", {
         message: err.message,
         name: err.name,
-        stack: err.stack
+        stack: err.stack,
       });
 
       // iOS-specific error messages
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       if (isIOS && err.message?.includes("secure")) {
-        setError("Voice calls require HTTPS on iPhone. Please use a secure connection.");
+        setError(
+          "Voice calls require HTTPS on iPhone. Please use a secure connection."
+        );
       } else if (err.message?.includes("permission")) {
-        setError("Microphone access denied. Check iPhone Settings → Safari → Microphone");
+        setError(
+          "Microphone access denied. Check iPhone Settings → Safari → Microphone"
+        );
       } else {
         setError(err.message || "Failed to connect to voice service");
       }

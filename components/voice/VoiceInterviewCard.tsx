@@ -4,15 +4,12 @@ import { Card } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { useVapiCall } from "@/hooks/useVapiCall";
 import { useAction } from "convex/react";
-import { useEffect, useState } from "react";
-import { LoadingSpinner } from "../LoadingSpinner";
+import { useState } from "react";
 import { VoiceControls } from "./VoiceControls";
 import { VoiceStateIndicator } from "./VoiceStateIndicator";
 import { VoiceWaveform } from "./VoiceWaveform";
 
 interface VoiceInterviewCardProps {
-  // title: string;
-  // description: string;
   type: "bio" | "preferences";
   onComplete: (transcript: string, processedText: string) => void;
   assistantId?: string;
@@ -20,39 +17,14 @@ interface VoiceInterviewCardProps {
 }
 
 export function VoiceInterviewCard({
-  // title,
-  // description,
   type,
   onComplete,
-  assistantId: providedAssistantId,
+  assistantId,
   canProceed,
 }: VoiceInterviewCardProps) {
-  const [assistantId, setAssistantId] = useState<string | null>(
-    providedAssistantId || null
-  );
   const [isProcessing, setIsProcessing] = useState(false);
-  const getBioAssistant = useAction(api.voice.getBioAssistant);
-  const getPreferencesAssistant = useAction(api.voice.getPreferencesAssistant);
   const processTranscript = useAction(api.voice.processTranscript);
   const [hasRetried, setHasRetried] = useState(false);
-
-  // Load assistant ID on mount if not provided
-  useEffect(() => {
-    if (!assistantId) {
-      const loadAssistant = async () => {
-        try {
-          const id =
-            type === "bio"
-              ? await getBioAssistant()
-              : await getPreferencesAssistant();
-          setAssistantId(id);
-        } catch (error) {
-          console.error("Failed to load assistant:", error);
-        }
-      };
-      loadAssistant();
-    }
-  }, [assistantId, type, getBioAssistant, getPreferencesAssistant]);
 
   const handleTranscriptComplete = async (transcript: string) => {
     console.log(
@@ -105,30 +77,36 @@ export function VoiceInterviewCard({
   // Override canProceed if user has explicitly clicked retry
   const effectiveCanProceed = hasRetried ? false : canProceed;
 
+  if (!assistantId) {
+    return (
+      <Card className="p-8">
+        <div className="space-y-6 h-[268px] flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">
+            Voice assistant not configured. Please check environment variables.
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-8">
       <div className="space-y-6 h-[268px]">
-        {!assistantId ? (
-          <LoadingSpinner />
-        ) : (
-          <>
-            <VoiceWaveform isActive={isWaveformActive} />
+        <VoiceWaveform isActive={isWaveformActive} />
 
-            <VoiceStateIndicator
-              state={currentState}
-              error={error || undefined}
-              canProceed={effectiveCanProceed}
-            />
+        <VoiceStateIndicator
+          state={currentState}
+          error={error || undefined}
+          canProceed={effectiveCanProceed}
+        />
 
-            <VoiceControls
-              state={currentState}
-              onStart={startCall}
-              onRetry={handleRetry}
-              disabled={!assistantId || isProcessing}
-              canProceed={effectiveCanProceed}
-            />
-          </>
-        )}
+        <VoiceControls
+          state={currentState}
+          onStart={startCall}
+          onRetry={handleRetry}
+          disabled={isProcessing}
+          canProceed={effectiveCanProceed}
+        />
       </div>
     </Card>
   );

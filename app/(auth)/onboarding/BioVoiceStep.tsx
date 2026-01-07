@@ -47,6 +47,7 @@ export default function BioVoiceStep({
       <div className="space-y-6">
         <VoiceInterviewCard
           type="bio"
+          assistantId={process.env.NEXT_PUBLIC_VAPI_BIO_ASSISTANT_ID}
           onComplete={handleComplete}
           canProceed={canProceed}
         />

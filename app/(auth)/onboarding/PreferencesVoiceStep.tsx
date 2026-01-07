@@ -45,7 +45,12 @@ export default function PreferencesVoiceStep({
       description="Describe the qualities and values you're seeking"
     >
       <div className="space-y-6">
-        <VoiceInterviewCard type="preferences" onComplete={handleComplete} />
+        <VoiceInterviewCard
+          type="preferences"
+          assistantId={process.env.NEXT_PUBLIC_VAPI_PREFERENCES_ASSISTANT_ID}
+          onComplete={handleComplete}
+          canProceed={canProceed}
+        />
 
         <div className="flex justify-between">
           <Button onClick={onBack} variant="outline">
