@@ -35,6 +35,11 @@ export function useVapiCall({
       return;
     }
 
+    // Detect iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    console.log("🔍 Device detection:", { isIOS, isSafari, userAgent: navigator.userAgent });
+
     vapiRef.current = new Vapi(publicKey);
 
     // Set up event listeners
@@ -102,19 +107,52 @@ export function useVapiCall({
   }, []); // Empty dependency array - only run once on mount
 
   const startCall = useCallback(async () => {
+    console.log("🎤 startCall triggered");
+
     if (!vapiRef.current) {
+      console.error("❌ Vapi client not initialized");
       setError("Voice service not initialized");
       setState("error");
       return;
     }
 
+    // Check microphone permissions (especially important for iOS)
     try {
-      setState("recording");
+      console.log("🔍 Checking microphone permissions...");
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop()); // Clean up test stream
+      console.log("✅ Microphone access granted");
+    } catch (permErr: any) {
+      console.error("❌ Microphone permission denied:", permErr);
+      setError("Microphone access denied. Please allow microphone access in your browser settings.");
+      setState("error");
+      return;
+    }
+
+    try {
+      console.log("🔄 Starting Vapi call with assistantId:", assistantId);
+      setState("connecting"); // Show connecting state while Vapi initializes
       setError(null);
       await vapiRef.current.start(assistantId);
+      console.log("✅ Vapi call started successfully");
+      // Note: State will be set to "recording" by the "call-start" event
     } catch (err: any) {
-      console.error("Failed to start call:", err);
-      setError(err.message || "Failed to connect to voice service");
+      console.error("❌ Failed to start call:", err);
+      console.error("❌ Error details:", {
+        message: err.message,
+        name: err.name,
+        stack: err.stack
+      });
+
+      // iOS-specific error messages
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS && err.message?.includes("secure")) {
+        setError("Voice calls require HTTPS on iPhone. Please use a secure connection.");
+      } else if (err.message?.includes("permission")) {
+        setError("Microphone access denied. Check iPhone Settings → Safari → Microphone");
+      } else {
+        setError(err.message || "Failed to connect to voice service");
+      }
       setState("error");
     }
   }, [assistantId]);

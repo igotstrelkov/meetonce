@@ -2,6 +2,7 @@ import { CheckCircle2, Loader2, Mic } from "lucide-react";
 
 export type VoiceState =
   | "idle"
+  | "connecting"
   | "recording"
   | "processing"
   | "complete"
@@ -38,6 +39,18 @@ export function VoiceStateIndicator({
     );
   }
 
+  if (state === "connecting") {
+    return (
+      <div className="text-center">
+        <div className="flex items-center justify-center gap-2 text-primary">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span className="font-medium">Connecting...</span>
+        </div>
+        <p className="text-sm text-gray-600 mt-1">Starting the interview</p>
+      </div>
+    );
+  }
+
   // Interview in progress
 
   if (state === "recording") {
@@ -45,7 +58,7 @@ export function VoiceStateIndicator({
       <div className="text-center">
         <div className="flex items-center justify-center gap-2 text-red-500">
           <Mic className="w-5 h-5 animate-pulse" />
-          <span className="font-medium">Listening...</span>
+          <span className="font-medium">In progress...</span>
         </div>
         <p className="text-sm text-gray-600 mt-1">Please speak clearly</p>
       </div>

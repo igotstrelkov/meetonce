@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { useVapiCall } from "@/hooks/useVapiCall";
 import { useAction } from "convex/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { VoiceControls } from "./VoiceControls";
 import { VoiceStateIndicator } from "./VoiceStateIndicator";
@@ -27,30 +27,59 @@ export function VoiceInterviewCard({
   assistantId: providedAssistantId,
   canProceed,
 }: VoiceInterviewCardProps) {
+  const [assistantId, setAssistantId] = useState<string | null>(
+    providedAssistantId || null
+  );
   const [isProcessing, setIsProcessing] = useState(false);
+  const getBioAssistant = useAction(api.voice.getBioAssistant);
+  const getPreferencesAssistant = useAction(api.voice.getPreferencesAssistant);
+  const processTranscript = useAction(api.voice.processTranscript);
   const [hasRetried, setHasRetried] = useState(false);
 
-  // Get assistant ID from environment variables or prop
-  const assistantId =
-    providedAssistantId ||
-    (type === "bio"
-      ? process.env.NEXT_PUBLIC_VAPI_BIO_ASSISTANT_ID
-      : process.env.NEXT_PUBLIC_VAPI_PREFERENCES_ASSISTANT_ID);
-
-  const processTranscript = useAction(api.voice.processTranscript);
+  // Load assistant ID on mount if not provided
+  useEffect(() => {
+    if (!assistantId) {
+      const loadAssistant = async () => {
+        try {
+          const id =
+            type === "bio"
+              ? await getBioAssistant()
+              : await getPreferencesAssistant();
+          setAssistantId(id);
+        } catch (error) {
+          console.error("Failed to load assistant:", error);
+        }
+      };
+      loadAssistant();
+    }
+  }, [assistantId, type, getBioAssistant, getPreferencesAssistant]);
 
   const handleTranscriptComplete = async (transcript: string) => {
+    console.log(
+      "🔍 handleTranscriptComplete called with transcript:",
+      transcript
+    );
+
     if (!transcript || transcript.trim().length === 0) {
+      console.warn("⚠️ Empty transcript, skipping processing");
       return;
     }
 
     try {
       setIsProcessing(true);
+      console.log("🔄 Processing transcript...");
       const processedText = await processTranscript({ transcript, type });
+      console.log("✅ Transcript processed successfully:", processedText);
       setHasRetried(false); // Reset retry flag on successful completion
       onComplete(transcript, processedText);
+      console.log("✅ onComplete called - Continue button should enable");
     } catch (error: any) {
-      console.error("Failed to process transcript:", error);
+      console.error("❌ Failed to process transcript:", error);
+      console.error("❌ Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
       // Error will be shown by the hook
     } finally {
       setIsProcessing(false);
@@ -69,20 +98,12 @@ export function VoiceInterviewCard({
 
   const currentState = isProcessing ? "processing" : state;
   const isWaveformActive =
-    currentState === "recording" || currentState === "processing";
+    currentState === "connecting" ||
+    currentState === "recording" ||
+    currentState === "processing";
 
   // Override canProceed if user has explicitly clicked retry
   const effectiveCanProceed = hasRetried ? false : canProceed;
-
-  if (!assistantId) {
-    return (
-      <Card className="p-8">
-        <div className="space-y-6 h-[268px] items-center justify-center text-center">
-          <LoadingSpinner />
-        </div>
-      </Card>
-    );
-  }
 
   return (
     <Card className="p-8">

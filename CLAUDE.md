@@ -209,7 +209,7 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 
 - **VoiceStateIndicator** (`components/voice/VoiceStateIndicator.tsx`): Status messages
   - Idle: "Ready to start the interview?"
-  - Recording: "Listening..." (with animated mic icon)
+  - Recording: "In progress..." (with animated mic icon)
   - Processing: "Processing your interview..." (with spinner)
   - Complete: "Interview complete! Ready to continue"
   - Error: Custom error message display
