@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
-import { Heart, MapPin, MessageCircle, Sparkles } from "lucide-react";
+import { MapPin, MessageCircle, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PassFeedbackForm from "./PassFeedbackForm";
@@ -161,7 +161,7 @@ export default function MatchCard({
       </Card>
 
       {/* About Section */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="text-xl">About {matchUser?.name}</CardTitle>
         </CardHeader>
@@ -170,10 +170,10 @@ export default function MatchCard({
             {matchUser?.bio}
           </p>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Looking For Section */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="text-xl">Looking For</CardTitle>
         </CardHeader>
@@ -182,7 +182,7 @@ export default function MatchCard({
             {matchUser?.lookingFor}
           </p>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Interests Section */}
       <Card>
@@ -237,7 +237,7 @@ export default function MatchCard({
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center justify-center gap-2 text-blue-700">
-                  <Heart className="w-5 h-5" />
+                  {/* <Heart className="w-5 h-5" /> */}
                   <p className="font-semibold">
                     You're interested! Waiting for their response...
                   </p>

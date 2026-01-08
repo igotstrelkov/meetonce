@@ -100,7 +100,7 @@ export const rejectPhoto = mutation({
       userName: user.name,
       reason: args.rejectionReason,
       guidance: args.guidance,
-      uploadUrl: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding`,
+      uploadUrl: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/resubmit`,
     });
 
     console.log(`❌ Rejected user ${args.userId}: ${args.rejectionReason}`);
