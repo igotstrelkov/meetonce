@@ -440,6 +440,43 @@ export const runMatchingBatch = internalAction({
       console.log(
         `✅ Matched ${user.name} ↔ ${matchData.matchUser.name} (${matchData.score}% compatible)`
       );
+
+      // Step 2g: Send weekly match emails to both users
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+      const dashboardUrl = `${appUrl}/dashboard`;
+
+      try {
+        // Send email to user about their match (matchUser)
+        await ctx.runAction(internal.emails.sendWeeklyMatchEmail, {
+          to: user.email,
+          userName: user.name,
+          matchName: matchData.matchUser.name,
+          matchAge: matchData.matchUser.age,
+          matchUrl: dashboardUrl,
+        });
+        console.log(`📧 Email sent to ${user.email}`);
+      } catch (emailError) {
+        console.error(`⚠️ Failed to send email to ${user.email}:`, emailError);
+        // Don't throw - continue matching even if email fails
+      }
+
+      try {
+        // Send email to matchUser about their match (user)
+        await ctx.runAction(internal.emails.sendWeeklyMatchEmail, {
+          to: matchData.matchUser.email,
+          userName: matchData.matchUser.name,
+          matchName: user.name,
+          matchAge: user.age,
+          matchUrl: dashboardUrl,
+        });
+        console.log(`📧 Email sent to ${matchData.matchUser.email}`);
+      } catch (emailError) {
+        console.error(
+          `⚠️ Failed to send email to ${matchData.matchUser.email}:`,
+          emailError
+        );
+        // Don't throw - continue matching even if email fails
+      }
     }
 
     console.log(`Batch complete. Matched ${matchedInBatch.size / 2} pairs.`);

@@ -27,9 +27,9 @@ MeetOnce is an AI-powered dating platform that eliminates endless swiping by del
 3. User created in Convex → Redirected to `/dashboard`
 4. Admin manually reviews photo in `/admin/photo-review`: **Two-step process** (Approve/Reject decision → Rate 1-10 attractiveness scale)
 5. User sees "Profile Under Review" message on `/dashboard` until photo is approved
-6. Sunday 11pm: Weekly batch matching runs (6-stage AI pipeline)
-7. Monday 9am: Users receive one curated match via email
-8. Users view match on `/dashboard`: See full profile, compatibility score, and explanation
+6. Sunday 11pm: Weekly batch matching runs (6-stage AI pipeline with dimensional scoring) → Emails sent to both users immediately after match creation
+7. Users receive match notification email with match preview
+8. Users view match on `/dashboard`: See full profile, overall compatibility score (0-100), detailed explanation, **dimensional breakdown** (5 progress bars), and red flags (if any)
 9. Users respond "Interested" or "Pass" by Friday 11:59pm (optional pass feedback with 6 categories)
 10. If mutual match: "Open Chat" button appears on dashboard → Full-screen real-time chat
 11. Users chat to plan their date (chat active until Friday 11:59pm)
@@ -140,20 +140,102 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 - **Pass history respected**: If either person passed before, they will NEVER be matched again
 - **Never match same pair twice** (compound index validation in both directions)
 
-**6-Stage Pipeline** (per user):
+**7-Stage Pipeline** (per user):
 
 1. **Vector Search** (Action): `ctx.vectorSearch()` finds top 256 similar users by embedding cosine similarity. **100x faster than manual calculation, scales to thousands**
 2. **Fast Filter** (Query): Load full documents, filter by accountStatus='approved', vacationMode=false, match/pass history
-3. **Deep Analysis** (Action): GPT-4 analyzes top 20 filtered candidates for compatibility (0-100 score + explanation)
+3. **Deep Analysis** (Action): GPT-4 analyzes top 20 filtered candidates with **dimensional scoring**:
+   - **5 dimensions**: Values (25pts), Lifestyle (25pts), Interests (20pts), Communication (20pts), Relationship Vision (10pts)
+   - **Total score**: 0-100 (sum of dimensions)
+   - **Red flags**: 0-3 potential compatibility risks identified
+   - **Calibration examples**: LLM trained with score=92 (exceptional), 76 (good), 63 (below threshold) examples
+   - **Strict scoring**: Score distribution enforced (90-100: <5%, 80-89: ~15%, 70-79: ~30%)
+   - **Profile enrichment**: Includes age, location, gender, seeking preferences (not just bio/lookingFor)
 4. **Validation** (Query): Check attractiveness ±2, compatibility ≥70, pass history in both directions
 5. **Package** (Action): Generate venue suggestion via LLM
-6. **Save** (Mutation): Write match record to weeklyMatches table
+6. **Save** (Mutation): Write match record with dimensional scores + red flags to weeklyMatches table
+7. **Notify** (Action): Send weekly match emails to **both users** immediately with match preview (name, age, dashboard link)
 
 **Pass History Tracking**:
 
 - Checks both `by_user_and_match` and `by_match_and_user` indexes
 - If `userResponse="passed"` OR `matchResponse="passed"` → Never re-match
 - Respects user preferences and improves algorithm over time
+
+**Compatibility Analysis System** (`convex/lib/matching.ts`):
+
+The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring to predict real compatibility.
+
+**Profile Formatting** (`formatProfile` function):
+- Enriched profile data includes: name, age, location, gender, seeking preferences (with age range)
+- Bio: 100-500 words (voice-processed, semantically optimized)
+- Looking for: 100-500 words (voice-processed preferences)
+- **Note**: Interests array intentionally excluded to avoid over-weighting surface-level matches
+
+**LLM Configuration**:
+- Model: GPT-4o via OpenRouter
+- Temperature: 0.5 (lower for consistent, less creative scoring)
+- Max tokens: 800 (increased for dimensional analysis)
+- System message: Professional matchmaker with 15 years experience persona
+
+**Dimensional Scoring Framework**:
+
+1. **Shared Values & Life Philosophy** (0-25 points):
+   - Core values alignment, life priorities, worldview, emotional maturity
+   - Scoring guide: 20-25 (perfect), 15-19 (strong), 10-14 (notable differences), 5-9 (potential), 0-4 (misalignment)
+
+2. **Lifestyle Compatibility** (0-25 points):
+   - Daily routines, energy patterns, social preferences, work-life balance
+   - Scoring guide: 20-25 (natural sync), 15-19 (minor adjustments), 10-14 (compromise), 5-9 (major adjustments), 0-4 (incompatible)
+
+3. **Interests & Connection Points** (0-20 points):
+   - Shared hobbies, complementary interests, cultural alignment
+   - Scoring guide: 16-20 (multiple passions), 11-15 (2-3 shared), 6-10 (some overlap), 0-5 (limited)
+
+4. **Communication & Emotional Style** (0-20 points):
+   - Conflict resolution, emotional expression, vulnerability comfort
+   - Scoring guide: 16-20 (aligned), 11-15 (complementary), 6-10 (manageable gaps), 0-5 (incompatible)
+
+5. **Relationship Vision & Goals** (0-10 points):
+   - Timeline alignment, future goals (kids/marriage/location)
+   - Scoring guide: 8-10 (identical), 5-7 (minor differences), 0-4 (misaligned)
+
+**Score Distribution Reality Check**:
+- 90-100 (Exceptional): <5% of matches - rare, multi-dimensional alignment
+- 80-89 (Excellent): ~15% of matches - strong compatibility with minor differences
+- 70-79 (Good): ~30% of matches - solid foundation, meaningful compromise needed
+- 60-69 (Moderate): ~35% of matches - potential with significant differences
+- <60 (Low): ~15% of matches - fundamental misalignments (not sent to users)
+
+**Red Flag Detection**:
+- Life stage misalignment: -15 points
+- Incompatible daily rhythms (night owl + early riser): -10 points
+- Family timeline conflict (wants kids vs unsure): -15 points
+- Availability mismatch (80hr weeks + needs quality time): -10 points
+- Opposite social energy (extreme introvert + extrovert): -10 points
+- Location distance (different cities, no plans): -20 points
+- Values contradiction (career-focused + work-life balance): -10 points
+- Age gap >10 years with different life stages: -10 points
+
+**Calibration Examples**:
+- Score 92: 28F engineer SF + 30M designer SF, yoga/climbing, jazz/saxophone, kids 3-5yr, therapy advocates
+- Score 76: 25F night owl + 32M early riser, different life stages, timeline misalignment
+- Score 63: 29M 80hr workaholic + 31F work-life balance seeker, incompatible energy
+
+**Explanation Quality Requirements**:
+- Must reference specific details from profiles (actual hobbies, places, values)
+- Must cite age and location when relevant
+- Must name 2-3 concrete shared interests
+- Must address main friction point if score <85
+- Prohibited: Generic phrases ("you both enjoy life", "communication is key")
+- Format: 2-3 paragraphs (150-250 words) with warm but honest tone
+
+**Benefits**:
+- **More discriminating scores**: Reduced score inflation (fewer 85-95, more 70-80)
+- **Better calibration**: Stricter rubrics aligned with research on relationship success
+- **Transparency**: Users see dimensional breakdown, understand *why* compatible
+- **Red flag honesty**: Users informed of potential friction points constructively
+- **Improved accuracy**: Profile enrichment + calibration examples → better predictions
 
 **Progressive Disclosure Pattern**:
 
@@ -368,6 +450,22 @@ Implemented as batched Convex actions for scalability. Processes users in batche
   - `accountStatus = "rejected"` → "Photo Needs Update" with rejection reason
   - No match found → "No Match This Week" message
   - Active match → Full match card with response buttons
+- **Match Card Display** (`components/match/MatchCard.tsx`):
+  - Profile photo with loading state
+  - Name, age, location header
+  - **Overall compatibility score** (large percentage display)
+  - **"Why We Matched You" explanation** (2-3 warm paragraphs with specific details)
+  - **Dimensional Scores Breakdown** (`components/match/DimensionalScores.tsx`):
+    - 5 progress bars with icons (Heart, Home, Sparkles, MessageSquare, Target)
+    - Score display for each dimension (e.g., "18/25")
+    - Percentage completion bars
+    - Descriptions for each dimension
+  - **Red Flags Alert** (if applicable):
+    - Warning icon with "Things to Consider" heading
+    - Bullet list of 0-3 compatibility risks
+    - Honest but constructive framing
+  - Interests badges
+  - Response buttons or status
 - **Response Handling**:
   - "I'm Interested" button → Updates `userResponse` or `matchResponse` (based on direction)
   - "Pass" button → Shows optional feedback form with 6 categories
@@ -432,6 +530,7 @@ components/
   │   └─ VoiceStateIndicator.tsx # Status indicator (idle/recording/processing/complete/error)
   ├─ match/
   │   ├─ MatchCard.tsx        # Match profile display with response buttons
+  │   ├─ DimensionalScores.tsx # Dimensional compatibility breakdown with progress bars
   │   ├─ PassFeedbackForm.tsx # Optional pass feedback (6 categories)
   │   ├─ ChatInterface.tsx    # Main chat orchestrator with real-time subscriptions
   │   ├─ ChatHeader.tsx       # Chat header with user info and countdown timer
@@ -440,7 +539,7 @@ components/
   │   └─ ChatExpiredBanner.tsx # Expiry banner with feedback link
   ├─ feedback/
   │   └─ PostDateFeedbackForm.tsx # 7-question post-date feedback (PRIMARY METRIC)
-  └─ ui/                      # shadcn/ui components (dialog, textarea, card, radio-group, checkbox, etc.)
+  └─ ui/                      # shadcn/ui components (dialog, textarea, card, radio-group, checkbox, progress, alert, etc.)
 
 hooks/
   └─ useVapiCall.ts           # Custom hook for Vapi SDK integration
@@ -504,8 +603,15 @@ TypeScript path aliases configured in `tsconfig.json`:
 
 - **Match Participants**: `userId`, `matchUserId`, `weekOf` (string, e.g., '2024-12-16')
 - **AI Analysis**:
-  - `compatibilityScore` (number, 0-100)
-  - `explanation` (string, 2-3 warm paragraphs)
+  - `compatibilityScore` (number, 0-100 - sum of dimensional scores)
+  - `explanation` (string, 2-3 warm paragraphs with specific profile details)
+  - `dimensionScores` (optional object):
+    - `values` (number, 0-25): Shared values & life philosophy alignment
+    - `lifestyle` (number, 0-25): Daily routines & social preferences compatibility
+    - `interests` (number, 0-20): Hobbies & connection points overlap
+    - `communication` (number, 0-20): Emotional expression & conflict resolution alignment
+    - `relationshipVision` (number, 0-10): Future timeline & goals compatibility
+  - `redFlags` (optional array of strings): 0-3 potential compatibility risks (e.g., "7-year age gap may reflect different life stages")
 - **Venue**: `suggestedVenue` (object with name, address, placeId, description)
 - **Responses**:
   - `userResponse`, `matchResponse` ('pending' | 'interested' | 'passed')
@@ -871,9 +977,10 @@ To grant admin access to a user:
 
 **Available Email Functions**:
 
-1. `sendWeeklyMatchEmail`: Notify user of their weekly match (Monday 9am)
+1. `sendWeeklyMatchEmail`: Notify user of their weekly match (sent immediately after match creation)
    - Args: to, userName, matchName, matchAge, matchUrl
    - Template: `emails/WeeklyMatch.tsx`
+   - Sent to BOTH users in the match pair
 
 2. `sendMutualMatchEmail`: Celebrate mutual match and encourage chat
    - Args: to, userName, matchName, matchUrl
@@ -894,6 +1001,6 @@ To grant admin access to a user:
 
 **Integration Points**:
 
-- Weekly matching cron job calls `sendWeeklyMatchEmail` after creating matches
+- Weekly matching algorithm (`convex/matching.ts`) sends `sendWeeklyMatchEmail` to BOTH users immediately after creating each match (Sunday 11pm)
 - Mutual match detection in `convex/matches.ts` calls `sendMutualMatchEmail` (both users get email)
 - Date feedback submission in `convex/feedback.ts` calls `sendSecondDateContactEmail` (if both want second date)
