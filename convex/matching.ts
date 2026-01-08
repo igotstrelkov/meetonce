@@ -447,7 +447,7 @@ export const runMatchingBatch = internalAction({
 
       try {
         // Send email to user about their match (matchUser)
-        await ctx.runAction(internal.emails.sendWeeklyMatchEmail, {
+        await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
           to: user.email,
           userName: user.name,
           matchName: matchData.matchUser.name,
@@ -462,7 +462,7 @@ export const runMatchingBatch = internalAction({
 
       try {
         // Send email to matchUser about their match (user)
-        await ctx.runAction(internal.emails.sendWeeklyMatchEmail, {
+        await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
           to: matchData.matchUser.email,
           userName: matchData.matchUser.name,
           matchName: user.name,
