@@ -1,10 +1,25 @@
 import { Doc } from "../_generated/dataModel";
 import { callWithRetry } from "./openrouter";
 
+export interface DimensionScores {
+  values: number;
+  lifestyle: number;
+  interests: number;
+  communication: number;
+  relationshipVision: number;
+}
+
+export interface CompatibilityAnalysis {
+  dimensionScores: DimensionScores;
+  totalScore: number;
+  redFlags: string[];
+  explanation: string;
+}
+
 export async function analyzeCompatibility(
   userProfile: string,
   candidateProfile: string
-): Promise<{ score: number; explanation: string }> {
+): Promise<CompatibilityAnalysis> {
   const prompt = `You are a professional matchmaker with 15 years of experience analyzing relationship compatibility. You predict real compatibility based on psychology research, not just surface similarities. You are honest, specific, and data-driven. You understand that "good on paper" doesn't always mean real chemistry, and you score accordingly.
 
 CONTEXT: These two people have been algorithmically matched using semantic vector embeddings for MeetOnce, a premium dating platform that delivers ONE carefully curated match per week. Your job is to provide an accurate compatibility analysis that predicts real match quality.
@@ -149,9 +164,19 @@ TONE: Warm but honest. Write like an experienced matchmaker who cares about real
 
 You MUST respond with valid JSON in this exact format:
 {
-  "score": <number between 0-100>,
+  "dimensionScores": {
+    "values": <0-25>,
+    "lifestyle": <0-25>,
+    "interests": <0-20>,
+    "communication": <0-20>,
+    "relationshipVision": <0-10>
+  },
+  "totalScore": <sum of dimension scores, 0-100>,
+  "redFlags": [<array of 0-3 strings describing potential compatibility risks>],
   "explanation": "<2-3 warm paragraphs explaining compatibility>"
-}`;
+}
+
+**IMPORTANT**: Calculate dimension scores first, then sum them for totalScore. If you identify red flags, list them concisely (e.g., "7-year age gap may reflect different life stages", "Different cities with no relocation plans"). Leave redFlags empty [] if no significant concerns.`;
 
   const response = await callWithRetry({
     model: process.env.ANALYSIS_MODEL!,
@@ -171,16 +196,61 @@ You MUST respond with valid JSON in this exact format:
         schema: {
           type: "object",
           properties: {
-            score: {
+            dimensionScores: {
+              type: "object",
+              description: "Breakdown by dimension",
+              properties: {
+                values: {
+                  type: "number",
+                  description: "Shared values & life philosophy (0-25 points)",
+                },
+                lifestyle: {
+                  type: "number",
+                  description: "Lifestyle compatibility (0-25 points)",
+                },
+                interests: {
+                  type: "number",
+                  description: "Interests & connection points (0-20 points)",
+                },
+                communication: {
+                  type: "number",
+                  description: "Communication & emotional style (0-20 points)",
+                },
+                relationshipVision: {
+                  type: "number",
+                  description: "Relationship vision & goals (0-10 points)",
+                },
+              },
+              required: [
+                "values",
+                "lifestyle",
+                "interests",
+                "communication",
+                "relationshipVision",
+              ],
+              additionalProperties: false,
+            },
+            totalScore: {
               type: "number",
-              description: "Compatibility score from 0-100",
+              description: "Sum of dimension scores (0-100)",
+            },
+            redFlags: {
+              type: "array",
+              description: "List of 0-3 potential compatibility risks",
+              items: { type: "string" },
+              maxItems: 3,
             },
             explanation: {
               type: "string",
               description: "2-3 warm paragraphs explaining compatibility",
             },
           },
-          required: ["score", "explanation"],
+          required: [
+            "dimensionScores",
+            "totalScore",
+            "redFlags",
+            "explanation",
+          ],
           additionalProperties: false,
         },
       },
@@ -194,7 +264,9 @@ You MUST respond with valid JSON in this exact format:
   try {
     const parsed = JSON.parse(content);
     return {
-      score: parsed.score,
+      dimensionScores: parsed.dimensionScores,
+      totalScore: parsed.totalScore,
+      redFlags: parsed.redFlags || [],
       explanation: parsed.explanation,
     };
   } catch (error) {

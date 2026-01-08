@@ -11,6 +11,7 @@ import { useMutation } from "convex/react";
 import { MapPin, MessageCircle, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import DimensionalScores from "./DimensionalScores";
 import PassFeedbackForm from "./PassFeedbackForm";
 
 type MatchCardProps = {
@@ -159,6 +160,14 @@ export default function MatchCard({
           </p>
         </CardContent>
       </Card>
+
+      {/* Dimensional Scores */}
+      {match.dimensionScores && (
+        <DimensionalScores
+          dimensionScores={match.dimensionScores}
+          redFlags={match.redFlags}
+        />
+      )}
 
       {/* About Section */}
       {/* <Card>

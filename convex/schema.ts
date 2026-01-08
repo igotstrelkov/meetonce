@@ -71,6 +71,16 @@ export default defineSchema({
     // AI Analysis
     compatibilityScore: v.number(),
     explanation: v.string(),
+    dimensionScores: v.optional(
+      v.object({
+        values: v.number(),
+        lifestyle: v.number(),
+        interests: v.number(),
+        communication: v.number(),
+        relationshipVision: v.number(),
+      })
+    ),
+    redFlags: v.optional(v.array(v.string())),
 
     // Venue
     suggestedVenue: v.object({

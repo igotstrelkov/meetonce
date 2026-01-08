@@ -211,6 +211,16 @@ export const saveMatch = internalMutation({
     weekOf: v.string(),
     compatibilityScore: v.number(),
     explanation: v.string(),
+    dimensionScores: v.optional(
+      v.object({
+        values: v.number(),
+        lifestyle: v.number(),
+        interests: v.number(),
+        communication: v.number(),
+        relationshipVision: v.number(),
+      })
+    ),
+    redFlags: v.optional(v.array(v.string())),
     suggestedVenue: v.object({
       name: v.string(),
       address: v.string(),
@@ -228,6 +238,8 @@ export const saveMatch = internalMutation({
       weekOf: args.weekOf,
       compatibilityScore: args.compatibilityScore,
       explanation: args.explanation,
+      dimensionScores: args.dimensionScores,
+      redFlags: args.redFlags,
       suggestedVenue: args.suggestedVenue,
 
       // Responses
@@ -362,8 +374,10 @@ export const runMatchingBatch = internalAction({
           );
           return {
             candidate,
-            score: compatibility.score,
+            score: compatibility.totalScore,
             explanation: compatibility.explanation,
+            dimensionScores: compatibility.dimensionScores,
+            redFlags: compatibility.redFlags,
           };
         })
       );
@@ -393,6 +407,8 @@ export const runMatchingBatch = internalAction({
             matchUser: item.candidate,
             score: item.score,
             explanation: item.explanation,
+            dimensionScores: item.dimensionScores,
+            redFlags: item.redFlags,
           };
           break;
         }
@@ -413,6 +429,8 @@ export const runMatchingBatch = internalAction({
         weekOf,
         compatibilityScore: matchData.score,
         explanation: matchData.explanation,
+        dimensionScores: matchData.dimensionScores,
+        redFlags: matchData.redFlags,
         suggestedVenue: venue,
       });
 
