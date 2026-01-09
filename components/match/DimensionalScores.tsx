@@ -104,9 +104,9 @@ export default function DimensionalScores({
 
       {redFlags && redFlags.length > 0 && (
         <Alert>
-          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          <AlertCircle className="h-4 w-4 text-black" />
           <AlertDescription>
-            <div className="font-medium text-muted-foreground mb-2">
+            <div className="font-medium text-black mb-2">
               Things to Consider:
             </div>
             <ul className="list-disc list-inside space-y-1 text-sm">

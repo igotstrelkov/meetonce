@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 interface ChatHeaderProps {
@@ -30,7 +29,7 @@ export function ChatHeader({
         >
           <ChevronLeft className="w-8 h-8" />
         </Button>
-        {matchUserPhotoUrl ? (
+        {/* {matchUserPhotoUrl ? (
           <Image
             src={matchUserPhotoUrl}
             alt={matchUserName}
@@ -44,7 +43,7 @@ export function ChatHeader({
               {matchUserName.charAt(0).toUpperCase()}
             </span>
           </div>
-        )}
+        )} */}
         <div>
           <h3 className="font-semibold text-gray-900">{matchUserName}</h3>
           <div className="flex items-center gap-1 text-sm text-gray-600">
