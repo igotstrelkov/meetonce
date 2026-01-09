@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import MutualMatch from "../emails/MutualMatch";
+import NewMessage from "../emails/NewMessage";
 import PhotoApproved from "../emails/PhotoApproved";
 import PhotoRejected from "../emails/PhotoRejected";
 import SecondDateContact from "../emails/SecondDateContact";
@@ -233,6 +234,51 @@ export const sendSecondDateContactEmail = internalAction({
     } catch (error) {
       console.error("❌ Email error:", error);
       throw error;
+    }
+  },
+});
+
+export const sendNewMessageEmail = internalAction({
+  args: {
+    to: v.string(),
+    receiverName: v.string(),
+    senderName: v.string(),
+    messagePreview: v.string(),
+    matchUrl: v.string(),
+    unreadCount: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const messageCount = args.unreadCount === 1 ? "1 new message" : `${args.unreadCount} new messages`;
+
+    console.log(`
+      ====== NEW MESSAGE EMAIL ======
+      To: ${args.to}
+      From: ${args.senderName}
+      Unread Count: ${args.unreadCount}
+      Subject: New message from ${args.senderName}
+      ==================================
+    `);
+
+    const { Resend } = await import("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    try {
+      await resend.emails.send({
+        from: "MeetOnce <admin@meetonce.co>",
+        to: args.to,
+        subject: `💬 New message from ${args.senderName}`,
+        react: NewMessage({
+          receiverName: args.receiverName,
+          senderName: args.senderName,
+          messagePreview: args.messagePreview,
+          matchUrl: args.matchUrl,
+          unreadCount: args.unreadCount,
+        }),
+      });
+      console.log(`✅ New message email sent to ${args.to} (${messageCount})`);
+    } catch (error) {
+      console.error("❌ Email error:", error);
+      // Don't throw - email failures should not block message delivery
     }
   },
 });

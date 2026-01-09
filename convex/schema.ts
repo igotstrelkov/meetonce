@@ -116,6 +116,9 @@ export default defineSchema({
     dateScheduled: v.boolean(),
     dateScheduledFor: v.optional(v.number()),
 
+    // Notifications
+    lastNotificationEmailSentAt: v.optional(v.number()), // Last time "new message" email was sent for this match
+
     // Timestamps
     sentAt: v.number(),
     expiresAt: v.number(),

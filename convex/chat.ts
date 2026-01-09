@@ -1,5 +1,6 @@
-import { mutation, query, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
+import { internalMutation, mutation, query } from "./_generated/server";
 
 /**
  * Get messages for a match with pagination
@@ -150,9 +151,7 @@ export const sendMessage = mutation({
 
     // Verify mutual match exists
     if (!match.mutualMatch) {
-      throw new Error(
-        "Cannot send messages until both users are interested"
-      );
+      throw new Error("Cannot send messages until both users are interested");
     }
 
     // Check match hasn't expired (Friday 11:59pm)
@@ -186,6 +185,19 @@ export const sendMessage = mutation({
       sentAt: now,
       flagged: false,
     });
+
+    // Schedule notification check (2 minute delay)
+    // This allows the user time to read the message in the app before getting an email
+    // This dramatically reduces email spam for active conversations
+    await ctx.scheduler.runAfter(
+      2 * 60 * 1000,
+      internal.chat.checkUnreadAndSendEmail,
+      {
+        messageId,
+        matchId: args.matchId,
+        senderName: currentUser.name,
+      }
+    );
 
     // Return new message with sender info
     const newMessage = await ctx.db.get(messageId);
@@ -337,5 +349,94 @@ export const cleanupExpiredMessages = internalMutation({
       deletedMessages: totalDeleted,
       expiredMatches: expiredMatches.length,
     };
+  },
+});
+
+/**
+ * Check if message is still unread and send email notification
+ * Logic:
+ * 1. Checks if message.readAt is still null
+ * 2. Checks if unreadCount is 1 OR >5 mins since last email
+ * 3. Schedules email if conditions met
+ */
+export const checkUnreadAndSendEmail = internalMutation({
+  args: {
+    messageId: v.id("messages"),
+    matchId: v.id("weeklyMatches"),
+    senderName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // 1. Check if message exists and is still unread
+    const message = await ctx.db.get(args.messageId);
+    if (!message) {
+      return; // Message deleted
+    }
+
+    if (message.readAt) {
+      // console.log("Message read, skipping email");
+      return; // User has seen it! Anti-spam success.
+    }
+
+    // 2. Get receiver info
+    const receiver = await ctx.db.get(message.receiverId);
+    if (!receiver || !receiver.email) {
+      return;
+    }
+
+    // 3. Count total unread messages
+    const unreadMessages = await ctx.db
+      .query("messages")
+      .withIndex("by_match_and_receiver", (q) =>
+        q.eq("matchId", args.matchId).eq("receiverId", message.receiverId)
+      )
+      .filter((q) => q.eq(q.field("readAt"), undefined))
+      .collect();
+
+    const unreadCount = unreadMessages.length;
+
+    // 4. Check "5 minute rule" (Anti-spam throttling)
+    const match = await ctx.db.get(args.matchId);
+    if (!match) return;
+
+    const lastNotificationAt = match.lastNotificationEmailSentAt ?? 0;
+    const now = Date.now();
+    const FIVE_MINUTES_MS = 5 * 60 * 1000;
+
+    const shouldNotify =
+      unreadCount === 1 || // First unread message (or first in a while)
+      now - lastNotificationAt > FIVE_MINUTES_MS; // 5+ min since last email
+
+    if (shouldNotify) {
+      // Prepare email data
+      const messagePreview =
+        message.content.length > 100
+          ? message.content.substring(0, 100) + "..."
+          : message.content;
+
+      const matchUrl = `${process.env.NEXT_PUBLIC_APP_URL}/chat/${args.matchId}`;
+
+      // Schedule email
+      await ctx.scheduler.runAfter(0, internal.emails.sendNewMessageEmail, {
+        to: receiver.email,
+        receiverName: receiver.name,
+        senderName: args.senderName,
+        messagePreview,
+        matchUrl,
+        unreadCount,
+      });
+
+      // Update timestamp
+      await ctx.db.patch(args.matchId, {
+        lastNotificationEmailSentAt: now,
+      });
+
+      console.log(
+        `📧 Delayed Notification Sent: ${receiver.email} has ${unreadCount} unread messages`
+      );
+    } else {
+      console.log(
+        `Skipping email: Unread=${unreadCount}, LastSent=${Math.round((now - lastNotificationAt) / 1000)}s ago`
+      );
+    }
   },
 });

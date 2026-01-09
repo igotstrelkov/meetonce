@@ -1,9 +1,16 @@
 "use client";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Heart, Home, MessageSquare, Sparkles, Target } from "lucide-react";
+import {
+  AlertCircle,
+  Heart,
+  Home,
+  MessageSquare,
+  Sparkles,
+  Target,
+} from "lucide-react";
 
 interface DimensionScores {
   values: number;
@@ -97,9 +104,11 @@ export default function DimensionalScores({
 
       {redFlags && redFlags.length > 0 && (
         <Alert>
-          <AlertCircle className="h-4 w-4" />
+          <AlertCircle className="h-4 w-4 text-muted-foreground" />
           <AlertDescription>
-            <div className="font-medium mb-2">Things to Consider:</div>
+            <div className="font-medium text-muted-foreground mb-2">
+              Things to Consider:
+            </div>
             <ul className="list-disc list-inside space-y-1 text-sm">
               {redFlags.map((flag, index) => (
                 <li key={index}>{flag}</li>

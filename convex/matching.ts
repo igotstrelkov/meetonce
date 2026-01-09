@@ -445,38 +445,25 @@ export const runMatchingBatch = internalAction({
       const appUrl = process.env.NEXT_PUBLIC_APP_URL;
       const dashboardUrl = `${appUrl}/dashboard`;
 
-      try {
-        // Send email to user about their match (matchUser)
-        await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
-          to: user.email,
-          userName: user.name,
-          matchName: matchData.matchUser.name,
-          matchAge: matchData.matchUser.age,
-          matchUrl: dashboardUrl,
-        });
-        console.log(`📧 Email sent to ${user.email}`);
-      } catch (emailError) {
-        console.error(`⚠️ Failed to send email to ${user.email}:`, emailError);
-        // Don't throw - continue matching even if email fails
-      }
+      // Send email to user about their match (matchUser)
+      await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
+        to: user.email,
+        userName: user.name,
+        matchName: matchData.matchUser.name,
+        matchAge: matchData.matchUser.age,
+        matchUrl: dashboardUrl,
+      });
+      console.log(`📧 Email sent to ${user.email}`);
 
-      try {
-        // Send email to matchUser about their match (user)
-        await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
-          to: matchData.matchUser.email,
-          userName: matchData.matchUser.name,
-          matchName: user.name,
-          matchAge: user.age,
-          matchUrl: dashboardUrl,
-        });
-        console.log(`📧 Email sent to ${matchData.matchUser.email}`);
-      } catch (emailError) {
-        console.error(
-          `⚠️ Failed to send email to ${matchData.matchUser.email}:`,
-          emailError
-        );
-        // Don't throw - continue matching even if email fails
-      }
+      // Send email to matchUser about their match (user)
+      await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
+        to: matchData.matchUser.email,
+        userName: matchData.matchUser.name,
+        matchName: user.name,
+        matchAge: user.age,
+        matchUrl: dashboardUrl,
+      });
+      console.log(`📧 Email sent to ${matchData.matchUser.email}`);
     }
 
     console.log(`Batch complete. Matched ${matchedInBatch.size / 2} pairs.`);
