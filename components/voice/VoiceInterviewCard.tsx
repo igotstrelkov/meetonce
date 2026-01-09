@@ -11,7 +11,12 @@ import { VoiceWaveform } from "./VoiceWaveform";
 
 interface VoiceInterviewCardProps {
   type: "bio" | "preferences";
-  onComplete: (transcript: string, processedText: string) => void;
+  onComplete: (
+    transcript: string,
+    result:
+      | { bio: string; interests: string[] }
+      | { preferences: string; interests: string[] }
+  ) => void;
   assistantId?: string;
   canProceed?: boolean;
 }
@@ -40,10 +45,10 @@ export function VoiceInterviewCard({
     try {
       setIsProcessing(true);
       console.log("🔄 Processing transcript...");
-      const processedText = await processTranscript({ transcript, type });
-      console.log("✅ Transcript processed successfully:", processedText);
+      const result = await processTranscript({ transcript, type });
+      console.log("✅ Transcript processed successfully:", result);
       setHasRetried(false); // Reset retry flag on successful completion
-      onComplete(transcript, processedText);
+      onComplete(transcript, result);
       console.log("✅ onComplete called - Continue button should enable");
     } catch (error: any) {
       console.error("❌ Failed to process transcript:", error);

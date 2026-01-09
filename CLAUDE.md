@@ -17,13 +17,12 @@ MeetOnce is an AI-powered dating platform that eliminates endless swiping by del
 ### Key User Flow
 
 1. User signs up via Clerk authentication → Redirected to `/onboarding`
-2. User completes 6-step onboarding wizard:
+2. User completes 5-step onboarding wizard:
    - **Step 1**: Profile (name, age, gender, location)
-   - **Step 2**: Bio Voice Interview (5-7 min Vapi conversation → GPT-4 processed bio)
-   - **Step 3**: Preferences Voice Interview (4-6 min Vapi conversation → GPT-4 processed preferences)
-   - **Step 4**: Interests selection
-   - **Step 5**: Photo upload (with face detection)
-   - **Step 6**: Document verification upload
+   - **Step 2**: Bio Voice Interview (5-7 min Vapi conversation → GPT-4 processed bio + auto-extracted interests)
+   - **Step 3**: Preferences Voice Interview (4-6 min Vapi conversation → GPT-4 processed preferences + auto-extracted partner interests)
+   - **Step 4**: Photo upload (with face detection)
+   - **Step 5**: Document verification upload
 3. User created in Convex → Redirected to `/dashboard`
 4. Admin manually reviews photo in `/admin/photo-review`: **Two-step process** (Approve/Reject decision → Rate 1-10 attractiveness scale)
 5. User sees "Profile Under Review" message on `/dashboard` until photo is approved
@@ -248,23 +247,28 @@ The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring t
 **Architecture**:
 
 - **Client**: @vapi-ai/web SDK integrated via custom `useVapiCall` hook
-- **Server**: Convex actions for transcript processing via GPT-4o
+- **Server**: Convex actions for transcript processing via GPT-4o with structured JSON output
 - **Visualization**: Real-time audio waveform with agent speaking detection
-- **Processing**: Raw transcript → GPT-4o optimization → semantic-rich bio/preferences
+- **Processing**: Raw transcript → GPT-4o optimization → semantic-rich bio/preferences + auto-extracted interests
 
-**Two-Stage Interview Flow**:
+**Two-Stage Interview Flow with Interest Extraction**:
 
 1. **Bio Interview (Step 2)** - 5-7 minutes
    - Vapi assistant conducts conversational interview
    - Topics: Work, lifestyle, hobbies, personality, values, unique details
    - Goal: Extract 8-10 specific semantic keywords (activities, places, interests)
-   - Output: 100-500 word bio optimized for vector matching
+   - Output: Structured JSON `{ bio: string, interests: string[] }`
+     - Bio: 100-500 word narrative optimized for vector matching
+     - Interests: 1-5 specific user interests auto-extracted (e.g., "hiking", "photography", "cooking")
 
 2. **Preferences Interview (Step 3)** - 4-6 minutes
    - Vapi assistant explores ideal partner qualities
    - Topics: Core values, lifestyle compatibility, communication style, relationship vision, deal-breakers
    - Goal: Extract 6-8 specific traits with behavioral examples
-   - Output: 100-500 word preferences optimized for vector matching
+   - Output: Structured JSON `{ preferences: string, interests: string[] }`
+     - Preferences: 100-500 word narrative optimized for vector matching
+     - Interests: 1-5 desired partner interests auto-extracted (e.g., "travel", "fitness", "live music")
+   - **Interest Merging**: Combines bio + preferences interests, deduplicates, limits to 15 max
 
 **Key Components**:
 
@@ -300,22 +304,26 @@ The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring t
 
 1. **Voice Collection**: Vapi assistant conducts interview, collects raw transcript
 2. **Transcript Completion**: useVapiCall hook triggers `onTranscriptComplete` callback
-3. **GPT-4 Processing**: Convex action calls OpenRouter with specialized prompts
-4. **Validation**: Word count check (100-500 words), retry if out of range
-5. **Storage**: Processed text saved to formData state
-6. **User Creation**: Final bio/preferences text used for embedding generation
+3. **GPT-4 Processing**: Convex action calls OpenRouter with specialized prompts using structured JSON schema output
+4. **Interest Extraction**: AI automatically identifies and extracts 1-5 specific interests from conversation
+5. **Validation**: Word count check (100-500 words) - retry validation disabled by default
+6. **Storage**: Structured result `{ bio/preferences: string, interests: string[] }` saved to formData
+7. **Interest Merging**: PreferencesVoiceStep deduplicates and merges interests from both interviews (max 15)
+8. **User Creation**: Final bio/preferences text + merged interests used for embedding generation
 
-**GPT-4 Processing Prompts**:
+**GPT-4 Processing Prompts with Interest Extraction**:
 
-- **Bio Prompt**: Converts raw transcript to compelling first-person bio
+- **Bio Prompt**: Converts raw transcript to compelling first-person bio + extracts user interests
   - Focus: Specific nouns, observable behaviors, semantic keywords
   - Avoids: Generic traits like "fun", "nice", "love to laugh"
   - Example transformation: "I like music" → "DJ house music at Brooklyn warehouses on weekends"
+  - Interest extraction: Identifies 1-5 concrete activities (lowercase, singular form)
 
-- **Preferences Prompt**: Converts raw transcript to clear relationship preferences
+- **Preferences Prompt**: Converts raw transcript to clear relationship preferences + extracts desired partner interests
   - Focus: Specific traits, behavioral examples, relationship dynamics
   - Distinguishes: Must-haves vs nice-to-haves
   - Positive framing: "no drama" → "emotionally mature, handles conflict calmly"
+  - Interest extraction: Identifies 1-5 shared activities user wants with partner
 
 **Vapi Assistant Configuration**:
 
@@ -338,6 +346,8 @@ The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring t
 - **User Experience**: Natural conversation vs tedious form filling
 - **Semantic Optimization**: Prompts engineered to generate embedding-friendly text
 - **Efficiency**: 10-15 min total vs 30+ min typing detailed bio/preferences
+- **Automated Interest Extraction**: AI identifies interests from natural conversation (no manual selection needed)
+- **Unlimited Interest Options**: No predefined list - AI extracts any interests mentioned organically
 
 **Real-Time Chat System** (`/chat/[matchId]`):
 
@@ -490,13 +500,12 @@ app/
       ├─ dashboard/
       │   └─ page.tsx        # Match display dashboard (shows current week's match)
       ├─ onboarding/
-      │   ├─ page.tsx        # Onboarding orchestrator (6 steps)
+      │   ├─ page.tsx        # Onboarding orchestrator (5 steps)
       │   ├─ ProfileStep.tsx # Step 1: Basic info
-      │   ├─ BioVoiceStep.tsx # Step 2: Bio voice interview
-      │   ├─ PreferencesVoiceStep.tsx # Step 3: Preferences voice interview
-      │   ├─ InterestsStep.tsx # Step 4: Interest selection
-      │   ├─ PhotoStep.tsx   # Step 5: Photo upload
-      │   ├─ DocumentStep.tsx # Step 6: Document verification
+      │   ├─ BioVoiceStep.tsx # Step 2: Bio voice interview (auto-extracts interests)
+      │   ├─ PreferencesVoiceStep.tsx # Step 3: Preferences voice interview (auto-extracts + merges interests)
+      │   ├─ PhotoStep.tsx   # Step 4: Photo upload
+      │   ├─ DocumentStep.tsx # Step 5: Document verification
       │   └─ StepWrapper.tsx # Reusable step wrapper
       ├─ resubmit/
       │   └─ page.tsx        # Photo/document resubmission for rejected users
@@ -555,9 +564,9 @@ convex/
   ├─ chat.ts            # Real-time chat queries (getMessages, getUnreadCount) and mutations (sendMessage, markMessagesAsRead, flagMessage)
   ├─ feedback.ts        # Post-date feedback mutations (submitPassFeedback, submitDateFeedback, getFeedbackForMatch)
   ├─ emails.ts          # Email actions (sendWeeklyMatchEmail, sendMutualMatchEmail, sendSecondDateContactEmail)
-  ├─ voice.ts           # Voice interview actions (processTranscript)
+  ├─ voice.ts           # Voice interview actions (processTranscript returns structured output with interests)
   ├─ lib/
-  │   ├─ openrouter.ts  # OpenRouter API integration + voice transcript processing (processVoiceTranscript)
+  │   ├─ openrouter.ts  # OpenRouter API integration + voice transcript processing with interest extraction (processVoiceTranscript)
   │   ├─ vapi.ts        # Vapi assistant ID management (getOrCreateAssistant)
   │   ├─ matching.ts    # Matching helpers (compatibility analysis, venue suggestions)
   │   └─ cosine.ts      # Vector similarity calculations (legacy - now uses native vector search)
@@ -568,7 +577,7 @@ emails/
 
 lib/
   ├─ utils.ts          # Utility functions (cn, date helpers)
-  └─ constants.ts      # App constants (INTERESTS, PASS_REASONS, GENDERS, COUNTRIES, etc.)
+  └─ constants.ts      # App constants (PASS_REASONS, GENDERS, COUNTRIES, etc.)
 
 proxy.ts                # Clerk middleware for route protection
 ```

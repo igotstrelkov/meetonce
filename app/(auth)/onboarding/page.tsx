@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import BioVoiceStep from "./BioVoiceStep";
 import DocumentStep from "./DocumentStep";
-import InterestsStep from "./InterestsStep";
 import PhotoStep from "./PhotoStep";
 import PreferencesVoiceStep from "./PreferencesVoiceStep";
 import ProfileStep from "./ProfileStep";
@@ -105,14 +104,14 @@ export default function OnboardingPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold">Create Your Profile</h1>
-          <div className="text-sm text-gray-600">Step {currentStep} of 6</div>
+          <div className="text-sm text-gray-600">Step {currentStep} of 5</div>
         </div>
 
         {/* Progress Bar */}
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-primary h-2 rounded-full transition-all"
-            style={{ width: `${(currentStep / 6) * 100}%` }}
+            style={{ width: `${(currentStep / 5) * 100}%` }}
           />
         </div>
       </div>
@@ -145,15 +144,6 @@ export default function OnboardingPage() {
         )}
 
         {currentStep === 4 && (
-          <InterestsStep
-            data={formData}
-            updateData={updateFormData}
-            onNext={nextStep}
-            onBack={prevStep}
-          />
-        )}
-
-        {currentStep === 5 && (
           <PhotoStep
             data={formData}
             updateData={updateFormData}
@@ -162,7 +152,7 @@ export default function OnboardingPage() {
           />
         )}
 
-        {currentStep === 6 && (
+        {currentStep === 5 && (
           <DocumentStep
             data={formData}
             updateData={updateFormData}

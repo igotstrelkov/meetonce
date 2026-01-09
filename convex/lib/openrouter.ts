@@ -105,13 +105,16 @@ export async function callWithRetry(
 }
 
 /**
- * Process voice interview transcript into optimized bio or preferences text
+ * Process voice interview transcript into optimized bio or preferences text with extracted interests
  * Optimized for semantic vector search and accurate matching
  */
 export async function processVoiceTranscript(
   transcript: string,
   type: "bio" | "preferences"
-): Promise<string> {
+): Promise<
+  | { bio: string; interests: string[] }
+  | { preferences: string; interests: string[] }
+> {
   const systemPrompts = {
     bio: `You are a professional dating profile writer specializing in semantic search optimization. Convert this voice interview transcript into a compelling, authentic "About You" bio (100-500 words) optimized for vector embedding matching.
 
@@ -168,7 +171,15 @@ EXAMPLE TRANSFORMATION:
 
 ✅ GOOD: "I'm a software engineer who codes by day and DJs house music at Brooklyn warehouses by night. You'll find me trail running in Prospect Park most mornings—training for my third half marathon—or experimenting with natural wine at new spots in Williamsburg. Sunday reset ritual: farmers market for fresh flowers, long solo walk with my rescue mutt Luna, and FaceTime with my parents back in Portland. I'm an ambivert—need my recharge time but come alive in intimate dinner parties where we're debating everything from AI ethics to the best pizza in New York."
 
-OUTPUT FORMAT: Single flowing narrative, 100-500 words, optimized for semantic vector search.`,
+INTEREST EXTRACTION:
+Extract 1-5 specific interests, hobbies, and activities mentioned in the transcript. Format as lowercase, singular form where possible.
+- Examples: "hiking", "photography", "cooking", "jazz music", "travel", "yoga", "reading", "running"
+- Extract concrete activities the person actually does or is passionate about
+- Avoid vague terms like "fun" or "adventure"
+
+OUTPUT FORMAT:
+- bio: Single flowing narrative, 100-500 words, optimized for semantic vector search
+- interests: Array of 1-5 specific interests in lowercase, singular form`,
 
     preferences: `You are a professional dating profile writer specializing in semantic search optimization. Convert this voice interview transcript into clear, specific relationship preferences (100-500 words) optimized for vector embedding matching.
 
@@ -229,7 +240,15 @@ EXAMPLE TRANSFORMATION:
 
 ✅ GOOD: "I'm looking for someone who's emotionally intelligent and growth-oriented—comfortable with vulnerability and actively working on themselves through therapy, meditation, or whatever their practice is. Someone who values deep conversations over small talk, can debate philosophy over wine without taking themselves too seriously, and has the emotional maturity to address conflicts directly but kindly. Lifestyle-wise, you're health-conscious (gym, yoga, hiking) but also appreciate a good pizza and natural wine night. Ideal weekends: Saturday morning farmers market run, afternoon adventure (museum, hike, new neighborhood exploration), intimate dinner party with close friends. You're ambitious in your career but don't let work consume your life—you prioritize quality time and presence. Must-haves: wants kids in the next 3-5 years, non-smoker, shares progressive values, has close friendships (shows emotional capacity). Bonus points if you love live music, have a passport full of stamps, and can make me laugh doing absolutely nothing."
 
-OUTPUT FORMAT: Single flowing narrative, 100-500 words, optimized for semantic vector search.`,
+INTEREST EXTRACTION:
+Extract 1-5 specific interests and activities the person wants to share with a partner. Format as lowercase, singular form where possible.
+- Examples: "hiking", "cooking together", "live music", "travel", "fitness", "wine tasting", "museums"
+- Focus on shared activities they mention wanting to do with a partner
+- Avoid personality traits, extract only concrete activities
+
+OUTPUT FORMAT:
+- preferences: Single flowing narrative, 100-500 words, optimized for semantic vector search
+- interests: Array of 1-5 desired shared interests in lowercase, singular form`,
   };
 
   const response = await callOpenRouter({
@@ -241,12 +260,32 @@ OUTPUT FORMAT: Single flowing narrative, 100-500 words, optimized for semantic v
       },
       {
         role: "user",
-        content: `TRANSCRIPT:\n${transcript}\n\nGenerate the optimized ${type} following all requirements above.`,
+        content: `TRANSCRIPT:\n${transcript}\n\nGenerate the optimized ${type} and extract interests following all requirements above.`,
       },
     ],
     temperature: 0.7,
-    max_tokens: 800,
+    max_tokens: 1000,
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name:
+          type === "bio" ? "bio_with_interests" : "preferences_with_interests",
+        strict: true,
+        schema: {
+          type: "object",
+          properties: {
+            [type]: { type: "string" },
+            interests: {
+              type: "array",
+              items: { type: "string" },
+            },
+          },
+          required: [type, "interests"],
+          additionalProperties: false,
+        },
+      },
+    },
   });
 
-  return response.choices[0].message.content.trim();
+  return JSON.parse(response.choices[0].message.content);
 }

@@ -10,6 +10,7 @@ interface PreferencesVoiceStepProps {
     lookingFor: string;
     preferencesTranscript: string;
     preferencesVoiceCompleted: boolean;
+    interests: string[];
   };
   updateData: (data: any) => void;
   onNext: () => void;
@@ -24,11 +25,31 @@ export default function PreferencesVoiceStep({
 }: PreferencesVoiceStepProps) {
   const [canProceed, setCanProceed] = useState(data.preferencesVoiceCompleted);
 
-  const handleComplete = (transcript: string, processedText: string) => {
+  const handleComplete = (
+    transcript: string,
+    result:
+      | { bio: string; interests: string[] }
+      | { preferences: string; interests: string[] }
+  ) => {
+    // Type assertion - we know this is preferences step
+    const preferencesResult = result as {
+      preferences: string;
+      interests: string[];
+    };
+
+    // Merge interests from bio and preferences, removing duplicates
+    const mergedInterests = Array.from(
+      new Set([...(data.interests || []), ...preferencesResult.interests])
+    );
+
+    // Limit to 15 interests maximum (as per plan edge cases)
+    const finalInterests = mergedInterests.slice(0, 15);
+
     updateData({
-      lookingFor: processedText,
+      lookingFor: preferencesResult.preferences,
       preferencesTranscript: transcript,
       preferencesVoiceCompleted: true,
+      interests: finalInterests,
     });
     setCanProceed(true);
   };

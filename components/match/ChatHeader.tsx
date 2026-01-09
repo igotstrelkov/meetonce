@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -22,28 +21,7 @@ export function ChatHeader({
   return (
     <div className="flex items-center justify-between pb-4 border-b">
       <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          className="h-12 w-12 p-0 mr-2"
-          onClick={() => router.back()}
-        >
-          <ChevronLeft className="w-8 h-8" />
-        </Button>
-        {/* {matchUserPhotoUrl ? (
-          <Image
-            src={matchUserPhotoUrl}
-            alt={matchUserName}
-            width={48}
-            height={48}
-            className="rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-600 text-lg font-medium">
-              {matchUserName.charAt(0).toUpperCase()}
-            </span>
-          </div>
-        )} */}
+        <ChevronLeft size={35} onClick={() => router.back()} />
         <div>
           <h3 className="font-semibold text-gray-900">{matchUserName}</h3>
           <div className="flex items-center gap-1 text-sm text-gray-600">

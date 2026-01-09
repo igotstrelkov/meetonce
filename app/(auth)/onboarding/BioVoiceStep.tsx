@@ -10,6 +10,7 @@ interface BioVoiceStepProps {
     bio: string;
     bioTranscript: string;
     bioVoiceCompleted: boolean;
+    interests: string[];
   };
   updateData: (data: any) => void;
   onNext: () => void;
@@ -24,11 +25,19 @@ export default function BioVoiceStep({
 }: BioVoiceStepProps) {
   const [canProceed, setCanProceed] = useState(data.bioVoiceCompleted);
 
-  const handleComplete = (transcript: string, processedText: string) => {
+  const handleComplete = (
+    transcript: string,
+    result:
+      | { bio: string; interests: string[] }
+      | { preferences: string; interests: string[] }
+  ) => {
+    // Type assertion - we know this is bio step
+    const bioResult = result as { bio: string; interests: string[] };
     updateData({
-      bio: processedText,
+      bio: bioResult.bio,
       bioTranscript: transcript,
       bioVoiceCompleted: true,
+      interests: bioResult.interests,
     });
     setCanProceed(true);
   };
