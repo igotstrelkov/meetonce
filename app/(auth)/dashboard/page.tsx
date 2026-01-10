@@ -204,7 +204,7 @@ export default function DashboardPage() {
             <DrawerTrigger asChild>
               <Button size="lg" className="w-full gap-2">
                 <User className="w-5 h-5" />
-                Match Details
+                View Match
               </Button>
             </DrawerTrigger>
           </CardContent>
@@ -238,27 +238,29 @@ export default function DashboardPage() {
       </Drawer>
 
       {/* Response Buttons or Status */}
-      <Card>
-        <CardFooter>
-          <Button
-            onClick={handleInterested}
-            size="lg"
-            className="flex-1 mr-4"
-            disabled={isSubmitting || myResponse !== "pending"}
-          >
-            {isSubmitting ? "Submitting..." : "I'm Interested!"}
-          </Button>
-          <Button
-            onClick={handlePass}
-            size="lg"
-            variant="outline"
-            className="flex-1"
-            disabled={isSubmitting || myResponse !== "pending"}
-          >
-            Pass
-          </Button>
-        </CardFooter>
-      </Card>
+      {myResponse === "pending" && (
+        <Card>
+          <CardFooter>
+            <Button
+              onClick={handleInterested}
+              size="lg"
+              className="flex-1 mr-4"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "I'm Interested!"}
+            </Button>
+            <Button
+              onClick={handlePass}
+              size="lg"
+              variant="outline"
+              className="flex-1"
+              disabled={isSubmitting}
+            >
+              Pass
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
 
       {showPassFeedback && (
         <PassFeedbackForm
@@ -268,37 +270,35 @@ export default function DashboardPage() {
         />
       )}
 
-      {myResponse !== "pending" && (
-        <div>
-          {myResponse === "interested" && theirResponse === "pending" && (
-            <Card>
-              <CardContent className="pt-6 space-y-4">
-                <div className="text-center space-y-2">
-                  <div className="text-4xl">🤞</div>
-                  <h3 className="text-2xl font-bold">Response Sent!</h3>
-                  <p className="text-muted-foreground">
-                    You're interested! Waiting for their response...
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+      <div>
+        {myResponse === "interested" && theirResponse === "pending" && (
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <div className="text-center space-y-2">
+                <div className="text-4xl">🤞</div>
+                <h3 className="text-2xl font-bold">Response Sent!</h3>
+                <p className="text-muted-foreground">
+                  You're interested! Waiting for their response...
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-          {myResponse === "passed" && (
-            <Card>
-              <CardContent className="pt-6 space-y-4">
-                <div className="text-center space-y-2">
-                  <div className="text-4xl">👋</div>
-                  <h3 className="text-2xl font-bold">Passed</h3>
-                  <p className="text-muted-foreground">
-                    You passed on this match. Check back next Monday!
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
+        {myResponse === "passed" && (
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <div className="text-center space-y-2">
+                <div className="text-4xl">👋</div>
+                <h3 className="text-2xl font-bold">Passed</h3>
+                <p className="text-muted-foreground">
+                  You passed on this match. Check back next Monday!
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* Mutual Match - Chat Button */}
       {match.mutualMatch && (
