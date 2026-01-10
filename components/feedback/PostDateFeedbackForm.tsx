@@ -9,6 +9,14 @@ import { api } from "@/convex/_generated/api";
 import { WENT_POORLY_OPTIONS, WENT_WELL_OPTIONS } from "@/lib/constants";
 import { useMutation } from "convex/react";
 import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 
 export default function PostDateFeedbackForm({
   matchId,
@@ -75,213 +83,237 @@ export default function PostDateFeedbackForm({
   };
 
   return (
-    <div className="space-y-6 bg-orange-50 border-2 border-primary rounded-lg p-6 shadow-sm">
-      <div>
+    <Card>
+      <CardHeader>
         <h2 className="text-2xl font-bold mb-2">How did it go?</h2>
         <p className="text-gray-600">
           Your feedback helps us make better matches
         </p>
-      </div>
+      </CardHeader>
 
-      {/* Q1: Did date happen? */}
-      <div className="space-y-2">
-        <Label className="text-lg font-semibold">
-          1. Did the date happen? *
-        </Label>
-        <RadioGroup
-          value={formData.dateHappened}
-          onValueChange={(value) =>
-            setFormData((prev) => ({ ...prev, dateHappened: String(value) }))
-          }
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="yes" id="yes" />
-            <Label htmlFor="yes">Yes</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="cancelled_by_them" id="cancelled_by_them" />
-            <Label htmlFor="cancelled_by_them">They cancelled</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="cancelled_by_me" id="cancelled_by_me" />
-            <Label htmlFor="cancelled_by_me">I cancelled</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="rescheduled" id="rescheduled" />
-            <Label htmlFor="rescheduled">We rescheduled</Label>
-          </div>
-        </RadioGroup>
-      </div>
-
-      {/* Only show remaining questions if date happened */}
-      {formData.dateHappened === "yes" && (
-        <>
-          {/* Q2: Overall rating */}
-          <div className="space-y-2">
-            <Label className="text-lg font-semibold">
-              2. Overall, how was the date? *
-            </Label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((rating) => (
-                <button
-                  key={rating}
-                  type="button"
-                  onClick={() =>
-                    setFormData((prev) => ({ ...prev, overallRating: rating }))
-                  }
-                  className={`w-12 h-12 rounded-lg text-lg transition-all ${
-                    formData.overallRating === rating
-                      ? "bg-primary text-white scale-110"
-                      : "bg-gray-200 hover:bg-gray-300"
-                  }`}
-                >
-                  {rating}★
-                </button>
-              ))}
+      <CardHeader>
+        <CardTitle>How did it go?</CardTitle>
+        <CardDescription>
+          Your feedback helps us make better matches
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {/* Q1: Did date happen? */}
+        <div className="space-y-2">
+          <Label className="text-lg font-semibold">
+            1. Did the date happen? *
+          </Label>
+          <RadioGroup
+            value={formData.dateHappened}
+            onValueChange={(value) =>
+              setFormData((prev) => ({ ...prev, dateHappened: String(value) }))
+            }
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="yes" id="yes" />
+              <Label htmlFor="yes">Yes</Label>
             </div>
-          </div>
-
-          {/* Q3: Would meet again? (PRIMARY METRIC!) */}
-          <div className="space-y-2">
-            <Label className="text-lg font-semibold">
-              3. Would you want to see them again? *
-            </Label>
-            <RadioGroup
-              value={formData.wouldMeetAgain}
-              onValueChange={(value) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  wouldMeetAgain: String(value),
-                }))
-              }
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="yes" id="meet-yes" />
-                <Label
-                  htmlFor="meet-yes"
-                  className="text-green-600 font-semibold"
-                >
-                  Yes! I'd love a second date
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="maybe" id="meet-maybe" />
-                <Label htmlFor="meet-maybe">Maybe, I'm not sure yet</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no" id="meet-no" />
-                <Label htmlFor="meet-no">No, not interested</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Q4: What went well? */}
-          <div className="space-y-2">
-            <Label className="text-lg font-semibold">
-              4. What went well? (select all that apply)
-            </Label>
-            <div className="grid grid-cols-2 gap-2">
-              {WENT_WELL_OPTIONS.map((option) => (
-                <div key={option} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`well-${option}`}
-                    checked={formData.wentWell.includes(option)}
-                    onCheckedChange={() => toggleWentWell(option)}
-                  />
-                  <Label htmlFor={`well-${option}`} className="cursor-pointer">
-                    {option}
-                  </Label>
-                </div>
-              ))}
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem
+                value="cancelled_by_them"
+                id="cancelled_by_them"
+              />
+              <Label htmlFor="cancelled_by_them">They cancelled</Label>
             </div>
-          </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="cancelled_by_me" id="cancelled_by_me" />
+              <Label htmlFor="cancelled_by_me">I cancelled</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="rescheduled" id="rescheduled" />
+              <Label htmlFor="rescheduled">We rescheduled</Label>
+            </div>
+          </RadioGroup>
+        </div>
 
-          {/* Q5: What didn't go well? */}
-          <div className="space-y-2">
-            <Label className="text-lg font-semibold">
-              5. What didn't go well? (optional)
-            </Label>
-            <div className="grid grid-cols-2 gap-2">
-              {WENT_POORLY_OPTIONS.map((option) => (
-                <div key={option} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`poorly-${option}`}
-                    checked={formData.wentPoorly.includes(option)}
-                    onCheckedChange={() => toggleWentPoorly(option)}
-                  />
-                  <Label
-                    htmlFor={`poorly-${option}`}
-                    className="cursor-pointer"
+        {/* Only show remaining questions if date happened */}
+        {formData.dateHappened === "yes" && (
+          <>
+            {/* Q2: Overall rating */}
+            <div className="space-y-2">
+              <Label className="text-lg font-semibold">
+                2. Overall, how was the date? *
+              </Label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((rating) => (
+                  <button
+                    key={rating}
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        overallRating: rating,
+                      }))
+                    }
+                    className={`w-12 h-12 rounded-lg text-lg transition-all ${
+                      formData.overallRating === rating
+                        ? "bg-primary text-white scale-110"
+                        : "bg-gray-200 hover:bg-gray-300"
+                    }`}
                   >
-                    {option}
+                    {rating}★
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Q3: Would meet again? (PRIMARY METRIC!) */}
+            <div className="space-y-2">
+              <Label className="text-lg font-semibold">
+                3. Would you want to see them again? *
+              </Label>
+              <RadioGroup
+                value={formData.wouldMeetAgain}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    wouldMeetAgain: String(value),
+                  }))
+                }
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="yes" id="meet-yes" />
+                  <Label
+                    htmlFor="meet-yes"
+                    className="text-green-600 font-semibold"
+                  >
+                    Yes! I'd love a second date
                   </Label>
                 </div>
-              ))}
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="maybe" id="meet-maybe" />
+                  <Label htmlFor="meet-maybe">Maybe, I'm not sure yet</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="no" id="meet-no" />
+                  <Label htmlFor="meet-no">No, not interested</Label>
+                </div>
+              </RadioGroup>
             </div>
-          </div>
 
-          {/* Q6: Venue rating */}
-          <div className="space-y-2">
-            <Label className="text-lg font-semibold">
-              6. How was the suggested venue?
-            </Label>
-            <RadioGroup
-              value={formData.venueRating}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, venueRating: String(value) }))
-              }
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="perfect" id="venue-perfect" />
-                <Label htmlFor="venue-perfect">Perfect choice!</Label>
+            {/* Q4: What went well? */}
+            <div className="space-y-2">
+              <Label className="text-lg font-semibold">
+                4. What went well? (select all that apply)
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                {WENT_WELL_OPTIONS.map((option) => (
+                  <div key={option} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`well-${option}`}
+                      checked={formData.wentWell.includes(option)}
+                      onCheckedChange={() => toggleWentWell(option)}
+                    />
+                    <Label
+                      htmlFor={`well-${option}`}
+                      className="cursor-pointer"
+                    >
+                      {option}
+                    </Label>
+                  </div>
+                ))}
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="good" id="venue-good" />
-                <Label htmlFor="venue-good">Good</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="okay" id="venue-okay" />
-                <Label htmlFor="venue-okay">Okay</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="not_good" id="venue-bad" />
-                <Label htmlFor="venue-bad">Not great</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="went_elsewhere" id="venue-elsewhere" />
-                <Label htmlFor="venue-elsewhere">We went somewhere else</Label>
-              </div>
-            </RadioGroup>
-          </div>
+            </div>
 
-          {/* Q7: Additional thoughts */}
-          <div className="space-y-2">
-            <Label className="text-lg font-semibold">
-              7. Any additional thoughts? (optional)
-            </Label>
-            <Textarea
-              value={formData.additionalThoughts}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  additionalThoughts: e.target.value,
-                }))
-              }
-              placeholder="Tell us anything else about your experience..."
-              className="min-h-[100px]"
-            />
-          </div>
-        </>
-      )}
+            {/* Q5: What didn't go well? */}
+            <div className="space-y-2">
+              <Label className="text-lg font-semibold">
+                5. What didn't go well? (optional)
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                {WENT_POORLY_OPTIONS.map((option) => (
+                  <div key={option} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`poorly-${option}`}
+                      checked={formData.wentPoorly.includes(option)}
+                      onCheckedChange={() => toggleWentPoorly(option)}
+                    />
+                    <Label
+                      htmlFor={`poorly-${option}`}
+                      className="cursor-pointer"
+                    >
+                      {option}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-      <Button
-        onClick={handleSubmit}
-        size="lg"
-        className="w-full"
-        disabled={!formData.dateHappened || isSubmitting}
-      >
-        {isSubmitting ? "Submitting..." : "Submit Feedback"}
-      </Button>
-    </div>
+            {/* Q6: Venue rating */}
+            <div className="space-y-2">
+              <Label className="text-lg font-semibold">
+                6. How was the suggested venue?
+              </Label>
+              <RadioGroup
+                value={formData.venueRating}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    venueRating: String(value),
+                  }))
+                }
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="perfect" id="venue-perfect" />
+                  <Label htmlFor="venue-perfect">Perfect choice!</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="good" id="venue-good" />
+                  <Label htmlFor="venue-good">Good</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="okay" id="venue-okay" />
+                  <Label htmlFor="venue-okay">Okay</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="not_good" id="venue-bad" />
+                  <Label htmlFor="venue-bad">Not great</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="went_elsewhere" id="venue-elsewhere" />
+                  <Label htmlFor="venue-elsewhere">
+                    We went somewhere else
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* Q7: Additional thoughts */}
+            <div className="space-y-2">
+              <Label className="text-lg font-semibold">
+                7. Any additional thoughts? (optional)
+              </Label>
+              <Textarea
+                value={formData.additionalThoughts}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    additionalThoughts: e.target.value,
+                  }))
+                }
+                placeholder="Tell us anything else about your experience..."
+                className="min-h-[100px]"
+              />
+            </div>
+          </>
+        )}
+      </CardContent>
+
+      <CardFooter>
+        <Button
+          onClick={handleSubmit}
+          size="lg"
+          className="w-full"
+          disabled={!formData.dateHappened || isSubmitting}
+        >
+          {isSubmitting ? "Submitting..." : "Submit Feedback"}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }

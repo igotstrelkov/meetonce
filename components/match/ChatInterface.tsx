@@ -4,7 +4,6 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo } from "react";
-import { ChatExpiredBanner } from "./ChatExpiredBanner";
 import { ChatHeader } from "./ChatHeader";
 import { MessageInput } from "./MessageInput";
 import { MessageList } from "./MessageList";
@@ -46,20 +45,20 @@ export function ChatInterface({
   // Check if chat is expired
   const isExpired = useMemo(() => Date.now() > expiresAt, [expiresAt]);
 
-  const handleSendMessage = useCallback(async (content: string) => {
-    try {
-      await sendMessage({ matchId, content });
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      throw error;
-    }
-  }, [sendMessage, matchId]);
+  const handleSendMessage = useCallback(
+    async (content: string) => {
+      try {
+        await sendMessage({ matchId, content });
+      } catch (error) {
+        console.error("Failed to send message:", error);
+        throw error;
+      }
+    },
+    [sendMessage, matchId]
+  );
 
   return (
     <div className="space-y-4">
-      {/* Expired banner */}
-      {isExpired && <ChatExpiredBanner matchId={matchId} />}
-
       {/* Chat card */}
       <>
         <div
@@ -69,7 +68,6 @@ export function ChatInterface({
           {/* Header */}
           <ChatHeader
             matchUserName={matchUser.name}
-            matchUserPhotoUrl={matchUser.photoUrl}
             expiresAt={expiresAt}
             unreadCount={unreadCount}
           />

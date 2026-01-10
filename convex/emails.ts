@@ -17,7 +17,7 @@ export const sendPhotoApprovedEmail = internalAction({
     console.log(`
       ====== PHOTO APPROVED EMAIL ======
       To: ${args.to}
-      Subject: ✅ Your Profile is Live!
+      Subject: Your Profile is Live!
 
       Hi ${args.userName},
 
@@ -36,7 +36,7 @@ export const sendPhotoApprovedEmail = internalAction({
       await resend.emails.send({
         from: "MeetOnce <admin@meetonce.co>",
         to: args.to,
-        subject: "✅ Your Profile is Live!",
+        subject: "Your Profile is Live!",
         react: PhotoApproved({
           userName: args.userName,
           dashboardUrl: args.dashboardUrl,
@@ -158,7 +158,7 @@ export const sendMutualMatchEmail = internalAction({
     console.log(`
       ====== MUTUAL MATCH EMAIL ======
       To: ${args.to}
-      Subject: 🎉 It's a Match with ${args.matchName}!
+      Subject: It's a Match with ${args.matchName}!
 
       Hi ${args.userName},
 
@@ -177,7 +177,7 @@ export const sendMutualMatchEmail = internalAction({
       await resend.emails.send({
         from: "MeetOnce <admin@meetonce.co>",
         to: args.to,
-        subject: `🎉 It's a Match with ${args.matchName}!`,
+        subject: `It's a Match with ${args.matchName}!`,
         react: MutualMatch({
           userName: args.userName,
           matchName: args.matchName,
@@ -203,7 +203,7 @@ export const sendSecondDateContactEmail = internalAction({
     console.log(`
       ====== SECOND DATE CONTACT INFO ======
       To: ${args.to}
-      Subject: 🎉 ${args.matchName} wants a second date too!
+      Subject: ${args.matchName} wants a second date too!
 
       Hi ${args.userName},
 
@@ -223,7 +223,7 @@ export const sendSecondDateContactEmail = internalAction({
       await resend.emails.send({
         from: "MeetOnce <admin@meetonce.co>",
         to: args.to,
-        subject: `🎉 ${args.matchName} wants a second date too!`,
+        subject: `${args.matchName} wants a second date too!`,
         react: SecondDateContact({
           userName: args.userName,
           matchName: args.matchName,
@@ -248,7 +248,10 @@ export const sendNewMessageEmail = internalAction({
     unreadCount: v.number(),
   },
   handler: async (ctx, args) => {
-    const messageCount = args.unreadCount === 1 ? "1 new message" : `${args.unreadCount} new messages`;
+    const messageCount =
+      args.unreadCount === 1
+        ? "1 new message"
+        : `${args.unreadCount} new messages`;
 
     console.log(`
       ====== NEW MESSAGE EMAIL ======
@@ -266,7 +269,7 @@ export const sendNewMessageEmail = internalAction({
       await resend.emails.send({
         from: "MeetOnce <admin@meetonce.co>",
         to: args.to,
-        subject: `💬 New message from ${args.senderName}`,
+        subject: `New message from ${args.senderName}`,
         react: NewMessage({
           receiverName: args.receiverName,
           senderName: args.senderName,

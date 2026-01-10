@@ -2,21 +2,23 @@
 
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 
 interface ChatHeaderProps {
   matchUserName: string;
-  matchUserPhotoUrl: string | null;
   expiresAt: number;
   unreadCount: number;
 }
 
 export function ChatHeader({
   matchUserName,
-  matchUserPhotoUrl,
   expiresAt,
   unreadCount,
 }: ChatHeaderProps) {
   const router = useRouter();
+
+  // Check if chat is expired
+  const isExpired = useMemo(() => Date.now() > expiresAt, [expiresAt]);
 
   return (
     <div className="flex items-center justify-between pb-4 border-b">
@@ -25,7 +27,9 @@ export function ChatHeader({
         <div>
           <h3 className="font-semibold text-gray-900">{matchUserName}</h3>
           <div className="flex items-center gap-1 text-sm text-gray-600">
-            <span>Expires Friday at 11:59 PM</span>
+            <span>
+              {isExpired ? "Chat Has Expired" : "Expires Friday at 11:59 PM"}
+            </span>
           </div>
         </div>
       </div>

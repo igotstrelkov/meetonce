@@ -53,38 +53,17 @@ export default function ChatPage({
   }
 
   return (
-    <div>
-      {/* Header with back button */}
-
-      {/* <div className="max-w-xl mx-auto px-4 flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/dashboard")}
-          className="gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Button>
-        <div className="flex-1 text-center">
-          <h1 className="text-lg font-semibold">Chat with {partner.name}</h1>
-        </div>
-        <div className="w-20" />
-      </div> */}
-
-      {/* Full-screen chat */}
-      <div className="max-w-xl mx-auto px-4">
-        <ChatInterface
-          matchId={match._id}
-          matchUser={{
-            _id: partner._id,
-            name: partner.name,
-            photoUrl: partner.photoUrl,
-          }}
-          currentUserId={currentUser._id}
-          expiresAt={match.expiresAt}
-        />
-      </div>
+    <div className="max-w-xl mx-auto px-4">
+      <ChatInterface
+        matchId={match._id}
+        matchUser={{
+          _id: partner._id,
+          name: partner.name,
+          photoUrl: partner.photoUrl,
+        }}
+        currentUserId={currentUser._id}
+        expiresAt={match.expiresAt}
+      />
     </div>
   );
 }

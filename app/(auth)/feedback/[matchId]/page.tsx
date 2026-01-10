@@ -1,10 +1,13 @@
 "use client";
 
 import PostDateFeedbackForm from "@/components/feedback/PostDateFeedbackForm";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
+import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 
@@ -27,23 +30,16 @@ export default function FeedbackPage({
     clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
   );
 
-  if (!clerkUser) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Please sign in to provide feedback.</p>
-      </div>
-    );
-  }
+  // if (!currentUser) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center">
+  //       <p className="text-gray-600">Please sign in to provide feedback.</p>
+  //     </div>
+  //   );
+  // }
 
   if (matchData === undefined || currentUser === undefined) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse">
-          <div className="h-8 w-48 bg-gray-200 rounded mb-4"></div>
-          <div className="h-4 w-64 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (!matchData || !currentUser) {
@@ -54,12 +50,12 @@ export default function FeedbackPage({
           <p className="text-gray-600 mb-4">
             We couldn't find the match you're looking for.
           </p>
-          <button
+          <Button
             onClick={() => router.push("/dashboard")}
             className="text-orange-600 hover:text-orange-700 font-semibold"
           >
             ← Back to Dashboard
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -75,9 +71,9 @@ export default function FeedbackPage({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen ">
       <div className="max-w-3xl mx-auto px-4">
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <button
             onClick={() => router.push("/dashboard")}
             className="text-gray-600 hover:text-gray-900 font-medium mb-4"
@@ -88,8 +84,20 @@ export default function FeedbackPage({
           <p className="text-gray-600">
             Tell us about your date with {matchPartner.name}
           </p>
+        </div> */}
+        <div className="pb-4">
+          <div className="flex items-center gap-3">
+            <ChevronLeft size={35} onClick={() => router.push("/dashboard")} />
+            <div>
+              <h3 className="font-semibold text-gray-900">
+                Post-Date Feedback
+              </h3>
+              <div className="flex items-center gap-1 text-sm text-gray-600">
+                <span>Tell us about your date with {matchPartner.name}</span>
+              </div>
+            </div>
+          </div>
         </div>
-
         <PostDateFeedbackForm
           matchId={matchId}
           userId={currentUser._id}
