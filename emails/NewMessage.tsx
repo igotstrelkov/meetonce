@@ -1,11 +1,11 @@
 import {
-  Html,
-  Head,
   Body,
+  Button,
   Container,
+  Head,
+  Html,
   Section,
   Text,
-  Button,
 } from "@react-email/components";
 
 interface NewMessageProps {
@@ -23,7 +23,8 @@ export default function NewMessage({
   matchUrl,
   unreadCount,
 }: NewMessageProps) {
-  const messageCount = unreadCount === 1 ? "1 new message" : `${unreadCount} new messages`;
+  const messageCount =
+    unreadCount === 1 ? "1 new message" : `${unreadCount} new messages`;
 
   return (
     <Html>
@@ -38,7 +39,8 @@ export default function NewMessage({
             <Text style={greeting}>Hi {receiverName},</Text>
 
             <Text style={intro}>
-              {senderName} sent you a message! You have {messageCount} waiting for you.
+              {senderName} sent you a message! You have {messageCount} waiting
+              for you.
             </Text>
 
             <div style={messageBox}>
@@ -51,7 +53,8 @@ export default function NewMessage({
             </Button>
 
             <Text style={footer}>
-              Chat is active until Friday at 11:59 PM. Reply now to keep the conversation going!
+              Chat is active until Friday at 11:59 PM. Reply now to keep the
+              conversation going!
             </Text>
           </Section>
         </Container>

@@ -1,26 +1,13 @@
 "use client";
 
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import MatchCard from "@/components/match/MatchCard";
-import PassFeedbackForm from "@/components/match/PassFeedbackForm";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
-import { useMutation, useQuery } from "convex/react";
-import { MessageCircle, User } from "lucide-react";
+import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { DashboardContent } from "./DashboardContent";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -44,12 +31,6 @@ export default function DashboardPage() {
         : "skip"
     ) || 0;
 
-  const respond = useMutation(api.matches.respondToMatch);
-  const submitPassFeedback = useMutation(api.feedback.submitPassFeedback);
-
-  const [showPassFeedback, setShowPassFeedback] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   useEffect(() => {
     // If still loading, wait
     if (currentUser === undefined) return;
@@ -59,8 +40,6 @@ export default function DashboardPage() {
       router.push("/onboarding");
       return;
     }
-
-    // User exists and is authenticated - stay on dashboard
   }, [currentUser, router]);
 
   if (currentUser === undefined || matchData === undefined) {
@@ -134,202 +113,14 @@ export default function DashboardPage() {
   const myResponse = isReversed ? match.matchResponse : match.userResponse;
   const theirResponse = isReversed ? match.userResponse : match.matchResponse;
 
-  const handleInterested = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-
-    try {
-      await respond({
-        matchId: match._id,
-        response: "interested",
-        isReversed,
-      });
-    } catch (error) {
-      console.error("Error responding to match:", error);
-      alert("Failed to submit response. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handlePass = async () => {
-    setShowPassFeedback(true);
-  };
-
-  const handlePassComplete = async (reason?: string) => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-
-    try {
-      await respond({
-        matchId: match._id,
-        response: "passed",
-        isReversed,
-      });
-
-      setShowPassFeedback(false);
-
-      // Save pass reason if provided
-      if (reason) {
-        await submitPassFeedback({
-          matchId: match._id,
-          userId: currentUser._id,
-          matchUserId: isReversed ? match.userId : match.matchUserId,
-          weekOf: match.weekOf,
-          reason: reason as any,
-        });
-      }
-    } catch (error) {
-      console.error("Error responding to match:", error);
-      alert("Failed to submit response. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
-    <div className="space-y-6">
-      <Drawer>
-        <Card>
-          <CardContent className="pt-6 space-y-4">
-            <div className="text-center space-y-2">
-              <div className="text-4xl">😉</div>
-              <h3 className="text-2xl font-bold">Your Weekly Match</h3>
-              <p className="text-muted-foreground">
-                Expires Friday at 11:59 PM
-              </p>
-            </div>
-
-            <Separator />
-            <DrawerTrigger asChild>
-              <Button size="lg" className="w-full gap-2">
-                <User className="w-5 h-5" />
-                View Match
-              </Button>
-            </DrawerTrigger>
-          </CardContent>
-        </Card>
-
-        <DrawerContent
-          className="h-[90vh]"
-          aria-description={undefined}
-          aria-describedby={undefined}
-        >
-          <DrawerHeader className="hidden">
-            <DrawerTitle>Match Details</DrawerTitle>
-          </DrawerHeader>
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            <div className="max-w-md mx-auto space-y-6">
-              <MatchCard
-                match={matchData.match}
-                matchUser={matchData.matchUser}
-                isReversed={matchData.isReversed}
-                currentUserId={currentUser._id}
-              />
-            </div>
-          </div>
-
-          <DrawerFooter>
-            <DrawerClose asChild>
-              <Button variant="outline">Close</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-
-      {/* Response Buttons or Status */}
-      {myResponse === "pending" && (
-        <Card>
-          <CardFooter>
-            <Button
-              onClick={handleInterested}
-              size="lg"
-              className="flex-1 mr-4"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Submitting..." : "I'm Interested!"}
-            </Button>
-            <Button
-              onClick={handlePass}
-              size="lg"
-              variant="outline"
-              className="flex-1"
-              disabled={isSubmitting}
-            >
-              Pass
-            </Button>
-          </CardFooter>
-        </Card>
-      )}
-
-      {showPassFeedback && (
-        <PassFeedbackForm
-          onSubmit={handlePassComplete}
-          onCancel={() => setShowPassFeedback(false)}
-          isSubmitting={isSubmitting}
-        />
-      )}
-
-      <div>
-        {myResponse === "interested" && theirResponse === "pending" && (
-          <Card>
-            <CardContent className="pt-6 space-y-4">
-              <div className="text-center space-y-2">
-                <div className="text-4xl">🤞</div>
-                <h3 className="text-2xl font-bold">Response Sent!</h3>
-                <p className="text-muted-foreground">
-                  You're interested! Waiting for their response...
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {myResponse === "passed" && (
-          <Card>
-            <CardContent className="pt-6 space-y-4">
-              <div className="text-center space-y-2">
-                <div className="text-4xl">👋</div>
-                <h3 className="text-2xl font-bold">Passed</h3>
-                <p className="text-muted-foreground">
-                  You passed on this match. Check back next Monday!
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Mutual Match - Chat Button */}
-      {match.mutualMatch && (
-        <Card>
-          <CardContent className="pt-6 space-y-4">
-            <div className="text-center space-y-2">
-              <div className="text-4xl">🎉</div>
-              <h3 className="text-2xl font-bold">It's Mutual!</h3>
-              <p className="text-muted-foreground">
-                You both are interested! Start chatting to plan your date.
-              </p>
-            </div>
-
-            <Separator />
-
-            <Button
-              onClick={() => router.push(`/chat/${match._id}`)}
-              size="lg"
-              className="w-full gap-2"
-            >
-              <MessageCircle className="w-5 h-5" />
-              Open Chat
-              {unreadCount > 0 && <span>({unreadCount} new)</span>}
-            </Button>
-
-            <p className="text-sm text-muted-foreground text-center">
-              Chat is active until Friday at 11:59 PM
-            </p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+    <DashboardContent
+      currentUser={currentUser}
+      matchData={matchData}
+      unreadCount={unreadCount}
+      myResponse={myResponse}
+      theirResponse={theirResponse}
+      isReversed={isReversed}
+    />
   );
 }

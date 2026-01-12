@@ -1,11 +1,11 @@
 import {
-  Html,
-  Head,
   Body,
+  Button,
   Container,
+  Head,
+  Html,
   Section,
   Text,
-  Button,
 } from "@react-email/components";
 
 interface PhotoRejectedProps {
@@ -66,7 +66,8 @@ export default function PhotoRejected({
             </Button>
 
             <Text style={footer}>
-              We'll review your new photo within 24 hours. Thanks for your patience!
+              We'll review your new photo within 24 hours. Thanks for your
+              patience!
             </Text>
           </Section>
         </Container>

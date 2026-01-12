@@ -3,7 +3,6 @@
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Id } from "@/convex/_generated/dataModel";
 import { MapPin, Sparkles } from "lucide-react";
 import { useState } from "react";
 import DimensionalScores from "./DimensionalScores";
@@ -11,19 +10,10 @@ import DimensionalScores from "./DimensionalScores";
 type MatchCardProps = {
   match: any;
   matchUser: any;
-  isReversed: boolean;
-  currentUserId: Id<"users">;
 };
 
-export default function MatchCard({
-  match,
-  matchUser,
-  isReversed,
-  currentUserId,
-}: MatchCardProps) {
+export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-
-  console.log("LOL");
 
   return (
     <div className="space-y-6">
@@ -145,4 +135,4 @@ export default function MatchCard({
       {/* Response Buttons or Status - Moved to Dashboard Page */}
     </div>
   );
-}
+};

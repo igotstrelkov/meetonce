@@ -1,11 +1,11 @@
 import {
-  Html,
-  Head,
   Body,
+  Button,
   Container,
+  Head,
+  Html,
   Section,
   Text,
-  Button,
 } from "@react-email/components";
 
 interface PhotoApprovedProps {
@@ -30,13 +30,14 @@ export default function PhotoApproved({
             <Text style={greeting}>Hi {userName},</Text>
 
             <Text style={intro}>
-              Great news! Your photo has been approved and your profile is now live.
+              Great news! Your photo has been approved and your profile is now
+              live.
             </Text>
 
             <Text style={intro}>
-              You'll start receiving weekly matches every Monday morning. We carefully
-              select one compatible person for you each week based on your profile,
-              interests, and preferences.
+              You'll start receiving weekly matches every Monday morning. We
+              carefully select one compatible person for you each week based on
+              your profile, interests, and preferences.
             </Text>
 
             <Button style={button} href={dashboardUrl}>
@@ -44,7 +45,8 @@ export default function PhotoApproved({
             </Button>
 
             <Text style={footer}>
-              Get ready for your first match! We can't wait to help you meet someone special.
+              Get ready for your first match! We can't wait to help you meet
+              someone special.
             </Text>
           </Section>
         </Container>

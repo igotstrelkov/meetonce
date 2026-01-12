@@ -1,11 +1,11 @@
 import {
-  Html,
-  Head,
   Body,
+  Button,
   Container,
+  Head,
+  Html,
   Section,
   Text,
-  Button,
 } from "@react-email/components";
 
 interface MutualMatchProps {
@@ -32,8 +32,8 @@ export default function MutualMatch({
             <Text style={greeting}>Hi {userName},</Text>
 
             <Text style={intro}>
-              Exciting news! {matchName} is interested too! You both want to meet,
-              so it's time to plan your date.
+              Exciting news! {matchName} is interested too! You both want to
+              meet, so it's time to plan your date.
             </Text>
 
             <div style={sectionBox}>
@@ -63,7 +63,7 @@ export default function MutualMatch({
 const main = { backgroundColor: "#f6f9fc", fontFamily: "sans-serif" };
 const container = { margin: "0 auto", padding: "20px", maxWidth: "600px" };
 const header = { textAlign: "center" as const, padding: "20px 0" };
-const heading = { fontSize: "28px", fontWeight: "bold", color: "#ec4899" };
+const heading = { fontSize: "28px", fontWeight: "bold", color: "#F54927" };
 const content = {
   backgroundColor: "#ffffff",
   padding: "40px",
@@ -80,27 +80,27 @@ const sectionBox = {
 const sectionTitle = {
   fontSize: "18px",
   fontWeight: "bold" as const,
-  color: "#831843",
+  color: "#F54927",
   marginBottom: "12px",
 };
 const venueNameStyle = {
   fontSize: "16px",
   fontWeight: "bold" as const,
-  color: "#831843",
+  color: "#F54927",
   marginBottom: "4px",
 };
 const venueAddressStyle = {
   fontSize: "14px",
-  color: "#9f1239",
+  color: "#F54927",
   marginBottom: "12px",
 };
 const venueNote = {
   fontSize: "13px",
-  color: "#be185d",
+  color: "#F54927",
   fontStyle: "italic" as const,
 };
 const button = {
-  backgroundColor: "#ec4899",
+  backgroundColor: "#F54927",
   color: "#ffffff",
   padding: "12px 40px",
   borderRadius: "4px",

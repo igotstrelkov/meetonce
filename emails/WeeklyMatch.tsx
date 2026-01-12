@@ -1,11 +1,11 @@
 import {
-  Html,
-  Head,
   Body,
+  Button,
   Container,
+  Head,
+  Html,
   Section,
   Text,
-  Button,
 } from "@react-email/components";
 
 interface WeeklyMatchProps {

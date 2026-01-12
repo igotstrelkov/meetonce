@@ -1,8 +1,8 @@
 import {
-  Html,
-  Head,
   Body,
   Container,
+  Head,
+  Html,
   Section,
   Text,
 } from "@react-email/components";
@@ -37,12 +37,16 @@ export default function SecondDateContact({
             <div style={contactBox}>
               <Text style={contactLabel}>Their Contact Information:</Text>
               <Text style={contactInfo}>
-                Email: <a href={`mailto:${matchEmail}`} style={emailLink}>{matchEmail}</a>
+                Email:{" "}
+                <a href={`mailto:${matchEmail}`} style={emailLink}>
+                  {matchEmail}
+                </a>
               </Text>
             </div>
 
             <Text style={callToAction}>
-              Reach out and plan your second date! We're so excited for you both.
+              Reach out and plan your second date! We're so excited for you
+              both.
             </Text>
 
             <Text style={footer}>
