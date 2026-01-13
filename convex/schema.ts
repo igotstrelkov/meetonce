@@ -126,6 +126,7 @@ export default defineSchema({
     .index("by_user_and_match", ["userId", "matchUserId"])
     .index("by_match_and_user", ["matchUserId", "userId"])
     .index("by_user", ["userId"])
+    .index("by_match_user", ["matchUserId"])
     .index("by_week", ["weekOf"])
     .index("by_user_and_week", ["userId", "weekOf"])
     .index("by_match_user_and_week", ["matchUserId", "weekOf"]),

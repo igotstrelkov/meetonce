@@ -4,15 +4,29 @@ import { mutation, query } from "./_generated/server";
 import { getWeekOfString } from "./lib/matching";
 
 export const getCurrentMatch = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, args) => {
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Get current user
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!currentUser) {
+      throw new Error("User not found");
+    }
+
     const weekOf = getWeekOfString();
 
     // Check if user has a match this week
     const matchAsUser = await ctx.db
       .query("weeklyMatches")
       .withIndex("by_user_and_week", (q) =>
-        q.eq("userId", args.userId).eq("weekOf", weekOf)
+        q.eq("userId", currentUser._id).eq("weekOf", weekOf)
       )
       .first();
 
@@ -36,7 +50,7 @@ export const getCurrentMatch = query({
     const matchAsMatch = await ctx.db
       .query("weeklyMatches")
       .withIndex("by_match_user_and_week", (q) =>
-        q.eq("matchUserId", args.userId).eq("weekOf", weekOf)
+        q.eq("matchUserId", currentUser._id).eq("weekOf", weekOf)
       )
       .first();
 
@@ -57,6 +71,80 @@ export const getCurrentMatch = query({
     }
 
     return null;
+  },
+});
+
+export const getPastMatches = query({
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Get current user
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!currentUser) {
+      throw new Error("User not found");
+    }
+
+    const currentWeek = getWeekOfString();
+
+    // Get all matches where user is either userId or matchUserId, excluding current week
+    const matchesAsUser = await ctx.db
+      .query("weeklyMatches")
+      .withIndex("by_user", (q) => q.eq("userId", currentUser._id))
+      .filter((q) => q.neq(q.field("weekOf"), currentWeek))
+      .order("desc")
+      .collect();
+
+    const matchesAsMatch = await ctx.db
+      .query("weeklyMatches")
+      .withIndex("by_match_user", (q) => q.eq("matchUserId", currentUser._id))
+      .filter((q) => q.neq(q.field("weekOf"), currentWeek))
+      .order("desc")
+      .collect();
+
+    // Combine and load match users
+    const allMatches = [...matchesAsUser, ...matchesAsMatch];
+
+    // Sort by sentAt (most recent first)
+    allMatches.sort((a, b) => b.sentAt - a.sentAt);
+
+    // Load match users with photos and feedback status
+    const matchesWithUsers = await Promise.all(
+      allMatches.map(async (match) => {
+        const isReversed = match.matchUserId === args.userId;
+        const matchUserId = isReversed ? match.userId : match.matchUserId;
+        const matchUser = await ctx.db.get(matchUserId);
+
+        if (!matchUser) return null;
+
+        const photoUrl = matchUser.photoStorageId
+          ? await ctx.storage.getUrl(matchUser.photoStorageId)
+          : null;
+
+        // Check if user has provided feedback for this match
+        const feedback = await ctx.db
+          .query("dateOutcomes")
+          .withIndex("by_match", (q) => q.eq("matchId", match._id))
+
+          .first();
+
+        return {
+          match,
+          matchUser: { ...matchUser, photoUrl },
+          isReversed,
+          feedbackProvided: feedback !== null,
+        };
+      })
+    );
+
+    // Filter out null values and return
+    return matchesWithUsers.filter((m) => m !== null);
   },
 });
 

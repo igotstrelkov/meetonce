@@ -4,16 +4,14 @@ import { useMutation } from "convex/react";
 import { useState } from "react";
 
 interface UseMatchInteractionProps {
-  matchId: Id<"weeklyMatches">;
-  userId: Id<"users">;
-  matchUserId: Id<"users">;
-  isReversed: boolean;
-  weekOf: string;
+  matchId?: Id<"weeklyMatches">;
+  matchUserId?: Id<"users">;
+  isReversed?: boolean;
+  weekOf?: string;
 }
 
 export function useMatchInteraction({
   matchId,
-  userId,
   matchUserId,
   isReversed,
   weekOf,
@@ -25,7 +23,7 @@ export function useMatchInteraction({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInterested = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || !matchId || !isReversed) return;
     setIsSubmitting(true);
 
     try {
@@ -47,7 +45,7 @@ export function useMatchInteraction({
   };
 
   const handlePassComplete = async (reason?: string) => {
-    if (isSubmitting) return;
+    if (isSubmitting || !matchId || !isReversed) return;
     setIsSubmitting(true);
 
     try {
@@ -59,10 +57,9 @@ export function useMatchInteraction({
 
       setShowPassFeedback(false);
 
-      if (reason) {
+      if (reason && matchUserId && weekOf) {
         await submitPassFeedback({
           matchId,
-          userId,
           matchUserId,
           weekOf,
           reason: reason as any,

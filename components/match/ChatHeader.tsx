@@ -23,12 +23,14 @@ export function ChatHeader({
   return (
     <div className="flex items-center justify-between pb-4 border-b">
       <div className="flex items-center gap-3">
-        <ChevronLeft size={35} onClick={() => router.back()} />
+        <ChevronLeft size={35} onClick={() => router.push("/dashboard")} />
         <div>
           <h3 className="font-semibold text-gray-900">{matchUserName}</h3>
           <div className="flex items-center gap-1 text-sm text-gray-600">
             <span>
-              {isExpired ? "Chat Has Expired" : "Expires Friday at 11:59 PM"}
+              {isExpired
+                ? "Chat Has Expired"
+                : "Chat is active until Friday at 11:59 PM"}
             </span>
           </div>
         </div>

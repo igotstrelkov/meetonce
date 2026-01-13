@@ -166,12 +166,14 @@ Implemented as batched Convex actions for scalability. Processes users in batche
 The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring to predict real compatibility.
 
 **Profile Formatting** (`formatProfile` function):
+
 - Enriched profile data includes: name, age, location, gender, seeking preferences (with age range)
 - Bio: 100-500 words (voice-processed, semantically optimized)
 - Looking for: 100-500 words (voice-processed preferences)
 - **Note**: Interests array intentionally excluded to avoid over-weighting surface-level matches
 
 **LLM Configuration**:
+
 - Model: GPT-4o via OpenRouter
 - Temperature: 0.5 (lower for consistent, less creative scoring)
 - Max tokens: 800 (increased for dimensional analysis)
@@ -200,6 +202,7 @@ The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring t
    - Scoring guide: 8-10 (identical), 5-7 (minor differences), 0-4 (misaligned)
 
 **Score Distribution Reality Check**:
+
 - 90-100 (Exceptional): <5% of matches - rare, multi-dimensional alignment
 - 80-89 (Excellent): ~15% of matches - strong compatibility with minor differences
 - 70-79 (Good): ~30% of matches - solid foundation, meaningful compromise needed
@@ -207,6 +210,7 @@ The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring t
 - <60 (Low): ~15% of matches - fundamental misalignments (not sent to users)
 
 **Red Flag Detection**:
+
 - Life stage misalignment: -15 points
 - Incompatible daily rhythms (night owl + early riser): -10 points
 - Family timeline conflict (wants kids vs unsure): -15 points
@@ -217,11 +221,13 @@ The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring t
 - Age gap >10 years with different life stages: -10 points
 
 **Calibration Examples**:
+
 - Score 92: 28F engineer SF + 30M designer SF, yoga/climbing, jazz/saxophone, kids 3-5yr, therapy advocates
 - Score 76: 25F night owl + 32M early riser, different life stages, timeline misalignment
 - Score 63: 29M 80hr workaholic + 31F work-life balance seeker, incompatible energy
 
 **Explanation Quality Requirements**:
+
 - Must reference specific details from profiles (actual hobbies, places, values)
 - Must cite age and location when relevant
 - Must name 2-3 concrete shared interests
@@ -230,9 +236,10 @@ The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring t
 - Format: 2-3 paragraphs (150-250 words) with warm but honest tone
 
 **Benefits**:
+
 - **More discriminating scores**: Reduced score inflation (fewer 85-95, more 70-80)
 - **Better calibration**: Stricter rubrics aligned with research on relationship success
-- **Transparency**: Users see dimensional breakdown, understand *why* compatible
+- **Transparency**: Users see dimensional breakdown, understand _why_ compatible
 - **Red flag honesty**: Users informed of potential friction points constructively
 - **Improved accuracy**: Profile enrichment + calibration examples → better predictions
 
@@ -364,9 +371,14 @@ The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring t
 2. **Chat Activation** - "Open Chat" button appears on match card
 3. **Full-Screen Chat** - Routes to `/chat/[matchId]` dedicated page
 4. **Real-Time Messaging** - Convex subscriptions for live updates (no polling)
-5. **Time-Limited** - Chat active until Friday 11:59pm (match expiry)
-6. **Read Receipts** - Messages marked as read when viewing chat
-7. **Message Cleanup** - Deleted 7 days after expiry
+5. **Smart Email Notifications** - New message email alerts with rate limiting
+   - Sends email notification when user receives new messages
+   - Rate limited: Max one email per 24 hours per match (tracked via `lastNotificationEmailSentAt`)
+   - Prevents notification spam while keeping users engaged
+   - Email template: `emails/NewMessage.tsx`
+6. **Time-Limited** - Chat active until Friday 11:59pm (match expiry)
+7. **Read Receipts** - Messages marked as read when viewing chat
+8. **Message Cleanup** - Deleted 7 days after expiry
 
 **Key Components**:
 
@@ -454,13 +466,25 @@ The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring t
 
 **Match Display & Response Flow** (`/dashboard`):
 
+**Two-Tab Dashboard Layout**:
+
+- **Tab 1: "This Week"** (`ThisWeek.tsx`) - Current week's match display
+- **Tab 2: "Past Dates"** (`PastMatches.tsx`) - Past mutual matches with feedback
+
+**This Week Tab** (`app/(auth)/dashboard/ThisWeek.tsx`):
+
 - Queries `getCurrentMatch` to get current week's match (checks both user and matchUser directions)
-- Displays different states based on user status:
-  - `accountStatus = "pending"` → "Profile Under Review" message
-  - `accountStatus = "rejected"` → "Photo Needs Update" with rejection reason
-  - No match found → "No Match This Week" message
-  - Active match → Full match card with response buttons
-- **Match Card Display** (`components/match/MatchCard.tsx`):
+- Uses `useMatchInteraction` hook for state management (interested, passed, showPassForm states)
+- Displays different states:
+  - No match → "No Match This Week" message
+  - Match pending response → Match card with "View Match" drawer trigger
+  - Match responded → Status card showing response state
+
+**Match Drawer UI** (`components/match/MatchDrawer.tsx`):
+
+- Bottom drawer interface for match details (mobile-optimized)
+- Triggered by "View Match" button on match card
+- **Drawer Content**:
   - Profile photo with loading state
   - Name, age, location header
   - **Overall compatibility score** (large percentage display)
@@ -475,17 +499,32 @@ The matching algorithm uses an optimized GPT-4 prompt with dimensional scoring t
     - Bullet list of 0-3 compatibility risks
     - Honest but constructive framing
   - Interests badges
-  - Response buttons or status
-- **Response Handling**:
-  - "I'm Interested" button → Updates `userResponse` or `matchResponse` (based on direction)
-  - "Pass" button → Shows optional feedback form with 6 categories
-  - Responses trigger mutual match detection (both = "interested" → `mutualMatch = true`)
-- **Mutual Match Reveal**:
-  - "Open Chat" button appears on match card
-  - Routes to `/chat/[matchId]` full-screen chat page
-  - Real-time messaging enabled
-  - Chat active until Friday 11:59pm (match expiry)
-  - Celebration message displayed
+  - Response buttons in drawer footer
+
+**Response Handling** (`useMatchInteraction` hook):
+
+- "I'm Interested" button → Updates `userResponse` or `matchResponse` (based on direction)
+- "Pass" button → Shows inline feedback form with 6 categories
+- Responses trigger mutual match detection (both = "interested" → `mutualMatch = true`)
+- State managed through custom hook for clean separation of concerns
+
+**Status Card** (`components/match/StatusCard.tsx`):
+
+- Shown after user responds to match
+- Displays current response state (interested, passed, waiting for response)
+- Shows mutual match celebration when both interested
+- "Open Chat" button appears for mutual matches → Routes to `/chat/[matchId]`
+
+**Past Dates Tab** (`app/(auth)/dashboard/PastMatches.tsx`):
+
+- Displays all past mutual matches (only shows dates that could have happened)
+- Each match card opens a feedback drawer
+- **Feedback Drawer**:
+  - Match user photo and details
+  - Week of match
+  - "Provide Feedback" or "View Feedback" based on feedback status
+  - Embedded `PostDateFeedbackForm` for collecting PRIMARY METRIC
+  - Shows submitted feedback via `FeedbackContent` component
 - All photo storage IDs converted to URLs via `ctx.storage.getUrl()` in queries
 
 ### File Structure
@@ -498,7 +537,9 @@ app/
   └─ (auth)/                 # Protected routes group
       ├─ layout.tsx          # Auth layout wrapper
       ├─ dashboard/
-      │   └─ page.tsx        # Match display dashboard (shows current week's match)
+      │   ├─ page.tsx        # Match display dashboard (two-tab layout: "This Week" & "Past Dates")
+      │   ├─ ThisWeek.tsx    # Current week's match display with drawer UI
+      │   └─ PastMatches.tsx # Past mutual matches with feedback drawer
       ├─ onboarding/
       │   ├─ page.tsx        # Onboarding orchestrator (5 steps)
       │   ├─ ProfileStep.tsx # Step 1: Basic info
@@ -539,19 +580,22 @@ components/
   │   └─ VoiceStateIndicator.tsx # Status indicator (idle/recording/processing/complete/error)
   ├─ match/
   │   ├─ MatchCard.tsx        # Match profile display with response buttons
+  │   ├─ MatchDrawer.tsx      # Drawer UI for match details with dimensional scores
+  │   ├─ StatusCard.tsx       # Match status indicator card
   │   ├─ DimensionalScores.tsx # Dimensional compatibility breakdown with progress bars
   │   ├─ PassFeedbackForm.tsx # Optional pass feedback (6 categories)
   │   ├─ ChatInterface.tsx    # Main chat orchestrator with real-time subscriptions
   │   ├─ ChatHeader.tsx       # Chat header with user info and countdown timer
   │   ├─ MessageList.tsx      # Scrollable message list with auto-scroll
-  │   ├─ MessageInput.tsx     # Message input with character counter
-  │   └─ ChatExpiredBanner.tsx # Expiry banner with feedback link
+  │   └─ MessageInput.tsx     # Message input with character counter
   ├─ feedback/
-  │   └─ PostDateFeedbackForm.tsx # 7-question post-date feedback (PRIMARY METRIC)
-  └─ ui/                      # shadcn/ui components (dialog, textarea, card, radio-group, checkbox, progress, alert, etc.)
+  │   ├─ PostDateFeedbackForm.tsx # 7-question post-date feedback (PRIMARY METRIC)
+  │   └─ FeedbackContent.tsx  # Feedback display component for past matches
+  └─ ui/                      # shadcn/ui components (drawer, dialog, textarea, card, radio-group, checkbox, progress, alert, etc.)
 
 hooks/
-  └─ useVapiCall.ts           # Custom hook for Vapi SDK integration
+  ├─ useVapiCall.ts           # Custom hook for Vapi SDK integration
+  └─ useMatchInteraction.ts   # Match interaction state management hook
 
 convex/
   ├─ auth.config.ts     # Clerk JWT configuration
@@ -631,6 +675,8 @@ TypeScript path aliases configured in `tsconfig.json`:
 - **Scheduling**:
   - `dateScheduled` (boolean)
   - `dateScheduledFor` (optional timestamp)
+- **Notifications**:
+  - `lastNotificationEmailSentAt` (optional timestamp) - Tracks last "new message" email notification to prevent spam
 - **Timestamps**: `sentAt`, `expiresAt` (Friday 11:59pm)
 - **Indexes**: `by_user_and_match`, `by_match_and_user` (prevent duplicate matches), `by_user`, `by_week`, `by_user_and_week`, `by_match_user_and_week`
 
@@ -768,11 +814,10 @@ Built with React Email + Resend. Email integration is **ACTIVE** using Resend AP
 2. ✅ **PhotoRejected.tsx** - Account rejected with reason + optional guidance
 3. ✅ **WeeklyMatch.tsx** - Weekly match delivery (Monday 9am)
 4. ✅ **MutualMatch.tsx** - Mutual match celebration (both interested)
-5. ✅ **SecondDateContact.tsx** - Mutual second-date interest (contact info sharing)
 
 **Email Functions** (`convex/emails.ts`):
 
-- All 5 email functions use Resend with `react:` parameter for React Email templates
+- All 4 email functions use Resend with `react:` parameter for React Email templates
 - Error handling with try-catch and console logging
 - From address: `MeetOnce <admin@meetonce.co>`
 - Uses environment variable `RESEND_API_KEY`
@@ -780,7 +825,9 @@ Built with React Email + Resend. Email integration is **ACTIVE** using Resend AP
 **Email Triggers**:
 
 - Photo approval/rejection → `convex/admin.ts` (approvePhoto, rejectPhoto mutations)
+- Weekly match → `convex/matching.ts` (sent to BOTH users immediately after match creation)
 - Mutual match → `convex/matches.ts` (respondToMatch mutation, sent to BOTH users)
+- New message → `convex/chat.ts` (sendMessage mutation, rate-limited to 1 per 24 hours per match)
 - Second date contact → `convex/feedback.ts` (submitDateFeedback mutation, sent to BOTH users)
 
 **Planned Templates** (not yet implemented):

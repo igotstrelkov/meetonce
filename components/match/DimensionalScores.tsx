@@ -1,16 +1,7 @@
 "use client";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import {
-  AlertCircle,
-  Heart,
-  Home,
-  MessageSquare,
-  Sparkles,
-  Target,
-} from "lucide-react";
+import { Heart, Home, MessageSquare, Sparkles, Target } from "lucide-react";
 
 interface DimensionScores {
   values: number;
@@ -22,7 +13,6 @@ interface DimensionScores {
 
 interface DimensionalScoresProps {
   dimensionScores: DimensionScores;
-  redFlags?: string[];
 }
 
 const DIMENSIONS = [
@@ -65,58 +55,34 @@ const DIMENSIONS = [
 
 export default function DimensionalScores({
   dimensionScores,
-  redFlags,
 }: DimensionalScoresProps) {
   if (!dimensionScores) return null;
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Compatibility Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {DIMENSIONS.map((dimension) => {
-            const score = dimensionScores[dimension.key];
-            const percentage = (score / dimension.max) * 100;
-            const Icon = dimension.icon;
+      {DIMENSIONS.map((dimension) => {
+        const score = dimensionScores[dimension.key];
+        const percentage = (score / dimension.max) * 100;
+        const Icon = dimension.icon;
 
-            return (
-              <div key={dimension.key} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Icon className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-medium">{dimension.label}</span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {score}/{dimension.max}
-                  </span>
-                </div>
-                <Progress value={percentage} className="h-2" />
-                <p className="text-xs text-muted-foreground">
-                  {dimension.description}
-                </p>
+        return (
+          <div key={dimension.key} className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Icon className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium">{dimension.label}</span>
               </div>
-            );
-          })}
-        </CardContent>
-      </Card>
-
-      {redFlags && redFlags.length > 0 && (
-        <Alert>
-          <AlertCircle className="h-4 w-4 text-black" />
-          <AlertDescription>
-            <div className="font-medium text-black mb-2">
-              Things to Consider:
+              <span className="text-sm text-muted-foreground">
+                {score}/{dimension.max}
+              </span>
             </div>
-            <ul className="list-disc list-inside space-y-1 text-sm">
-              {redFlags.map((flag, index) => (
-                <li key={index}>{flag}</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
+            <Progress value={percentage} className="h-2" />
+            <p className="text-xs text-muted-foreground">
+              {dimension.description}
+            </p>
+          </div>
+        );
+      })}
     </div>
   );
 }

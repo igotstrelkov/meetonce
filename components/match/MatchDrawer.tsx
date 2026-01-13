@@ -11,11 +11,12 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Separator } from "@/components/ui/separator";
+import { Doc } from "@/convex/_generated/dataModel";
 import { User } from "lucide-react";
 
 interface MatchDrawerProps {
-  match: any;
-  matchUser: any;
+  match: Doc<"weeklyMatches">;
+  matchUser: Doc<"users"> & { photoUrl: string | null };
 }
 
 export const MatchDrawer = ({ match, matchUser }: MatchDrawerProps) => {
@@ -47,11 +48,8 @@ export const MatchDrawer = ({ match, matchUser }: MatchDrawerProps) => {
         <DrawerHeader className="hidden">
           <DrawerTitle>Match Details</DrawerTitle>
         </DrawerHeader>
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-          <div className="max-w-md mx-auto space-y-6">
-            <MatchCard match={match} matchUser={matchUser} />
-          </div>
-        </div>
+
+        <MatchCard match={match} matchUser={matchUser} />
 
         <DrawerFooter>
           <DrawerClose asChild>

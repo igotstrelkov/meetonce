@@ -5,7 +5,6 @@ import { mutation, query } from "./_generated/server";
 export const submitPassFeedback = mutation({
   args: {
     matchId: v.id("weeklyMatches"),
-    userId: v.id("users"),
     matchUserId: v.id("users"),
     weekOf: v.string(),
     reason: v.union(
@@ -19,8 +18,23 @@ export const submitPassFeedback = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Get current user
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!currentUser) {
+      throw new Error("User not found");
+    }
     await ctx.db.insert("passReasons", {
       ...args,
+      userId: currentUser._id,
       providedAt: Date.now(),
     });
   },
@@ -116,5 +130,38 @@ export const getFeedbackForMatch = query({
       .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
       .filter((q) => q.eq(q.field("userId"), args.userId))
       .first();
+  },
+});
+
+export const getDateOutcome = query({
+  args: { matchId: v.id("weeklyMatches") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!currentUser) {
+      throw new Error("User not found");
+    }
+
+    // Check if user has provided feedback for this match
+    const outcome = await ctx.db
+      .query("dateOutcomes")
+      .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+      .filter((q) => q.eq(q.field("userId"), currentUser._id))
+      .first();
+
+    if (!outcome) {
+      throw new Error("Date outcome not found");
+    }
+
+    return {
+      ...outcome,
+    };
   },
 });

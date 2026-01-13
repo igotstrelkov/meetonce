@@ -2,34 +2,23 @@
 
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { DashboardContent } from "./DashboardContent";
+import { PastMatches } from "./PastMatches";
+import { ThisWeek } from "./ThisWeek";
 
 export default function DashboardPage() {
   const router = useRouter();
+
   const { user } = useUser();
   const currentUser = useQuery(
     api.users.getUserByClerkId,
     user ? { clerkId: user.id } : "skip"
   );
-
-  const matchData = useQuery(
-    api.matches.getCurrentMatch,
-    currentUser ? { userId: currentUser._id } : "skip"
-  );
-
-  // Query unread count
-  const unreadCount =
-    useQuery(
-      api.chat.getUnreadCount,
-      matchData && matchData.match.mutualMatch
-        ? { matchId: matchData.match._id }
-        : "skip"
-    ) || 0;
 
   useEffect(() => {
     // If still loading, wait
@@ -42,7 +31,7 @@ export default function DashboardPage() {
     }
   }, [currentUser, router]);
 
-  if (currentUser === undefined || matchData === undefined) {
+  if (currentUser === undefined) {
     return <LoadingSpinner />;
   }
 
@@ -97,30 +86,20 @@ export default function DashboardPage() {
     );
   }
 
-  if (matchData === null) {
-    return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-        <h2 className="text-2xl font-bold mb-2">No Match This Week</h2>
-        <p className="text-gray-700">
-          We're still looking for your perfect match. New matches are released
-          every Monday morning!
-        </p>
-      </div>
-    );
-  }
-
-  const { match, isReversed } = matchData;
-  const myResponse = isReversed ? match.matchResponse : match.userResponse;
-  const theirResponse = isReversed ? match.userResponse : match.matchResponse;
-
   return (
-    <DashboardContent
-      currentUser={currentUser}
-      matchData={matchData}
-      unreadCount={unreadCount}
-      myResponse={myResponse}
-      theirResponse={theirResponse}
-      isReversed={isReversed}
-    />
+    <Tabs defaultValue="this-week" className="w-full">
+      <TabsList className="grid w-full grid-cols-2 mb-6">
+        <TabsTrigger value="this-week">This Week</TabsTrigger>
+        <TabsTrigger value="past-matches">Past Dates</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="this-week">
+        <ThisWeek />
+      </TabsContent>
+
+      <TabsContent value="past-matches">
+        <PastMatches />
+      </TabsContent>
+    </Tabs>
   );
 }

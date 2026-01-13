@@ -52,10 +52,7 @@ export default function NewMessage({
               View Messages
             </Button>
 
-            <Text style={footer}>
-              Chat is active until Friday at 11:59 PM. Reply now to keep the
-              conversation going!
-            </Text>
+            <Text style={footer}>Chat is active until Friday at 11:59 PM</Text>
           </Section>
         </Container>
       </Body>

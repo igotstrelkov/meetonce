@@ -6,25 +6,18 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/convex/_generated/api";
+import { Doc } from "@/convex/_generated/dataModel";
 import { WENT_POORLY_OPTIONS, WENT_WELL_OPTIONS } from "@/lib/constants";
 import { useMutation } from "convex/react";
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
 
 export default function PostDateFeedbackForm({
-  matchId,
-  userId,
-  matchUserId,
-  weekOf,
+  match,
   onComplete,
-}: any) {
+}: {
+  match: Doc<"weeklyMatches">;
+  onComplete?: () => void;
+}) {
   const submitFeedback = useMutation(api.feedback.submitDateFeedback);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -42,10 +35,10 @@ export default function PostDateFeedbackForm({
     setIsSubmitting(true);
     try {
       await submitFeedback({
-        matchId,
-        userId,
-        matchUserId,
-        weekOf,
+        matchId: match._id,
+        userId: match.userId,
+        matchUserId: match.matchUserId,
+        weekOf: match.weekOf,
         dateHappened: formData.dateHappened as any,
         overallRating: formData.overallRating || undefined,
         wouldMeetAgain: formData.wouldMeetAgain as any,
@@ -83,23 +76,10 @@ export default function PostDateFeedbackForm({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <h2 className="text-2xl font-bold mb-2">How did it go?</h2>
-        <p className="text-gray-600">
-          Your feedback helps us make better matches
-        </p>
-      </CardHeader>
-
-      <CardHeader>
-        <CardTitle>How did it go?</CardTitle>
-        <CardDescription>
-          Your feedback helps us make better matches
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="flex-1 overflow-y-auto px-4">
+      <div className="max-w-md mx-auto space-y-6">
         {/* Q1: Did date happen? */}
-        <div className="space-y-2">
+        <div className="space-y-2 pt-6">
           <Label className="text-lg font-semibold">
             1. Did the date happen? *
           </Label>
@@ -135,7 +115,7 @@ export default function PostDateFeedbackForm({
         {formData.dateHappened === "yes" && (
           <>
             {/* Q2: Overall rating */}
-            <div className="space-y-2">
+            <div className="space-y-2 pt-6">
               <Label className="text-lg font-semibold">
                 2. Overall, how was the date? *
               </Label>
@@ -163,7 +143,7 @@ export default function PostDateFeedbackForm({
             </div>
 
             {/* Q3: Would meet again? (PRIMARY METRIC!) */}
-            <div className="space-y-2">
+            <div className="space-y-2 pt-6">
               <Label className="text-lg font-semibold">
                 3. Would you want to see them again? *
               </Label>
@@ -178,10 +158,7 @@ export default function PostDateFeedbackForm({
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="yes" id="meet-yes" />
-                  <Label
-                    htmlFor="meet-yes"
-                    className="text-green-600 font-semibold"
-                  >
+                  <Label htmlFor="meet-yes" className="font-semibold">
                     Yes! I'd love a second date
                   </Label>
                 </div>
@@ -197,7 +174,7 @@ export default function PostDateFeedbackForm({
             </div>
 
             {/* Q4: What went well? */}
-            <div className="space-y-2">
+            <div className="space-y-2 pt-6">
               <Label className="text-lg font-semibold">
                 4. What went well? (select all that apply)
               </Label>
@@ -221,7 +198,7 @@ export default function PostDateFeedbackForm({
             </div>
 
             {/* Q5: What didn't go well? */}
-            <div className="space-y-2">
+            <div className="space-y-2 pt-6">
               <Label className="text-lg font-semibold">
                 5. What didn't go well? (optional)
               </Label>
@@ -245,7 +222,7 @@ export default function PostDateFeedbackForm({
             </div>
 
             {/* Q6: Venue rating */}
-            <div className="space-y-2">
+            <div className="space-y-2 pt-6">
               <Label className="text-lg font-semibold">
                 6. How was the suggested venue?
               </Label>
@@ -284,7 +261,7 @@ export default function PostDateFeedbackForm({
             </div>
 
             {/* Q7: Additional thoughts */}
-            <div className="space-y-2">
+            <div className="space-y-2 pt-6">
               <Label className="text-lg font-semibold">
                 7. Any additional thoughts? (optional)
               </Label>
@@ -302,18 +279,16 @@ export default function PostDateFeedbackForm({
             </div>
           </>
         )}
-      </CardContent>
 
-      <CardFooter>
         <Button
           onClick={handleSubmit}
           size="lg"
-          className="w-full"
+          className="w-full mt-6"
           disabled={!formData.dateHappened || isSubmitting}
         >
           {isSubmitting ? "Submitting..." : "Submit Feedback"}
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
