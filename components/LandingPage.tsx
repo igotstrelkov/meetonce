@@ -25,11 +25,11 @@ export function LandingPage() {
       <main>
         {/* Hero Section */}
         <section className="relative px-4 md:py-12 max-w-7xl mx-auto flex flex-col items-center text-center">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-background to-background blur-3xl opacity-50" />
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-primary/20 via-background to-background blur-3xl opacity-50" />
 
           <h1 className="text-4xl md:text-7xl font-bold tracking-tight mb-8 max-w-4xl leading-[1.1]">
-            Tell me your type, <br />
-            <span className="text-primary">I set up the date</span>
+            Tell us your type, <br />
+            <span className="text-primary">we'll plan the date</span>
           </h1>
 
           <div className="w-full max-w-3xl bg-card border border-border/50 rounded-2xl p-6 md:p-8 shadow-xl backdrop-blur-sm mb-10">
@@ -52,7 +52,7 @@ export function LandingPage() {
                 <Textarea
                   rows={4}
                   placeholder="Describe your ideal match..."
-                  className="min-h-[3rem] text-lg bg-background/50 border-primary/20 focus-visible:ring-primary resize-none"
+                  className="min-h-12 text-lg bg-background/50 border-primary/20 focus-visible:ring-primary resize-none"
                 />
                 <SignInButton mode="modal" forceRedirectUrl="/dashboard">
                   <Button
@@ -179,8 +179,8 @@ export function LandingPage() {
               </ul>
             </div>
 
-            <div className="relative p-8 rounded-3xl bg-gradient-to-br from-background to-primary/10 border border-primary/20 shadow-2xl shadow-primary/10 overflow-hidden group hover:scale-[1.02] transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative p-8 rounded-3xl bg-linear-to-br from-background to-primary/10 border border-primary/20 shadow-2xl shadow-primary/10 overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+              <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
                 MeetOnce
                 <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
@@ -196,7 +196,7 @@ export function LandingPage() {
                   "Zero Wasted Time",
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-3 font-medium">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full border bg-secondary flex items-center justify-center">
+                    <div className="shrink-0 w-6 h-6 rounded-full border bg-secondary flex items-center justify-center">
                       <Check className="w-3.5 h-3.5 text-secondary-foreground" />
                     </div>
                     {item}
@@ -251,7 +251,7 @@ export function LandingPage() {
                   { icon: MessageSquare, text: "A support team available" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-4">
-                    <div className="flex-shrink-0 mt-0.5 text-orange-500">
+                    <div className="shrink-0 mt-0.5 text-orange-500">
                       <item.icon className="w-6 h-6" />
                     </div>
                     <span className="text-lg font-medium">{item.text}</span>
@@ -300,7 +300,7 @@ export function LandingPage() {
                 >
                   <summary className="flex items-center justify-between p-6 cursor-pointer list-none font-bold text-lg hover:bg-muted/30 transition-colors">
                     {item.q}
-                    <div className="flex-shrink-0 ml-4 transition-transform group-open:rotate-180">
+                    <div className="shrink-0 ml-4 transition-transform group-open:rotate-180">
                       <svg
                         width="24"
                         height="24"

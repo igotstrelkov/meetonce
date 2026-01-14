@@ -8,6 +8,8 @@ import { useQuery } from "convex/react";
 export default function AdminOverviewPage() {
   const metrics = useQuery(api.admin.getPlatformMetrics);
 
+  console.log(metrics);
+
   if (!metrics) return <LoadingSpinner />;
 
   return (
@@ -19,28 +21,28 @@ export default function AdminOverviewPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
-          title="Total Users"
-          value={metrics.totalUsers}
-          subtitle="All registered users"
-        />
-
-        <MetricCard
-          title="Pending Photos"
-          value={metrics.pendingPhotos}
-          subtitle="Awaiting review"
-          urgent={metrics.pendingPhotos > 50}
-        />
-
-        <MetricCard
           title="Approved Users"
           value={metrics.approvedUsers}
           subtitle="Ready to match"
         />
 
         <MetricCard
-          title="Active Users"
-          value={metrics.activeUsers}
-          subtitle="Not on vacation"
+          title="Pending Users"
+          value={metrics.pendingPhotos}
+          subtitle="Awaiting review"
+          urgent={metrics.pendingPhotos > 50}
+        />
+
+        <MetricCard
+          title="Male Users"
+          value={metrics.maleUsers}
+          subtitle="All male users"
+        />
+
+        <MetricCard
+          title="Female Users"
+          value={metrics.femaleUsers}
+          subtitle="All female users"
         />
       </div>
 

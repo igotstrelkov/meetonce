@@ -112,31 +112,31 @@ export const rejectPhoto = mutation({
 export const getPlatformMetrics = query({
   args: {},
   returns: v.object({
-    totalUsers: v.number(),
+    maleUsers: v.number(),
     pendingPhotos: v.number(),
     approvedUsers: v.number(),
-    activeUsers: v.number(),
+    femaleUsers: v.number(),
     approvalRate: v.number(),
   }),
   handler: async (ctx) => {
     const allUsers = await ctx.db.query("users").collect();
 
     const totalUsers = allUsers.length;
+
+    const maleUsers = allUsers.filter((u) => u.gender === "male").length;
     const pendingPhotos = allUsers.filter(
       (u) => u.accountStatus === "pending"
     ).length;
     const approvedUsers = allUsers.filter(
       (u) => u.accountStatus === "approved"
     ).length;
-    const activeUsers = allUsers.filter(
-      (u) => u.accountStatus === "approved" && !u.vacationMode
-    ).length;
+    const femaleUsers = allUsers.filter((u) => u.gender === "female").length;
 
     return {
-      totalUsers,
+      maleUsers,
       pendingPhotos,
       approvedUsers,
-      activeUsers,
+      femaleUsers,
       approvalRate:
         totalUsers > 0 ? Math.round((approvedUsers / totalUsers) * 100) : 0,
     };

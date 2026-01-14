@@ -887,7 +887,7 @@ Protected route (Clerk authentication + `isAdmin=true` required). Four tabs with
 - User growth, photo queue status (alerts if >50 pending), matching performance
 - **Critical metrics**: Date completion rate (≥80%), mutual interest rate (≥30%), second date request rate
 - Alert system for issues: mutual interest <20%, photo queue >50, completion rate <70%
-- Metrics displayed: Total users, pending photos, approval rate, average rating (admin only)
+- Metrics displayed: Total users, pending users, approval rate, average rating (admin only)
 
 **Tab 2: Photo Review Queue** (`/admin/photo-review`) - **PRIMARY ADMIN TASK**
 

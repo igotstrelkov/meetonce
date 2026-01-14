@@ -5,7 +5,7 @@ import PhotoApproved from "../emails/PhotoApproved";
 import PhotoRejected from "../emails/PhotoRejected";
 import SecondDateContact from "../emails/SecondDateContact";
 import WeeklyMatch from "../emails/WeeklyMatch";
-import { internalAction } from "./_generated/server";
+import { action, internalAction } from "./_generated/server";
 
 export const sendPhotoApprovedEmail = internalAction({
   args: {
@@ -282,6 +282,45 @@ export const sendNewMessageEmail = internalAction({
     } catch (error) {
       console.error("❌ Email error:", error);
       // Don't throw - email failures should not block message delivery
+    }
+  },
+});
+
+export const sendUserFeedback = action({
+  args: {
+    feedback: v.string(),
+    userEmail: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Must be authenticated to send feedback");
+    }
+
+    const userInfo = args.userEmail || identity.email || identity.subject;
+
+    console.log(`
+      ====== USER FEEDBACK ======
+      From: ${userInfo}
+      Feedback: ${args.feedback}
+      ===========================
+    `);
+
+    const { Resend } = await import("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    try {
+      await resend.emails.send({
+        from: "MeetOnce <admin@meetonce.co>",
+        to: "igorstrelkov95@gmail.com",
+        subject: "MeetOnce User Feedback",
+        text: `Feedback from: ${userInfo}\n\n${args.feedback}`,
+      });
+      console.log(`✅ User feedback email sent`);
+      return { success: true };
+    } catch (error) {
+      console.error("❌ Feedback email error:", error);
+      throw new Error("Failed to send feedback");
     }
   },
 });
