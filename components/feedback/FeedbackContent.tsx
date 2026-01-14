@@ -8,7 +8,6 @@ import { useQuery } from "convex/react";
 import {
   Calendar,
   CheckCircle,
-  MapPin,
   Star,
   ThumbsDown,
   ThumbsUp,
@@ -58,8 +57,9 @@ export function FeedbackContent({
                 {matchUser.name}, {matchUser.age}
               </h3>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar className="w-4 h-4" />
-                <span>Week of {outcome?.weekOf}</span>
+                <span>
+                  {matchUser.jobTitle} at {matchUser.workplace}
+                </span>
               </div>
             </div>
             {outcome !== null && (
@@ -183,16 +183,14 @@ export function FeedbackContent({
                       </div>
                     )}
 
-                    {/* Venue Rating */}
-                    {outcome?.venueRating && (
+                    {/* Week of */}
+                    {outcome?.weekOf && (
                       <div>
-                        <p className="text-sm text-gray-600 mb-1">
-                          Venue Rating:
-                        </p>
+                        <p className="text-sm text-gray-600 mb-1">Week of:</p>
                         <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-gray-600" />
+                          <Calendar className="w-4 h-4 text-gray-600" />
                           <span className="capitalize text-gray-700">
-                            {outcome?.venueRating.replace(/_/g, " ")}
+                            {outcome?.weekOf}
                           </span>
                         </div>
                       </div>

@@ -2,9 +2,8 @@
 
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Doc } from "@/convex/_generated/dataModel";
-import { AlertCircle, Calendar } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { Alert, AlertDescription } from "../ui/alert";
 import { Separator } from "../ui/separator";
 import DimensionalScores from "./DimensionalScores";
 
@@ -45,8 +44,9 @@ export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
             {matchUser.name}, {matchUser.age}
           </h3>
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Calendar className="w-4 h-4" />
-            <span>Week of {match.weekOf}</span>
+            <span>
+              {matchUser.jobTitle} at {matchUser.workplace}
+            </span>
           </div>
         </div>
 
@@ -77,17 +77,23 @@ export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
 
         {match.redFlags && match.redFlags.length > 0 && (
           <>
-            <Alert variant="destructive" className="border-red-500">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                <div className="font-medium mb-2">Things to Consider:</div>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  {match.redFlags.map((flag, index) => (
-                    <li key={index}>{flag}</li>
-                  ))}
-                </ul>
-              </AlertDescription>
-            </Alert>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-amber-900 mb-2">
+                    Things to Consider
+                  </h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-amber-800">
+                    {match.redFlags.map((flag, index) => (
+                      <li key={index} className="leading-relaxed">
+                        {flag}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
           </>
         )}
       </div>

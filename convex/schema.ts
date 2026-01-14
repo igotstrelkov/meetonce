@@ -12,6 +12,8 @@ export default defineSchema({
     age: v.number(),
     gender: v.string(),
     location: v.string(),
+    jobTitle: v.string(),
+    workplace: v.string(),
     bio: v.string(),
     lookingFor: v.string(),
     interests: v.array(v.string()),

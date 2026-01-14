@@ -36,9 +36,9 @@ export function PastMatches() {
   if (pastMutualMatches.length === 0) {
     return (
       <Card className="p-8 text-center">
-        <p className="text-gray-600">No dates to rate yet</p>
+        <p className="text-gray-600">No past dates found</p>
         <p className="text-sm text-gray-500 mt-2">
-          When you have mutual matches, you can rate your dates here
+          Rate your past dates to help our AI find you better matches.
         </p>
       </Card>
     );

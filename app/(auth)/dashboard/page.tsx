@@ -31,27 +31,8 @@ export default function DashboardPage() {
     }
   }, [currentUser, router]);
 
-  if (currentUser === undefined) {
+  if (currentUser === undefined || currentUser === null) {
     return <LoadingSpinner />;
-  }
-
-  if (currentUser === null) {
-    return (
-      <div className="flex h-[60vh] w-full items-center justify-center">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold text-gray-900">
-            User Profile Not Found
-          </h2>
-          <p className="text-gray-600">
-            We couldn't locate your profile data. You may need to complete the
-            onboarding process.
-          </p>
-          <Button onClick={() => router.push("/onboarding")}>
-            Complete Onboarding
-          </Button>
-        </div>
-      </div>
-    );
   }
 
   if (currentUser.accountStatus === "rejected") {
