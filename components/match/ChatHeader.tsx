@@ -25,7 +25,9 @@ export function ChatHeader({
       <div className="flex items-center gap-3">
         <ChevronLeft size={35} onClick={() => router.push("/dashboard")} />
         <div>
-          <h3 className="font-semibold text-gray-900">{matchUserName}</h3>
+          <h3 className="font-semibold text-gray-900">
+            {matchUserName.split(" ")[0]}
+          </h3>
           <div className="flex items-center gap-1 text-sm text-gray-600">
             <span>
               {isExpired

@@ -38,7 +38,7 @@ export function PastMatches() {
       <Card className="p-8 text-center">
         <p className="text-gray-600">No past dates found</p>
         <p className="text-sm text-gray-500 mt-2">
-          Rate your past dates to help our AI find you better matches.
+          Leave anonymous feedback to help us find you better dates.
         </p>
       </Card>
     );
@@ -75,25 +75,21 @@ function PastMatchItem({ pastMutualMatch }: PastMutualMatchProps) {
           <div className="flex gap-3">
             {/* Match User Photo */}
             <div className="shrink-0">
-              {matchUser.photoUrl ? (
-                <Image
-                  src={matchUser.photoUrl}
-                  alt={matchUser.name}
-                  width={120}
-                  height={120}
-                  className="rounded-lg object-cover"
-                />
-              ) : (
-                <div className="w-[120px] h-[120px] bg-gray-200 rounded-lg flex items-center justify-center">
-                  <span className="text-4xl">👤</span>
-                </div>
-              )}
+              <Image
+                src={matchUser.photoUrl || "/avatar.png"}
+                alt={matchUser.name}
+                width={120}
+                height={120}
+                className="rounded-lg object-cover"
+              />
             </div>
 
             {/* Match Details */}
             <div className="flex-1 space-y-3">
               <div>
-                <h3 className="text-xl font-bold">{matchUser.name}</h3>
+                <h3 className="text-xl font-bold">
+                  {matchUser.name.split(" ")[0]}
+                </h3>
                 <p className="text-sm text-gray-600">
                   {matchUser.age} • {matchUser.location}
                 </p>

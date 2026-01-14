@@ -41,7 +41,7 @@ export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
         {/* Profile Header */}
         <div>
           <h3 className="text-lg font-bold">
-            {matchUser.name}, {matchUser.age}
+            {matchUser.name.split(" ")[0]}, {matchUser.age}
           </h3>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>
@@ -86,9 +86,9 @@ export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
                   </h4>
                   <ul className="list-disc list-inside space-y-1 text-sm text-amber-800">
                     {match.redFlags.map((flag, index) => (
-                      <li key={index} className="leading-relaxed">
+                      <div key={index} className="leading-relaxed">
                         {flag}
-                      </li>
+                      </div>
                     ))}
                   </ul>
                 </div>

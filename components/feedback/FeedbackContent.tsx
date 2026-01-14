@@ -8,6 +8,7 @@ import { useQuery } from "convex/react";
 import {
   Calendar,
   CheckCircle,
+  MapPin,
   Star,
   ThumbsDown,
   ThumbsUp,
@@ -54,7 +55,7 @@ export function FeedbackContent({
           <div className="flex-1 space-y-3">
             <div>
               <h3 className="text-lg font-bold">
-                {matchUser.name}, {matchUser.age}
+                {matchUser.name.split(" ")[0]}, {matchUser.age}
               </h3>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>
@@ -145,56 +146,76 @@ export function FeedbackContent({
                       )}
                     </div>
 
-                    {/* What Went Well */}
-                    {outcome?.wentWell && outcome?.wentWell.length > 0 && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          What went well:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {outcome?.wentWell.map((item, i) => (
-                            <span
-                              key={i}
-                              className="px-2 py-1 bg-green-50 text-green-700 text-sm rounded-md"
-                            >
-                              {item}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Week of */}
+                      {outcome?.weekOf && (
+                        <div>
+                          <p className="text-sm text-gray-600 mb-1">Week of:</p>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-gray-600" />
+                            <span className="capitalize text-gray-700">
+                              {outcome?.weekOf}
                             </span>
-                          ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* What Went Poorly */}
-                    {outcome?.wentPoorly && outcome?.wentPoorly.length > 0 && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          Areas to improve:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {outcome?.wentPoorly.map((item, i) => (
-                            <span
-                              key={i}
-                              className="px-2 py-1 bg-red-50 text-red-700 text-sm rounded-md"
-                            >
-                              {item}
+                      {/* Venue Rating */}
+                      {outcome?.venueRating && (
+                        <div>
+                          <p className="text-sm text-gray-600 mb-1">
+                            Venue Rating:
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-gray-600" />
+                            <span className="capitalize text-gray-700">
+                              {outcome?.venueRating}
                             </span>
-                          ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
-                    {/* Week of */}
-                    {outcome?.weekOf && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Week of:</p>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-gray-600" />
-                          <span className="capitalize text-gray-700">
-                            {outcome?.weekOf}
-                          </span>
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* What Went Well */}
+                      {outcome?.wentWell && outcome?.wentWell.length > 0 && (
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2">
+                            What went well:
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {outcome?.wentWell.map((item, i) => (
+                              <span
+                                key={i}
+                                className="px-2 py-1 bg-green-50 text-green-700 text-sm rounded-md"
+                              >
+                                {item}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+
+                      {/* What Went Poorly */}
+                      {outcome?.wentPoorly &&
+                        outcome?.wentPoorly.length > 0 && (
+                          <div>
+                            <p className="text-sm text-gray-600 mb-2">
+                              Areas to improve:
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {outcome?.wentPoorly.map((item, i) => (
+                                <span
+                                  key={i}
+                                  className="px-2 py-1 bg-red-50 text-red-700 text-sm rounded-md"
+                                >
+                                  {item}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                    </div>
 
                     {/* Additional Thoughts */}
                     {outcome?.additionalThoughts && (

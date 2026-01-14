@@ -38,7 +38,7 @@ export default function MutualMatch({
 
             <div style={sectionBox}>
               <Text style={sectionTitle}>💬 Start Chatting Now!</Text>
-              <Text style={venueNote}>
+              <Text style={chatNote}>
                 You can now chat directly in the app! Head to your dashboard to
                 start the conversation and plan your date together. Chat is
                 active until Friday at 11:59 PM.
@@ -83,18 +83,7 @@ const sectionTitle = {
   color: "#F54927",
   marginBottom: "12px",
 };
-const venueNameStyle = {
-  fontSize: "16px",
-  fontWeight: "bold" as const,
-  color: "#F54927",
-  marginBottom: "4px",
-};
-const venueAddressStyle = {
-  fontSize: "14px",
-  color: "#F54927",
-  marginBottom: "12px",
-};
-const venueNote = {
+const chatNote = {
   fontSize: "13px",
   color: "#F54927",
   fontStyle: "italic" as const,
