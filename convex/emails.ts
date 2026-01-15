@@ -46,7 +46,7 @@ export const sendWaitlistEmail = internalAction({
   },
 });
 
-export const sendPhotoApprovedEmail = internalAction({
+export const sendUserApprovedEmail = internalAction({
   args: {
     to: v.string(),
     userName: v.string(),
@@ -89,7 +89,7 @@ export const sendPhotoApprovedEmail = internalAction({
   },
 });
 
-export const sendPhotoRejectedEmail = internalAction({
+export const sendUserRejectedEmail = internalAction({
   args: {
     to: v.string(),
     userName: v.string(),

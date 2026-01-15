@@ -158,7 +158,7 @@ export default function UserReviewPage() {
                     size="lg"
                     className="bg-green-600 hover:bg-green-700 text-lg px-8 py-6"
                   >
-                    ✓ Waitlist
+                    ✓ Add to waitlist
                   </Button>
                   <Button
                     onClick={() => setShowRejectModal(true)}

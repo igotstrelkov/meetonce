@@ -11,7 +11,7 @@ import { WENT_POORLY_OPTIONS, WENT_WELL_OPTIONS } from "@/lib/constants";
 import { useMutation } from "convex/react";
 import { useState } from "react";
 
-export const PostDateFeedbackForm = ({
+export const FeedbackForm = ({
   match,
   onComplete,
 }: {

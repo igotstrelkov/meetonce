@@ -1,7 +1,7 @@
 "use client";
 
 import { FeedbackContent } from "@/app/(auth)/dashboard/FeedbackContent";
-import { PostDateFeedbackForm } from "@/app/(auth)/dashboard/PostDateFeedbackForm";
+import { FeedbackForm } from "@/app/(auth)/dashboard/FeedbackForm";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -127,10 +127,7 @@ function PastMatchItem({ pastMutualMatch }: PastMutualMatchProps) {
           {feedbackProvided ? (
             <FeedbackContent match={match} matchUser={matchUser} />
           ) : (
-            <PostDateFeedbackForm
-              match={match}
-              onComplete={() => setIsOpen(false)}
-            />
+            <FeedbackForm match={match} onComplete={() => setIsOpen(false)} />
           )}
         </div>
 

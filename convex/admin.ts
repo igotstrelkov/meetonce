@@ -96,7 +96,7 @@ export const rejectUser = mutation({
     });
 
     // Send rejection email
-    await ctx.scheduler.runAfter(0, internal.emails.sendPhotoRejectedEmail, {
+    await ctx.scheduler.runAfter(0, internal.emails.sendUserRejectedEmail, {
       to: user.email,
       userName: user.name,
       reason: args.rejectionReason,
@@ -165,7 +165,7 @@ export const approveUser = mutation({
     });
 
     // Send approval email
-    await ctx.scheduler.runAfter(0, internal.emails.sendPhotoApprovedEmail, {
+    await ctx.scheduler.runAfter(0, internal.emails.sendUserApprovedEmail, {
       to: user.email,
       userName: user.name,
       dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
