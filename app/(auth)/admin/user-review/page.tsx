@@ -12,69 +12,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/convex/_generated/api";
 import { REJECTION_CATEGORIES } from "@/lib/constants";
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type ReviewStep = "decision" | "rating";
 
-export default function PhotoReviewPage() {
-  const pendingPhotos = useQuery(api.admin.getPendingPhotos);
-  const approvePhoto = useMutation(api.admin.approvePhoto);
-  const rejectPhoto = useMutation(api.admin.rejectPhoto);
+export default function UserReviewPage() {
+  const pendingUsers = useQuery(api.admin.getPendingUsers);
+  const waitlistUser = useMutation(api.admin.waitlistUser);
+  const rejectUser = useMutation(api.admin.rejectUser);
 
   const [step, setStep] = useState<ReviewStep>("decision");
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
 
-  // Keyboard shortcuts for decision step
-  useEffect(() => {
-    if (step !== "decision" || showRejectModal) return;
-
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // A for approve
-      if (e.key === "a" || e.key === "A") {
-        handleApproveDecision();
-      }
-
-      // R for reject
-      if (e.key === "r" || e.key === "R") {
-        setShowRejectModal(true);
-      }
-    };
-
-    window.addEventListener("keypress", handleKeyPress);
-    return () => window.removeEventListener("keypress", handleKeyPress);
-  }, [step, showRejectModal]);
-
-  // Keyboard shortcuts for rating step
-  useEffect(() => {
-    if (step !== "rating") return;
-
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // Number keys 1-9, 0 for 10
-      if (e.key >= "1" && e.key <= "9") {
-        const rating = parseInt(e.key);
-        setSelectedRating(rating);
-        handleFinalApprove(rating);
-      } else if (e.key === "0") {
-        setSelectedRating(10);
-        handleFinalApprove(10);
-      }
-    };
-
-    window.addEventListener("keypress", handleKeyPress);
-    return () => window.removeEventListener("keypress", handleKeyPress);
-  }, [step]);
-
-  const handleApproveDecision = () => {
+  const handleWaitlistDecision = () => {
     setStep("rating");
   };
 
-  const handleFinalApprove = async (rating: number) => {
-    if (!currentPhoto) return;
+  const handleWaitlist = async (rating: number) => {
+    if (!currentUser) return;
 
-    await approvePhoto({
-      userId: currentPhoto._id,
+    await waitlistUser({
+      userId: currentUser._id,
       rating: rating,
     });
 
@@ -84,10 +44,10 @@ export default function PhotoReviewPage() {
   };
 
   const handleReject = async () => {
-    if (!currentPhoto) return;
+    if (!currentUser) return;
 
-    await rejectPhoto({
-      userId: currentPhoto._id,
+    await rejectUser({
+      userId: currentUser._id,
       rejectionReason: rejectionReason || "Please resubmit a clearer photo",
     });
 
@@ -98,25 +58,25 @@ export default function PhotoReviewPage() {
   };
 
   // 1. Loading State
-  if (pendingPhotos === undefined) {
+  if (pendingUsers === undefined) {
     return <LoadingSpinner />;
   }
 
   // 2. Render State
-  const currentPhoto = pendingPhotos[0];
+  const currentUser = pendingUsers[0];
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold mb-2">Photo Review</h2>
+          <h2 className="text-3xl font-bold mb-2">User Review</h2>
           <p className="text-gray-600">
-            {pendingPhotos?.length || 0} photos remaining
+            {pendingUsers?.length || 0} users remaining
           </p>
         </div>
       </div>
 
-      {pendingPhotos.length === 0 ? (
+      {pendingUsers.length === 0 ? (
         <div className="flex items-center justify-center min-h-[300px]">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-2">No Pending Users</h2>
@@ -133,9 +93,9 @@ export default function PhotoReviewPage() {
                 <h3 className="text-sm font-semibold mb-2 text-center">
                   Profile Photo
                 </h3>
-                {currentPhoto.photoUrl ? (
+                {currentUser.photoUrl ? (
                   <img
-                    src={currentPhoto.photoUrl}
+                    src={currentUser.photoUrl}
                     alt="User photo"
                     className="w-full h-96 object-cover rounded-lg"
                   />
@@ -151,9 +111,9 @@ export default function PhotoReviewPage() {
                 <h3 className="text-sm font-semibold mb-2 text-center">
                   Verification Document
                 </h3>
-                {currentPhoto.verificationDocUrl ? (
+                {currentUser.verificationDocUrl ? (
                   <img
-                    src={currentPhoto.verificationDocUrl}
+                    src={currentUser.verificationDocUrl}
                     alt="Verification document"
                     className="w-full h-96 object-contain rounded-lg bg-gray-50"
                   />
@@ -167,41 +127,38 @@ export default function PhotoReviewPage() {
 
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold">
-                {currentPhoto.name}, {currentPhoto.age}
+                {currentUser.name}, {currentUser.age}
               </h3>
-              <p className="text-gray-600">{currentPhoto.location}</p>
+              <p className="text-gray-600">{currentUser.location}</p>
               <p className="text-sm text-gray-500 mt-2">
-                Resubmissions: {currentPhoto.accountResubmissionCount}
+                Resubmissions: {currentUser.accountResubmissionCount}
               </p>
             </div>
 
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">About Them</h3>
               <p className="text-gray-700 leading-relaxed">
-                {currentPhoto?.bio}
+                {currentUser?.bio}
               </p>
             </div>
 
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Looking For</h3>
               <p className="text-gray-700 leading-relaxed">
-                {currentPhoto?.lookingFor}
+                {currentUser?.lookingFor}
               </p>
             </div>
 
-            {/* Step 1: Decision (Approve or Reject) */}
+            {/* Step 1: Decision (Waitlist or Reject) */}
             {step === "decision" && (
               <div className="p-4">
-                {/* <h3 className="text-xl font-bold mb-4">
-            Step 1: Approve or Reject?
-          </h3> */}
                 <div className="flex gap-4 justify-center">
                   <Button
-                    onClick={handleApproveDecision}
+                    onClick={handleWaitlistDecision}
                     size="lg"
                     className="bg-green-600 hover:bg-green-700 text-lg px-8 py-6"
                   >
-                    ✓ Approve (A)
+                    ✓ Waitlist
                   </Button>
                   <Button
                     onClick={() => setShowRejectModal(true)}
@@ -209,16 +166,13 @@ export default function PhotoReviewPage() {
                     variant="destructive"
                     className="text-lg px-8 py-6"
                   >
-                    ✗ Reject (R)
+                    ✗ Reject
                   </Button>
                 </div>
-                <p className="text-sm text-gray-600 text-center mt-4">
-                  Keyboard: Press A to approve, R to reject
-                </p>
               </div>
             )}
 
-            {/* Step 2: Rating (Only if Approved) */}
+            {/* Step 2: Rating (Only if Waitlisted) */}
             {step === "rating" && (
               <div>
                 <h3 className="text-xl font-bold mb-4">
@@ -228,7 +182,7 @@ export default function PhotoReviewPage() {
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                     <button
                       key={num}
-                      onClick={() => handleFinalApprove(num)}
+                      onClick={() => handleWaitlist(num)}
                       className={`w-14 h-14 rounded-lg text-lg font-bold transition-all ${
                         selectedRating === num
                           ? "bg-primary text-white scale-110"
@@ -239,9 +193,6 @@ export default function PhotoReviewPage() {
                     </button>
                   ))}
                 </div>
-                <p className="text-sm text-gray-600 text-center mt-4">
-                  Keyboard: Press 1-9 or 0 (for 10)
-                </p>
               </div>
             )}
           </div>

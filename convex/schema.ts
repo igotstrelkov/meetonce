@@ -25,6 +25,7 @@ export default defineSchema({
     // Account Status
     accountStatus: v.union(
       v.literal("pending"),
+      v.literal("waitlisted"),
       v.literal("approved"),
       v.literal("rejected")
     ),

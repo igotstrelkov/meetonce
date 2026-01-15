@@ -12,7 +12,6 @@ import { makeMatchKey } from "./lib/utils";
 
 export const getUserByClerkId = query({
   args: { clerkId: v.string() },
-  returns: v.union(v.any(), v.null()),
   handler: async (ctx, args) => {
     return await ctx.db
       .query("users")

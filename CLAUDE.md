@@ -824,7 +824,7 @@ Built with React Email + Resend. Email integration is **ACTIVE** using Resend AP
 
 **Email Triggers**:
 
-- Photo approval/rejection → `convex/admin.ts` (approvePhoto, rejectPhoto mutations)
+- Photo approval/rejection → `convex/admin.ts` (waitlistUser, rejectUser mutations)
 - Weekly match → `convex/matching.ts` (sent to BOTH users immediately after match creation)
 - Mutual match → `convex/matches.ts` (respondToMatch mutation, sent to BOTH users)
 - New message → `convex/chat.ts` (sendMessage mutation, rate-limited to 1 per 24 hours per match)

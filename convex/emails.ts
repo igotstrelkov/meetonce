@@ -4,8 +4,47 @@ import NewMessage from "../emails/NewMessage";
 import PhotoApproved from "../emails/PhotoApproved";
 import PhotoRejected from "../emails/PhotoRejected";
 import SecondDateContact from "../emails/SecondDateContact";
+import Waitlist from "../emails/Waitlist";
 import WeeklyMatch from "../emails/WeeklyMatch";
 import { action, internalAction } from "./_generated/server";
+
+export const sendWaitlistEmail = internalAction({
+  args: {
+    to: v.string(),
+    userName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    console.log(`
+      ====== WAITLIST EMAIL ======
+      To: ${args.to}
+      Subject: You're on the Waitlist!
+
+      Hi ${args.userName},
+
+      Your profile has been reviewed and you're on our waitlist.
+      We'll notify you when your account is fully activated.
+      ============================
+    `);
+
+    const { Resend } = await import("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    try {
+      await resend.emails.send({
+        from: "MeetOnce <admin@meetonce.co>",
+        to: args.to,
+        subject: "You're on the Waitlist!",
+        react: Waitlist({
+          userName: args.userName,
+        }),
+      });
+      console.log(`✅ Waitlist email sent to ${args.to}`);
+    } catch (error) {
+      console.error("❌ Email error:", error);
+      throw error;
+    }
+  },
+});
 
 export const sendPhotoApprovedEmail = internalAction({
   args: {

@@ -4,7 +4,7 @@ import { mutation, query } from "./_generated/server";
 import { getWeekOfString } from "./lib/matching";
 import { makeMatchKey } from "./lib/utils";
 
-export const getPendingPhotos = query({
+export const getPendingUsers = query({
   args: {},
   handler: async (ctx) => {
     const users = await ctx.db
@@ -35,7 +35,7 @@ export const getPendingPhotos = query({
   },
 });
 
-export const approvePhoto = mutation({
+export const waitlistUser = mutation({
   args: {
     userId: v.id("users"),
     rating: v.number(),
@@ -46,32 +46,33 @@ export const approvePhoto = mutation({
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error("User not found");
 
-    // Update photo status
+    // Update photo status to waitlisted (not approved yet)
     await ctx.db.patch(args.userId, {
-      accountStatus: "approved",
+      accountStatus: "waitlisted",
       attractivenessRating: args.rating,
       updatedAt: Date.now(),
       matchKey: makeMatchKey({
-        accountStatus: "approved",
+        accountStatus: "waitlisted",
         vacationMode: user.vacationMode,
         gender: user.gender,
       }),
     });
 
-    // Send approval email
-    await ctx.scheduler.runAfter(0, internal.emails.sendPhotoApprovedEmail, {
+    // Send waitlist email
+    await ctx.scheduler.runAfter(0, internal.emails.sendWaitlistEmail, {
       to: user.email,
       userName: user.name,
-      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
     });
 
-    console.log(`✅ Approved user ${args.userId} with rating ${args.rating}`);
+    console.log(
+      `⏳ User ${args.userId} added to waitlist with rating ${args.rating}`
+    );
 
     return args.userId;
   },
 });
 
-export const rejectPhoto = mutation({
+export const rejectUser = mutation({
   args: {
     userId: v.id("users"),
     rejectionReason: v.string(),
@@ -109,11 +110,79 @@ export const rejectPhoto = mutation({
   },
 });
 
+// === WAITLIST MANAGEMENT ===
+
+export const getWaitlistedUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db
+      .query("users")
+      .withIndex("by_account_status", (q) =>
+        q.eq("accountStatus", "waitlisted")
+      )
+      .collect();
+
+    // Convert storage IDs to URLs
+    const usersWithUrls = await Promise.all(
+      users.map(async (user) => {
+        const photoUrl = user.photoStorageId
+          ? await ctx.storage.getUrl(user.photoStorageId)
+          : null;
+
+        return {
+          ...user,
+          photoUrl,
+        };
+      })
+    );
+
+    return usersWithUrls;
+  },
+});
+
+export const approveUser = mutation({
+  args: {
+    userId: v.id("users"),
+  },
+  returns: v.id("users"),
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("User not found");
+
+    if (user.accountStatus !== "waitlisted") {
+      throw new Error("User is not on the waitlist");
+    }
+
+    // Update status to approved
+    await ctx.db.patch(args.userId, {
+      accountStatus: "approved",
+      updatedAt: Date.now(),
+      matchKey: makeMatchKey({
+        accountStatus: "approved",
+        vacationMode: user.vacationMode,
+        gender: user.gender,
+      }),
+    });
+
+    // Send approval email
+    await ctx.scheduler.runAfter(0, internal.emails.sendPhotoApprovedEmail, {
+      to: user.email,
+      userName: user.name,
+      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+    });
+
+    console.log(`✅ Approved waitlisted user ${args.userId}`);
+
+    return args.userId;
+  },
+});
+
 export const getPlatformMetrics = query({
   args: {},
   returns: v.object({
     maleUsers: v.number(),
-    pendingPhotos: v.number(),
+    pendingUsers: v.number(),
+    waitlistedUsers: v.number(),
     approvedUsers: v.number(),
     femaleUsers: v.number(),
     approvalRate: v.number(),
@@ -123,18 +192,26 @@ export const getPlatformMetrics = query({
 
     const totalUsers = allUsers.length;
 
-    const maleUsers = allUsers.filter((u) => u.gender === "male").length;
-    const pendingPhotos = allUsers.filter(
+    const maleUsers = allUsers.filter(
+      (u) => u.gender === "male" && u.accountStatus === "approved"
+    ).length;
+    const pendingUsers = allUsers.filter(
       (u) => u.accountStatus === "pending"
+    ).length;
+    const waitlistedUsers = allUsers.filter(
+      (u) => u.accountStatus === "waitlisted"
     ).length;
     const approvedUsers = allUsers.filter(
       (u) => u.accountStatus === "approved"
     ).length;
-    const femaleUsers = allUsers.filter((u) => u.gender === "female").length;
+    const femaleUsers = allUsers.filter(
+      (u) => u.gender === "female" && u.accountStatus === "approved"
+    ).length;
 
     return {
       maleUsers,
-      pendingPhotos,
+      pendingUsers,
+      waitlistedUsers,
       approvedUsers,
       femaleUsers,
       approvalRate:

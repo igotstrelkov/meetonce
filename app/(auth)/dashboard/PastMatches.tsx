@@ -1,7 +1,7 @@
 "use client";
 
-import { FeedbackContent } from "@/components/feedback/FeedbackContent";
-import PostDateFeedbackForm from "@/components/feedback/PostDateFeedbackForm";
+import { FeedbackContent } from "@/app/(auth)/dashboard/FeedbackContent";
+import { PostDateFeedbackForm } from "@/app/(auth)/dashboard/PostDateFeedbackForm";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

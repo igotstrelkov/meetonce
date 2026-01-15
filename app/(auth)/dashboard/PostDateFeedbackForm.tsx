@@ -11,13 +11,13 @@ import { WENT_POORLY_OPTIONS, WENT_WELL_OPTIONS } from "@/lib/constants";
 import { useMutation } from "convex/react";
 import { useState } from "react";
 
-export default function PostDateFeedbackForm({
+export const PostDateFeedbackForm = ({
   match,
   onComplete,
 }: {
   match: Doc<"weeklyMatches">;
   onComplete?: () => void;
-}) {
+}) => {
   const submitFeedback = useMutation(api.feedback.submitDateFeedback);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -291,4 +291,4 @@ export default function PostDateFeedbackForm({
       </div>
     </div>
   );
-}
+};
