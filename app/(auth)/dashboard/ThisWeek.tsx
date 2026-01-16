@@ -76,14 +76,14 @@ export const ThisWeek = () => {
       {/* Response Buttons or Status */}
       {myResponse === "pending" && (
         <Card>
-          <CardFooter className="pt-6">
+          <CardFooter className="">
             <Button
               onClick={handleInterested}
               size="lg"
               className="flex-1 mr-4"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Submitting..." : "I'm Interested!"}
+              {isSubmitting ? "Submitting..." : "Accept"}
             </Button>
             <Button
               onClick={handlePass}
@@ -127,7 +127,7 @@ export const ThisWeek = () => {
         <StatusCard
           icon="🎉"
           title="It's a Date!"
-          description="You both are interested! Use chat to plan your first date."
+          description="Use chat for further communication."
         >
           <Separator />
 
@@ -135,6 +135,7 @@ export const ThisWeek = () => {
             onClick={() => router.push(`/chat/${match._id}`)}
             size="lg"
             className="w-full gap-2"
+            variant="outline"
           >
             <MessageCircle className="w-5 h-5" />
             Open Chat

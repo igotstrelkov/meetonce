@@ -10,9 +10,9 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Separator } from "@/components/ui/separator";
 import { Doc } from "@/convex/_generated/dataModel";
-import { User } from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
+import Image from "next/image";
 
 interface MatchDrawerProps {
   match: Doc<"weeklyMatches">;
@@ -23,18 +23,53 @@ export const MatchDrawer = ({ match, matchUser }: MatchDrawerProps) => {
   return (
     <Drawer>
       <Card>
-        <CardContent className="pt-6 space-y-4">
-          <div className="text-center space-y-2">
-            <div className="text-4xl">😉</div>
-            <h3 className="text-2xl font-bold">Your Weekly Match</h3>
-            <p className="text-muted-foreground">Expires Friday at 11:59 PM</p>
+        {/* <div className="text-4xl">😉</div>
+            <h3 className="text-2xl font-bold">Your Weekly Match</h3> */}
+        <CardContent>
+          <div className="flex gap-4 mb-4">
+            {/* Match User Photo */}
+            <div className="shrink-0 relative">
+              <Image
+                src={matchUser.photoUrl || "/avatar.png"}
+                alt={matchUser.name}
+                width={120}
+                height={120}
+                className="rounded-lg object-cover"
+              />
+              <div className="absolute bottom-2 left-2 right-2 flex justify-center">
+                <div className="backdrop-blur-[2px] shadow-sm rounded-full px-2 py-0.5 text-[10px] font-bold bg-green-100 text-green-800 border border-green-200">
+                  {match.compatibilityScore}% Compatibility
+                </div>
+              </div>
+            </div>
+
+            {/* Match Details */}
+            <div className="flex-1 space-y-3">
+              <div>
+                <h3 className="text-xl font-bold">
+                  {matchUser.name.split(" ")[0]}, {matchUser.age}
+                </h3>
+                <p className="text-sm text-gray-600">{matchUser.jobTitle}</p>
+              </div>
+
+              {/* Venue Info */}
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <MapPin className="w-4 h-4" />
+                <span>{match.suggestedVenue.name}</span>
+              </div>
+              {/* Venue Info */}
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Clock className="w-4 h-4" />
+                <span>Saturday at 14:00</span>
+              </div>
+            </div>
           </div>
 
-          <Separator />
+          {/* <Separator className="my-4" /> */}
           <DrawerTrigger asChild>
-            <Button size="lg" className="w-full gap-2">
-              <User className="w-5 h-5" />
-              View Match
+            <Button variant="outline" size="lg" className="w-full gap-2">
+              {/* <User className="w-5 h-5" /> */}
+              View More
             </Button>
           </DrawerTrigger>
         </CardContent>

@@ -26,6 +26,7 @@ export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
                 <LoadingSpinner size="lg" centered={false} />
               </div>
             )}
+
             <img
               src={matchUser?.photoUrl || "/avatar.png"}
               alt={matchUser?.name}
@@ -43,11 +44,15 @@ export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
           <h3 className="text-lg font-bold">
             {matchUser.name.split(" ")[0]}, {matchUser.age}
           </h3>
+
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>
-              {matchUser.jobTitle} at {matchUser.workplace}
-            </span>
+            <span>{matchUser.jobTitle}</span>
           </div>
+
+          {/* <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Building2 className="w-4 h-4" />
+            <span>{matchUser.location}, Ireland</span>
+          </div> */}
         </div>
 
         {/* Compatibility Score */}
