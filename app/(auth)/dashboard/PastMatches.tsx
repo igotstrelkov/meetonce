@@ -66,6 +66,7 @@ interface PastMutualMatchProps {
 
 function PastMatchItem({ pastMutualMatch }: PastMutualMatchProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const { match, matchUser, feedbackProvided } = pastMutualMatch;
 
   return (
@@ -74,13 +75,16 @@ function PastMatchItem({ pastMutualMatch }: PastMutualMatchProps) {
         <Card className={`p-3 transition-all cursor-pointer hover:shadow-lg`}>
           <div className="flex gap-3">
             {/* Match User Photo */}
-            <div className="shrink-0 relative">
+            <div className="shrink-0 relative w-[120px]">
               <Image
-                src={matchUser.photoUrl || "/avatar.png"}
-                alt={matchUser.name}
+                src={matchUser?.photoUrl || "/avatar.png"}
+                alt={matchUser?.name || "Match Photo"}
                 width={120}
                 height={120}
-                className="rounded-lg object-cover"
+                className={`w-full aspect-square object-cover rounded-2xl shadow-lg transition-opacity duration-300 ${
+                  imageLoaded ? "opacity-100" : "opacity-0"
+                }`}
+                onLoad={() => setImageLoaded(true)}
               />
               <div className="absolute bottom-2 left-2 right-2 flex justify-center">
                 <div className="backdrop-blur-[2px] shadow-sm rounded-full px-2 py-0.5 text-[10px] font-bold bg-green-100 text-green-800 border border-green-200">

@@ -1,6 +1,5 @@
 "use client";
 
-import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
 import { Doc } from "@/convex/_generated/dataModel";
@@ -14,6 +13,7 @@ import {
   ThumbsUp,
   XCircle,
 } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 
 export function FeedbackContent({
@@ -35,19 +35,15 @@ export function FeedbackContent({
           {/* Profile Photo with Loading State */}
           <div className="flex justify-center">
             <div className="relative w-full max-w-md">
-              {!imageLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-2xl aspect-square">
-                  <LoadingSpinner size="lg" centered={false} />
-                </div>
-              )}
-              <img
+              <Image
                 src={matchUser.photoUrl || "/avatar.png"}
                 alt={matchUser.name}
+                width={500}
+                height={500}
                 className={`w-full aspect-square object-cover rounded-2xl shadow-lg transition-opacity duration-300 ${
                   imageLoaded ? "opacity-100" : "opacity-0"
                 }`}
                 onLoad={() => setImageLoaded(true)}
-                onError={() => setImageLoaded(true)}
               />
             </div>
           </div>
@@ -58,9 +54,7 @@ export function FeedbackContent({
                 {matchUser.name.split(" ")[0]}, {matchUser.age}
               </h3>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>
-                  {matchUser.jobTitle} at {matchUser.workplace}
-                </span>
+                <span>{matchUser.jobTitle}</span>
               </div>
             </div>
             {outcome !== null && (

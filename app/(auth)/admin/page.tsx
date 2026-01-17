@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
+import Image from "next/image";
 
 export default function AdminOverviewPage() {
   const metrics = useQuery(api.admin.getPlatformMetrics);
@@ -95,7 +96,7 @@ export default function AdminOverviewPage() {
               >
                 <div className="flex items-center gap-4">
                   {user.photoUrl ? (
-                    <img
+                    <Image
                       src={user.photoUrl}
                       alt={user.name}
                       className="w-12 h-12 rounded-full object-cover"

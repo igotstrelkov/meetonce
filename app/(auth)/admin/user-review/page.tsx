@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/convex/_generated/api";
 import { REJECTION_CATEGORIES } from "@/lib/constants";
 import { useMutation, useQuery } from "convex/react";
+import Image from "next/image";
 import { useState } from "react";
 
 type ReviewStep = "decision" | "rating";
@@ -94,7 +95,7 @@ export default function UserReviewPage() {
                   Profile Photo
                 </h3>
                 {currentUser.photoUrl ? (
-                  <img
+                  <Image
                     src={currentUser.photoUrl}
                     alt="User photo"
                     className="w-full h-96 object-cover rounded-lg"
@@ -112,7 +113,7 @@ export default function UserReviewPage() {
                   Verification Document
                 </h3>
                 {currentUser.verificationDocUrl ? (
-                  <img
+                  <Image
                     src={currentUser.verificationDocUrl}
                     alt="Verification document"
                     className="w-full h-96 object-contain rounded-lg bg-gray-50"
