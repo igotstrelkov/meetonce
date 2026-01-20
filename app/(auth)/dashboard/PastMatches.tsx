@@ -25,7 +25,11 @@ export function PastMatches() {
   const pastMatches = useQuery(api.matches.getPastMatches, {});
 
   if (pastMatches === undefined) {
-    return <LoadingSpinner />;
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   // Filter to only show mutual matches (dates that could have happened)

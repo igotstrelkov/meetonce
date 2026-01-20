@@ -105,7 +105,7 @@ export const ThisWeek = () => {
     <div className="relative min-h-[calc(100vh-80px)] flex flex-col">
       {/* Drawer Context wrapping the whole hero section */}
       <Drawer>
-        <div className="flex-1 flex flex-col md:flex-row bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
+        <div className="flex-1 flex flex-col md:flex-row bg-white rounded-3xl overflow-hidden border border-gray-100">
           {/* Main Hero Image Section */}
           <div className="relative w-full md:w-1/2 min-h-[400px] md:min-h-full">
             <Image
@@ -119,7 +119,7 @@ export const ThisWeek = () => {
               priority
             />
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:bg-gradient-to-l md:from-white/10 md:to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent md:bg-linear-to-l md:from-white/10 md:to-transparent" />
 
             {/* Mobile-only Info Overlay (bottom of image) */}
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white md:hidden">
