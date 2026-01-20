@@ -4,6 +4,7 @@ import { FeedbackContent } from "@/app/(auth)/dashboard/FeedbackContent";
 import { FeedbackForm } from "@/app/(auth)/dashboard/FeedbackForm";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Drawer,
   DrawerClose,
@@ -13,17 +14,10 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
 import { Doc } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import {
-  Calendar,
-  Check,
-  ChevronRight,
-  CircleQuestionMark,
-  MapPin,
-} from "lucide-react";
+import { Calendar, Check, CircleQuestionMark, MapPin } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -41,12 +35,6 @@ export function PastMatches() {
 
   if (pastMutualMatches.length === 0) {
     return (
-      // <Card className="p-8 text-center">
-      //   <p className="text-gray-600 text-lg font-bold">No Past Dates</p>
-      //   <p className="text-sm text-gray-500 mt-2">
-      //     Leave anonymous feedback to help us find you better dates.
-      //   </p>
-      // </Card>
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 space-y-4">
         <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
           <Calendar className="w-10 h-10 text-blue-500" />
@@ -87,69 +75,68 @@ function PastMatchItem({ pastMutualMatch }: PastMutualMatchProps) {
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
-        <div className="group relative p-4 transition-all hover:bg-gray-50 rounded-2xl cursor-pointer">
-          <div className="flex gap-4">
+        <Card className={`p-3 transition-all cursor-pointer hover:shadow-lg`}>
+          <div className="flex gap-3">
             {/* Match User Photo */}
-            <div className="shrink-0 relative w-[100px]">
+            <div className="shrink-0 relative w-[120px]">
               <Image
                 src={matchUser?.photoUrl || "/avatar.png"}
                 alt={matchUser?.name || "Match Photo"}
-                width={100}
-                height={100}
-                className={`w-full aspect-square object-cover rounded-2xl transition-opacity duration-300 ${
+                width={120}
+                height={120}
+                className={`w-full aspect-square object-cover rounded-2xl shadow-lg transition-opacity duration-300 ${
                   imageLoaded ? "opacity-100" : "opacity-0"
                 }`}
                 onLoad={() => setImageLoaded(true)}
               />
-              <div className="absolute bottom-2 left-0 right-0 flex justify-center">
-                <div className="bg-white/90 backdrop-blur-[2px] shadow-sm rounded-full px-2 py-0.5 text-[10px] font-bold text-green-700">
-                  {match.compatibilityScore}%
-                </div>
-              </div>
             </div>
 
             {/* Match Details */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold truncate pr-2">
+            <div className="flex-1">
+              <div>
+                <h3 className="text-xl font-bold">
                   {matchUser.name.split(" ")[0]}, {matchUser.age}
                 </h3>
+                <p className="text-sm text-gray-600">Week of {match.weekOf}</p>
               </div>
 
-              {/* Status Badge */}
-              <div className="flex items-center gap-2">
-                {feedbackProvided ? (
-                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-xs font-medium">
-                    <Check className="w-3 h-3" />
-                    Feedback Sent
-                  </div>
-                ) : (
-                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full text-xs font-medium">
-                    <CircleQuestionMark className="w-3 h-3" />
-                    Feedback Needed
-                  </div>
-                )}
+              {/* Venue Info */}
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <MapPin className="w-4 h-4" />
+                <span>{match.suggestedVenue.name}</span>
+              </div>
+              {/* Venue Info */}
+              {/* <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Clock className="w-4 h-4" />
+                <span>Saturday at 14:00</span>
+              </div> */}
+              {/* Week Info */}
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Calendar className="w-4 h-4" />
+                <span>Saturday at 14:00</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-500 mt-1">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
-                  <span className="truncate">Week of {match.weekOf}</span>
+              {/* Feedback Status */}
+              {feedbackProvided ? (
+                // <p className="text-sm text-green-600 font-medium">
+                //   Feedback provided
+                // </p>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Check className="w-4 h-4" />
+                  <span className="">Feedback provided</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
-                  <span className="truncate">{match.suggestedVenue.name}</span>
+              ) : (
+                // <p className="text-sm text-red-600 font-medium">
+                //   Feedback required
+                // </p>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <CircleQuestionMark className="w-4 h-4" />
+                  <span className="">Feedback required</span>
                 </div>
-              </div>
-            </div>
-
-            {/* Chevron */}
-            <div className="flex items-center justify-center text-gray-300">
-              <ChevronRight className="w-6 h-6" />
+              )}
             </div>
           </div>
-          <Separator className="absolute bottom-0 left-4 right-4 group-last:hidden" />
-        </div>
+        </Card>
       </DrawerTrigger>
       <DrawerContent
         className="h-[90vh]"
