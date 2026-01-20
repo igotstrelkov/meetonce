@@ -34,9 +34,9 @@ export default function AdminLayout({
 
   if (currentUser === undefined || currentUser === null) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <LoadingSpinner />
-      </div>
+      // <div className="flex items-center justify-center min-h-[50vh]">
+      <LoadingSpinner />
+      // </div>
     );
   }
 

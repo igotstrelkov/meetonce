@@ -13,7 +13,6 @@ import {
   ThumbsUp,
   XCircle,
 } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
 
 export function FeedbackContent({
@@ -33,7 +32,7 @@ export function FeedbackContent({
       <div className="flex-1 overflow-y-auto px-4 py-4">
         <div className="max-w-md mx-auto space-y-6">
           {/* Profile Photo with Loading State */}
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             <div className="relative w-full max-w-md">
               <Image
                 src={matchUser.photoUrl || "/avatar.png"}
@@ -46,17 +45,17 @@ export function FeedbackContent({
                 onLoad={() => setImageLoaded(true)}
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="flex-1 space-y-3">
-            <div>
+            {/* <div>
               <h3 className="text-lg font-bold">
                 {matchUser.name.split(" ")[0]}, {matchUser.age}
               </h3>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>{matchUser.jobTitle}</span>
               </div>
-            </div>
+            </div> */}
             {outcome !== null && (
               <>
                 {/* Date Status */}

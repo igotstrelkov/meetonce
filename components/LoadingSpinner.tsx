@@ -21,7 +21,7 @@ const sizeClasses = {
 export function LoadingSpinner({
   size = "md",
   className,
-  minHeight = "100px",
+  minHeight = "40px",
   centered = true,
 }: LoadingSpinnerProps) {
   if (centered) {
