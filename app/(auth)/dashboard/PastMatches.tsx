@@ -93,7 +93,7 @@ function PastMatchItem({ pastMutualMatch }: PastMutualMatchProps) {
 
             {/* Match Details */}
             <div className="flex-1">
-              <div>
+              <div className="mb-1">
                 <h3 className="text-xl font-bold">
                   {matchUser.name.split(" ")[0]}, {matchUser.age}
                 </h3>
@@ -122,16 +122,16 @@ function PastMatchItem({ pastMutualMatch }: PastMutualMatchProps) {
                 //   Feedback provided
                 // </p>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Check className="w-4 h-4" />
-                  <span className="">Feedback provided</span>
+                  <Check className="w-4 h-4 text-green-600" />
+                  <span className="text-green-600">Feedback provided</span>
                 </div>
               ) : (
                 // <p className="text-sm text-red-600 font-medium">
                 //   Feedback required
                 // </p>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <CircleQuestionMark className="w-4 h-4" />
-                  <span className="">Feedback required</span>
+                  <CircleQuestionMark className="w-4 h-4 text-red-600" />
+                  <span className="text-red-600">Feedback required</span>
                 </div>
               )}
             </div>

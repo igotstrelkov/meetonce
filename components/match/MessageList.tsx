@@ -33,7 +33,7 @@ export function MessageList({ messages, currentUserId }: MessageListProps) {
     return (
       <div className="flex-1 flex items-center justify-center text-gray-500 text-sm py-12">
         <div className="text-center">
-          <p className="mb-2 text-lg font-bold">No messages yet</p>
+          <p className="mb-2">No messages yet</p>
           <p className="text-xs">Send a message to start the conversation!</p>
         </div>
       </div>

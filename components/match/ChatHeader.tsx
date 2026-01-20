@@ -32,7 +32,7 @@ export function ChatHeader({
             <span>
               {isExpired
                 ? "Chat Has Expired"
-                : "Chat is active until Friday at 11:59 PM"}
+                : "Chat is active until Friday, 11:59 PM"}
             </span>
           </div>
         </div>
