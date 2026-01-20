@@ -2,9 +2,7 @@
 
 import { Doc } from "@/convex/_generated/dataModel";
 import { AlertCircle } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
-import { Separator } from "../ui/separator";
 import DimensionalScores from "./DimensionalScores";
 
 type MatchCardProps = {
@@ -19,7 +17,7 @@ export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
     <div className="flex-1 overflow-y-auto px-4 py-4">
       <div className="max-w-md mx-auto space-y-6">
         {/* Profile Photo with Loading State */}
-        <div className="flex justify-center">
+        {/* <div className="flex justify-center">
           <div className="relative w-full max-w-md">
             <Image
               src={matchUser?.photoUrl || "/avatar.png"}
@@ -32,28 +30,27 @@ export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
               onLoad={() => setImageLoaded(true)}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Profile Header */}
         <div className="flex-1 space-y-3">
-          <div>
+          {/* <div>
             <h3 className="text-lg font-bold">
               {matchUser.name.split(" ")[0]}, {matchUser.age}
             </h3>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span>{matchUser.jobTitle}</span>
             </div>
-          </div>
+          </div> */}
 
           {/* Compatibility Score */}
-          <div className="flex flex-wrap gap-2">
+          {/* <div className="flex flex-wrap gap-2">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-              {/* <CheckCircle className="w-4 h-4" /> */}
               {match.compatibilityScore}% Compatibility
             </div>
           </div>
 
-          <Separator />
+          <Separator /> */}
 
           {/* Why We Matched You */}
           <div>

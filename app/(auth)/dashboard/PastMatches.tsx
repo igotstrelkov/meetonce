@@ -17,7 +17,7 @@ import {
 import { api } from "@/convex/_generated/api";
 import { Doc } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { Calendar, Check, MapPin, X } from "lucide-react";
+import { Calendar, Check, CircleQuestionMark, MapPin } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -134,7 +134,7 @@ function PastMatchItem({ pastMutualMatch }: PastMutualMatchProps) {
                 //   Feedback required
                 // </p>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <X className="w-4 h-4" />
+                  <CircleQuestionMark className="w-4 h-4" />
                   <span className="">Feedback required</span>
                 </div>
               )}
