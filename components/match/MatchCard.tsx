@@ -33,7 +33,7 @@ export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
         </div> */}
 
         {/* Profile Header */}
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 space-y-8">
           {/* <div>
             <h3 className="text-lg font-bold">
               {matchUser.name.split(" ")[0]}, {matchUser.age}
