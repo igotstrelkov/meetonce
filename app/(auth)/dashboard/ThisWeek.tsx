@@ -179,7 +179,7 @@ export const ThisWeek = () => {
 
               {/* "View More" Trigger */}
               <DrawerTrigger asChild>
-                <button className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-medium text-sm transition-colors group">
+                <button className="w-full flex items-center justify-center gap-2 text-gray-500 hover:text-gray-900 font-medium text-sm transition-colors group">
                   <Info className="w-4 h-4" />
                   View full analysis
                   <ChevronUp className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
@@ -208,7 +208,7 @@ export const ThisWeek = () => {
                     disabled={isSubmitting}
                   >
                     <Check className="w-5 h-5 mr-2" />
-                    Interested
+                    Accept
                   </Button>
                 </div>
               ) : myResponse === "interested" ? (
