@@ -58,7 +58,7 @@ export default function ChatPage({
         matchId={match._id}
         matchUser={{
           _id: partner._id,
-          name: partner.name,
+          name: partner.firstName,
           photoUrl: partner.photoUrl,
         }}
         currentUserId={currentUser._id}

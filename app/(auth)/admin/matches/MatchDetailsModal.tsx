@@ -46,7 +46,7 @@ export default function MatchDetailsModal({
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Match Details: {user?.name} ↔ {matchUser?.name}
+            Match Details: {user?.firstName} ↔ {matchUser?.firstName}
           </DialogTitle>
         </DialogHeader>
 
@@ -89,7 +89,7 @@ export default function MatchDetailsModal({
           {/* User Responses */}
           <div className="grid grid-cols-2 gap-4">
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-3">{`${user?.name}'s Response`}</h3>
+              <h3 className="font-semibold mb-3">{`${user?.firstName}'s Response`}</h3>
               <ResponseBadge response={match.userResponse} />
               {match.userRespondedAt && (
                 <div className="text-xs text-gray-500 mt-2">
@@ -110,7 +110,7 @@ export default function MatchDetailsModal({
 
             <div className="border rounded-lg p-4">
               <h3 className="font-semibold mb-3">
-                {`${matchUser?.name}'s Response`}
+                {`${matchUser?.firstName}'s Response`}
               </h3>
               <ResponseBadge response={match.matchResponse} />
               {match.matchRespondedAt && (
@@ -138,13 +138,13 @@ export default function MatchDetailsModal({
               <div className="grid grid-cols-2 gap-4">
                 {userOutcome && (
                   <DateOutcomeCard
-                    userName={user?.name || "User"}
+                    userName={user?.firstName || "User"}
                     outcome={userOutcome}
                   />
                 )}
                 {matchUserOutcome && (
                   <DateOutcomeCard
-                    userName={matchUser?.name || "Match"}
+                    userName={matchUser?.firstName || "Match"}
                     outcome={matchUserOutcome}
                   />
                 )}
