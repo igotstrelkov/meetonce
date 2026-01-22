@@ -21,7 +21,6 @@ interface ProfileStepProps {
     gender: string;
     location: string;
     jobTitle: string;
-    workplace: string;
     interestedIn: string;
     minAge: number;
     maxAge: number;
@@ -54,10 +53,6 @@ export default function ProfileStep({
 
     if (!data.jobTitle || data.jobTitle.length < 2) {
       newErrors.jobTitle = "Job title is required";
-    }
-
-    if (!data.workplace || data.workplace.length < 2) {
-      newErrors.workplace = "Workplace is required";
     }
 
     if (!data.interestedIn) {
@@ -216,22 +211,6 @@ export default function ProfileStep({
           />
           {errors.jobTitle && (
             <p className="text-sm text-red-500 mt-1">{errors.jobTitle}</p>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="workplace" className="mb-2 block">
-            Workplace *
-          </Label>
-          <Input
-            id="workplace"
-            value={data.workplace}
-            onChange={(e) => updateData({ workplace: e.target.value })}
-            placeholder="e.g., Company name or industry"
-            className="w-full"
-          />
-          {errors.workplace && (
-            <p className="text-sm text-red-500 mt-1">{errors.workplace}</p>
           )}
         </div>
       </div>

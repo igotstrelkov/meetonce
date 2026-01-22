@@ -168,7 +168,7 @@ export const ThisWeek = () => {
 
                 <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl">
                   <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
-                    <Calendar className="w-5 h-5 text-pink-500" />
+                    <Calendar className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">When</h3>

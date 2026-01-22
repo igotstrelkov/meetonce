@@ -13,7 +13,6 @@ export default defineSchema({
     gender: v.string(),
     location: v.string(),
     jobTitle: v.string(),
-    workplace: v.string(),
     bio: v.string(),
     lookingFor: v.string(),
     interests: v.array(v.string()),

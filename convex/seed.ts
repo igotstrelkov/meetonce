@@ -25,7 +25,6 @@ const TEST_USERS = [
     minAge: 26,
     maxAge: 35,
     jobTitle: "Software Engineer",
-    workplace: "Tech Company",
   },
   {
     name: "Emma Murphy",
@@ -47,7 +46,6 @@ const TEST_USERS = [
     minAge: 28,
     maxAge: 38,
     jobTitle: "Marketing Manager",
-    workplace: "Marketing Agency",
   },
   {
     name: "Aoife O'Brien",
@@ -62,7 +60,6 @@ const TEST_USERS = [
     minAge: 24,
     maxAge: 32,
     jobTitle: "Graphic Designer",
-    workplace: "Design Agency",
   },
   {
     name: "Michael Chen",
@@ -84,7 +81,6 @@ const TEST_USERS = [
     minAge: 25,
     maxAge: 33,
     jobTitle: "Data Scientist",
-    workplace: "Tech Company",
   },
   {
     name: "James Walsh",
@@ -106,7 +102,6 @@ const TEST_USERS = [
     minAge: 27,
     maxAge: 36,
     jobTitle: "Teacher",
-    workplace: "School",
   },
   {
     name: "Liam O'Sullivan",
@@ -121,7 +116,6 @@ const TEST_USERS = [
     minAge: 24,
     maxAge: 32,
     jobTitle: "Fitness Coach",
-    workplace: "Gym",
   },
   {
     name: "Chloe Murphy",
@@ -143,7 +137,6 @@ const TEST_USERS = [
     minAge: 27,
     maxAge: 36,
     jobTitle: "Journalist",
-    workplace: "News Agency",
   },
   {
     name: "Sophie Byrne",
@@ -165,7 +158,6 @@ const TEST_USERS = [
     minAge: 23,
     maxAge: 30,
     jobTitle: "Environmental Scientist",
-    workplace: "Research Institute",
   },
   {
     name: "Patrick Doyle",
@@ -187,7 +179,6 @@ const TEST_USERS = [
     minAge: 28,
     maxAge: 38,
     jobTitle: "Architect",
-    workplace: "Design Firm",
   },
   {
     name: "Daniel Murphy",
@@ -202,7 +193,6 @@ const TEST_USERS = [
     minAge: 26,
     maxAge: 35,
     jobTitle: "Product Manager",
-    workplace: "Startup",
   },
   {
     name: "Rachel Kelly",
@@ -224,7 +214,6 @@ const TEST_USERS = [
     minAge: 26,
     maxAge: 35,
     jobTitle: "Veterinarian",
-    workplace: "Clinic",
   },
   {
     name: "Conor Fitzgerald",
@@ -239,7 +228,6 @@ const TEST_USERS = [
     minAge: 25,
     maxAge: 33,
     jobTitle: "Civil Engineer",
-    workplace: "Engineering Firm",
   },
   {
     name: "Katie O'Connor",
@@ -261,7 +249,6 @@ const TEST_USERS = [
     minAge: 25,
     maxAge: 32,
     jobTitle: "Nurse",
-    workplace: "Hospital",
   },
   {
     name: "Niamh Ryan",
@@ -283,7 +270,6 @@ const TEST_USERS = [
     minAge: 24,
     maxAge: 31,
     jobTitle: "Physiotherapist",
-    workplace: "Clinic",
   },
   {
     name: "Seán Brennan",
@@ -305,7 +291,6 @@ const TEST_USERS = [
     minAge: 26,
     maxAge: 35,
     jobTitle: "Teacher",
-    workplace: "School",
   },
   {
     name: "Tom Anderson",
@@ -320,7 +305,6 @@ const TEST_USERS = [
     minAge: 28,
     maxAge: 38,
     jobTitle: "Financial Analyst",
-    workplace: "Bank",
   },
   {
     name: "Grace Dunne",
@@ -342,7 +326,6 @@ const TEST_USERS = [
     minAge: 26,
     maxAge: 34,
     jobTitle: "HR Manager",
-    workplace: "HR Firm",
   },
   {
     name: "Oisín McCarthy",
@@ -357,7 +340,6 @@ const TEST_USERS = [
     minAge: 25,
     maxAge: 33,
     jobTitle: "UX Designer",
-    workplace: "Design Firm",
   },
   {
     name: "Ciara Walsh",
@@ -379,7 +361,6 @@ const TEST_USERS = [
     minAge: 27,
     maxAge: 35,
     jobTitle: "Event Planner",
-    workplace: "Event Planning Firm",
   },
   {
     name: "Brian Kavanagh",
@@ -401,7 +382,6 @@ const TEST_USERS = [
     minAge: 27,
     maxAge: 37,
     jobTitle: "Mechanical Engineer",
-    workplace: "Renewable Energy Firm",
   },
 ];
 
@@ -443,7 +423,6 @@ export const seedTestUsers = internalAction({
             location: user.location,
             bio: user.bio,
             jobTitle: user.jobTitle,
-            workplace: user.workplace,
             lookingFor: user.lookingFor,
             interests: user.interests,
             interestedIn: user.interestedIn,

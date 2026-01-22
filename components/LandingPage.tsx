@@ -27,9 +27,12 @@ export function LandingPage() {
         <section className="relative px-4 md:py-12 max-w-7xl mx-auto flex flex-col items-center text-center">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-primary/20 via-background to-background blur-3xl opacity-50" />
 
-          <h1 className="text-4xl md:text-7xl font-bold tracking-tight mb-8 max-w-4xl leading-[1.1]">
-            Tell us your type, <br />
-            <span className="text-primary">we'll plan the date</span>
+          <h1 className="text-4xl md:text-7xl font-extrabold tracking-tighter mb-8 max-w-4xl leading-[1.1]">
+            Your personal matchmaker
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">
+              in Dublin.
+            </span>
           </h1>
 
           <div className="w-full max-w-3xl bg-card border border-border/50 rounded-2xl p-6 md:p-8 shadow-xl backdrop-blur-sm mb-10">

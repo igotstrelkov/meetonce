@@ -18,9 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MeetOnce | Tell me your type, I set up the date",
+  title: "MeetOnce | We Find Them. You Date Them.",
   description:
-    "Revolutionizing online dating by replacing endless swiping with one exceptional, AI-curated match delivered weekly. The platform operates on a simple principle: quality over quantity. Users describe themselves and their ideal partner in natural language, and our AI finds their best possible match, explains why they're compatible, and helps them schedule their first date. One match. One week. That's it.",
+    "The first curated dating app made specifically for Dublin singles. 1 quality match per week. Real dates, not endless swiping.",
 };
 
 export default function RootLayout({
