@@ -52,6 +52,9 @@ export default defineSchema({
     interestedIn: v.string(),
     minAge: v.optional(v.number()),
     maxAge: v.optional(v.number()),
+
+    // Optional legacy field from test data
+    workplace: v.optional(v.string()),
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"])
@@ -209,4 +212,28 @@ export default defineSchema({
     .index("by_match_and_receiver", ["matchId", "receiverId"])
     .index("by_sender", ["senderId"])
     .index("by_flagged", ["flagged"]),
+
+  coffeeShops: defineTable({
+    // Google Places data
+    placeId: v.string(),
+    name: v.string(),
+    address: v.string(),
+    latitude: v.number(),
+    longitude: v.number(),
+
+    // Optional enrichment data
+    rating: v.optional(v.number()),
+    userRatingsTotal: v.optional(v.number()),
+    priceLevel: v.optional(v.number()),
+
+    // Admin metadata
+    addedBy: v.optional(v.string()),
+    isActive: v.boolean(),
+
+    // Timestamps
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_place_id", ["placeId"])
+    .index("by_active", ["isActive"]),
 });

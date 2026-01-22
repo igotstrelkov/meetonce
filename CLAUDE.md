@@ -87,7 +87,15 @@ proxy.ts (Clerk middleware)
 - **Queries**: Read-only (`useQuery(api.file.function)`)
 - **Mutations**: Write operations (`useMutation(api.file.function)`)
 - **Actions**: External APIs via `fetch()` (`useAction(api.file.function)`)
-- **Important**: Mutations/Queries cannot use `fetch()` - use actions instead
+
+### When to Use Actions vs Mutations
+
+Actions are **only** needed when you need:
+- `fetch()` for external API calls
+- `ctx.vectorSearch()` for vector search
+- `ctx.runAction()` to call other actions
+
+**Prefer mutations** when you only need database access + auth (`ctx.auth.getUserIdentity()` works in mutations). Mutations are faster (no extra round trip) and simpler.
 
 ### Key Admin Functions (`convex/admin.ts`)
 

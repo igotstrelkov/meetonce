@@ -10,6 +10,7 @@ export default function AdminNav() {
     { name: "Overview", href: "/admin" },
     { name: "User Review", href: "/admin/user-review" },
     { name: "Matches", href: "/admin/matches" },
+    { name: "Coffee Shops", href: "/admin/coffee-shops" },
     { name: "Analytics", href: "/admin/analytics" },
   ];
 

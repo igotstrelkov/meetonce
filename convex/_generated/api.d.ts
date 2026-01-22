@@ -10,9 +10,11 @@
 
 import type * as admin from "../admin.js";
 import type * as chat from "../chat.js";
+import type * as coffeeShops from "../coffeeShops.js";
 import type * as crons from "../crons.js";
 import type * as emails from "../emails.js";
 import type * as feedback from "../feedback.js";
+import type * as lib_googlePlaces from "../lib/googlePlaces.js";
 import type * as lib_matching from "../lib/matching.js";
 import type * as lib_openrouter from "../lib/openrouter.js";
 import type * as lib_utils from "../lib/utils.js";
@@ -32,9 +34,11 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   chat: typeof chat;
+  coffeeShops: typeof coffeeShops;
   crons: typeof crons;
   emails: typeof emails;
   feedback: typeof feedback;
+  "lib/googlePlaces": typeof lib_googlePlaces;
   "lib/matching": typeof lib_matching;
   "lib/openrouter": typeof lib_openrouter;
   "lib/utils": typeof lib_utils;

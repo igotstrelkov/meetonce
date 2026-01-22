@@ -105,7 +105,7 @@ export const ThisWeek = () => {
     <div className="relative min-h-[calc(100vh-80px)] flex flex-col">
       {/* Drawer Context wrapping the whole hero section */}
       <Drawer>
-        <div className="flex-1 flex flex-col md:flex-row bg-white rounded-3xl overflow-hidden border border-gray-100">
+        <div className="flex-1 flex flex-col md:flex-row rounded-lg transition-colors overflow-hidden border">
           {/* Main Hero Image Section */}
           <div className="relative w-full md:w-1/2 min-h-[400px] md:min-h-full">
             <Image
