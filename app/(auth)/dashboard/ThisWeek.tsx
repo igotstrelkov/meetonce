@@ -110,7 +110,7 @@ export const ThisWeek = () => {
           <div className="relative w-full md:w-1/2 min-h-[400px] md:min-h-full">
             <Image
               src={matchUser.photoUrl || "/avatar.png"}
-              alt={matchUser.name.split(" ")[0]}
+              alt={matchUser.firstName}
               fill
               className={`object-cover transition-opacity duration-700 ${
                 imageLoaded ? "opacity-100" : "opacity-0"
@@ -129,7 +129,7 @@ export const ThisWeek = () => {
                 </div>
               </div>
               <h1 className="text-4xl font-bold mb-1">
-                {matchUser.name.split(" ")[0]}, {matchUser.age}
+                {matchUser.firstName}, {matchUser.age}
               </h1>
               <p className="text-white/90 font-medium">{matchUser.jobTitle}</p>
             </div>
@@ -144,7 +144,7 @@ export const ThisWeek = () => {
                   {match.compatibilityScore}% Match
                 </div>
                 <h1 className="text-4xl font-bold mb-2">
-                  {matchUser.name.split(" ")[0]}, {matchUser.age}
+                  {matchUser.firstName}, {matchUser.age}
                 </h1>
                 <p className="text-xl text-gray-500">{matchUser.jobTitle}</p>
               </div>
@@ -240,7 +240,7 @@ export const ThisWeek = () => {
                     </div>
                   ) : (
                     <p className="text-green-700">
-                      Waiting for {matchUser.name.split(" ")[0]} to respond...
+                      Waiting for {matchUser.firstName} to respond...
                     </p>
                   )}
                 </div>

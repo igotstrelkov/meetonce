@@ -8,7 +8,8 @@ export default defineSchema({
     email: v.string(),
 
     // Profile
-    name: v.string(),
+    firstName: v.string(),
+    lastName: v.string(),
     age: v.number(),
     gender: v.string(),
     location: v.string(),
@@ -52,9 +53,6 @@ export default defineSchema({
     interestedIn: v.string(),
     minAge: v.optional(v.number()),
     maxAge: v.optional(v.number()),
-
-    // Optional legacy field from test data
-    workplace: v.optional(v.string()),
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"])

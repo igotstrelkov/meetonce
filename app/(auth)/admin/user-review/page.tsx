@@ -128,7 +128,9 @@ export default function UserReviewPage() {
 
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold">
-                {currentUser.name}, {currentUser.age}
+                {currentUser.firstName} {currentUser.lastName},{" "}
+                {currentUser.age}, {currentUser.gender}, Co{" "}
+                {currentUser.location}, {currentUser.jobTitle}
               </h3>
               <p className="text-gray-600">{currentUser.location}</p>
               <p className="text-sm text-gray-500 mt-2">

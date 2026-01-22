@@ -410,6 +410,10 @@ export async function suggestVenue(location: string): Promise<{
   };
 }
 
+// Location: ${user.location}
+// Gender: ${user.gender}
+// Seeking: ${user.interestedIn}${agePreference}
+
 export function formatProfile(user: Doc<"users">): string {
   // const interestsList = user.interests?.length
   //   ? `\n\nInterests: ${user.interests.join(", ")}`
@@ -420,11 +424,8 @@ export function formatProfile(user: Doc<"users">): string {
       ? ` (seeking ages ${user.minAge || "any"}-${user.maxAge || "any"})`
       : "";
 
-  return `Name: ${user.name}
+  return `Name: ${user.firstName}
 Age: ${user.age}
-Location: ${user.location}
-Gender: ${user.gender}
-Seeking: ${user.interestedIn}${agePreference}
 
 About me:
 ${user.bio}

@@ -100,8 +100,8 @@ export const submitDateFeedback = mutation({
             internal.emails.sendSecondDateContactEmail,
             {
               to: user.email,
-              userName: user.name,
-              matchName: matchUser.name,
+              userName: user.firstName,
+              matchName: matchUser.firstName,
               matchEmail: matchUser.email,
             }
           );
@@ -111,8 +111,8 @@ export const submitDateFeedback = mutation({
             internal.emails.sendSecondDateContactEmail,
             {
               to: matchUser.email,
-              userName: matchUser.name,
-              matchName: user.name,
+              userName: matchUser.firstName,
+              matchName: user.firstName,
               matchEmail: user.email,
             }
           );

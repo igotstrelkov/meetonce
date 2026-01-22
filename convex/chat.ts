@@ -61,7 +61,7 @@ export const getMessages = query({
         const sender = await ctx.db.get(message.senderId);
         return {
           ...message,
-          senderName: sender?.name || "Unknown User",
+          senderName: sender?.firstName || "Unknown User",
           senderPhotoUrl: sender?.photoStorageId
             ? await ctx.storage.getUrl(sender.photoStorageId)
             : null,
@@ -195,7 +195,7 @@ export const sendMessage = mutation({
       {
         messageId,
         matchId: args.matchId,
-        senderName: currentUser.name,
+        senderName: currentUser.firstName,
       }
     );
 
@@ -203,7 +203,7 @@ export const sendMessage = mutation({
     const newMessage = await ctx.db.get(messageId);
     return {
       ...newMessage,
-      senderName: currentUser.name,
+      senderName: currentUser.firstName,
       senderPhotoUrl: currentUser.photoStorageId
         ? await ctx.storage.getUrl(currentUser.photoStorageId)
         : null,
@@ -418,7 +418,7 @@ export const checkUnreadAndSendEmail = internalMutation({
       // Schedule email
       await ctx.scheduler.runAfter(0, internal.emails.sendNewMessageEmail, {
         to: receiver.email,
-        receiverName: receiver.name,
+        receiverName: receiver.firstName,
         senderName: args.senderName,
         messagePreview,
         matchUrl,

@@ -98,19 +98,19 @@ export default function AdminOverviewPage() {
                   {user.photoUrl ? (
                     <Image
                       src={user.photoUrl}
-                      alt={user.name}
+                      alt={user.firstName}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
                       <span className="text-gray-500 text-sm">
-                        {user.name.charAt(0)}
+                        {user.firstName.charAt(0)}
                       </span>
                     </div>
                   )}
                   <div>
                     <p className="font-semibold">
-                      {user.name}, {user.age}
+                      {user.firstName} {user.lastName}, {user.age}
                     </p>
                     <p className="text-sm text-gray-600">{user.email}</p>
                     <p className="text-sm text-gray-500">

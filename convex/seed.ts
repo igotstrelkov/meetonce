@@ -6,7 +6,8 @@ import { generateEmbedding } from "./lib/openrouter";
 // Test user profiles
 const TEST_USERS = [
   {
-    name: "Sarah Johnson",
+    firstName: "Sarah",
+    lastName: "Johnson",
     age: 28,
     gender: "female",
     interestedIn: "male",
@@ -27,7 +28,8 @@ const TEST_USERS = [
     jobTitle: "Software Engineer",
   },
   {
-    name: "Emma Murphy",
+    firstName: "Emma",
+    lastName: "Murphy",
     age: 31,
     gender: "female",
     interestedIn: "male",
@@ -48,7 +50,8 @@ const TEST_USERS = [
     jobTitle: "Marketing Manager",
   },
   {
-    name: "Aoife O'Brien",
+    firstName: "Aoife",
+    lastName: "O'Brien",
     age: 26,
     gender: "female",
     interestedIn: "male",
@@ -62,7 +65,8 @@ const TEST_USERS = [
     jobTitle: "Graphic Designer",
   },
   {
-    name: "Michael Chen",
+    firstName: "Michael",
+    lastName: "Chen",
     age: 29,
     gender: "male",
     interestedIn: "female",
@@ -83,7 +87,8 @@ const TEST_USERS = [
     jobTitle: "Data Scientist",
   },
   {
-    name: "James Walsh",
+    firstName: "James",
+    lastName: "Walsh",
     age: 32,
     gender: "male",
     interestedIn: "female",
@@ -104,7 +109,8 @@ const TEST_USERS = [
     jobTitle: "Teacher",
   },
   {
-    name: "Liam O'Sullivan",
+    firstName: "Liam",
+    lastName: "O'Sullivan",
     age: 27,
     gender: "male",
     interestedIn: "female",
@@ -118,7 +124,8 @@ const TEST_USERS = [
     jobTitle: "Fitness Coach",
   },
   {
-    name: "Chloe Murphy",
+    firstName: "Chloe",
+    lastName: "Murphy",
     age: 30,
     gender: "female",
     interestedIn: "male",
@@ -139,7 +146,8 @@ const TEST_USERS = [
     jobTitle: "Journalist",
   },
   {
-    name: "Sophie Byrne",
+    firstName: "Sophie",
+    lastName: "Byrne",
     age: 25,
     gender: "female",
     interestedIn: "male",
@@ -160,7 +168,8 @@ const TEST_USERS = [
     jobTitle: "Environmental Scientist",
   },
   {
-    name: "Patrick Doyle",
+    firstName: "Patrick",
+    lastName: "Doyle",
     age: 34,
     gender: "male",
     interestedIn: "female",
@@ -181,7 +190,8 @@ const TEST_USERS = [
     jobTitle: "Architect",
   },
   {
-    name: "Daniel Murphy",
+    firstName: "Daniel",
+    lastName: "Murphy",
     age: 30,
     gender: "male",
     interestedIn: "female",
@@ -195,7 +205,8 @@ const TEST_USERS = [
     jobTitle: "Product Manager",
   },
   {
-    name: "Rachel Kelly",
+    firstName: "Rachel",
+    lastName: "Kelly",
     age: 29,
     gender: "female",
     interestedIn: "male",
@@ -216,7 +227,8 @@ const TEST_USERS = [
     jobTitle: "Veterinarian",
   },
   {
-    name: "Conor Fitzgerald",
+    firstName: "Conor",
+    lastName: "Fitzgerald",
     age: 28,
     gender: "male",
     interestedIn: "female",
@@ -230,7 +242,8 @@ const TEST_USERS = [
     jobTitle: "Civil Engineer",
   },
   {
-    name: "Katie O'Connor",
+    firstName: "Katie",
+    lastName: "O'Connor",
     age: 27,
     gender: "female",
     interestedIn: "male",
@@ -251,7 +264,8 @@ const TEST_USERS = [
     jobTitle: "Nurse",
   },
   {
-    name: "Niamh Ryan",
+    firstName: "Niamh",
+    lastName: "Ryan",
     age: 26,
     gender: "female",
     interestedIn: "male",
@@ -272,7 +286,8 @@ const TEST_USERS = [
     jobTitle: "Physiotherapist",
   },
   {
-    name: "Seán Brennan",
+    firstName: "Seán",
+    lastName: "Brennan",
     age: 31,
     gender: "male",
     interestedIn: "female",
@@ -293,7 +308,8 @@ const TEST_USERS = [
     jobTitle: "Teacher",
   },
   {
-    name: "Tom Anderson",
+    firstName: "Tom",
+    lastName: "Anderson",
     age: 33,
     gender: "male",
     interestedIn: "female",
@@ -307,7 +323,8 @@ const TEST_USERS = [
     jobTitle: "Financial Analyst",
   },
   {
-    name: "Grace Dunne",
+    firstName: "Grace",
+    lastName: "Dunne",
     age: 28,
     gender: "female",
     interestedIn: "male",
@@ -328,7 +345,8 @@ const TEST_USERS = [
     jobTitle: "HR Manager",
   },
   {
-    name: "Oisín McCarthy",
+    firstName: "Oisín",
+    lastName: "McCarthy",
     age: 29,
     gender: "male",
     interestedIn: "female",
@@ -342,7 +360,8 @@ const TEST_USERS = [
     jobTitle: "UX Designer",
   },
   {
-    name: "Ciara Walsh",
+    firstName: "Ciara",
+    lastName: "Walsh",
     age: 30,
     gender: "female",
     interestedIn: "male",
@@ -363,7 +382,8 @@ const TEST_USERS = [
     jobTitle: "Event Planner",
   },
   {
-    name: "Brian Kavanagh",
+    firstName: "Brian",
+    lastName: "Kavanagh",
     age: 32,
     gender: "male",
     interestedIn: "female",
@@ -415,9 +435,10 @@ export const seedTestUsers = internalAction({
         const userId = await ctx.runMutation(
           internal.users.internalCreateUser,
           {
-            clerkId: `test_${user.name.toLowerCase().replace(/\s+/g, "_")}_${Date.now()}`,
-            email: `${user.name.toLowerCase().replace(/\s+/g, ".")}@test.meetonce.com`,
-            name: user.name,
+            clerkId: `test_${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}_${Date.now()}`,
+            email: `${user.firstName.toLowerCase()}.${user.lastName.toLowerCase()}@test.meetonce.com`,
+            firstName: user.firstName,
+            lastName: user.lastName,
             age: user.age,
             gender: user.gender,
             location: user.location,
@@ -445,11 +466,14 @@ export const seedTestUsers = internalAction({
 
         successCount++;
         console.log(
-          `✅ Created user: ${user.name}${approved ? " (approved)" : ""}`
+          `✅ Created user: ${user.firstName} ${user.lastName}${approved ? " (approved)" : ""}`
         );
       } catch (error) {
         errorCount++;
-        console.error(`❌ Failed to create user ${user.name}:`, error);
+        console.error(
+          `❌ Failed to create user ${user.firstName} ${user.lastName}:`,
+          error
+        );
       }
     }
 
@@ -486,9 +510,12 @@ export const clearTestUsers = internalAction({
       try {
         await ctx.runMutation(internal.users.deleteUser, { userId: user._id });
         deleteCount++;
-        console.log(`✅ Deleted: ${user.name}`);
+        console.log(`✅ Deleted: ${user.firstName} ${user.lastName}`);
       } catch (error) {
-        console.error(`❌ Failed to delete ${user.name}:`, error);
+        console.error(
+          `❌ Failed to delete ${user.firstName} ${user.lastName}:`,
+          error
+        );
       }
     }
 

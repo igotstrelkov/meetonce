@@ -217,16 +217,16 @@ export const respondToMatch = mutation({
         // Send email to user
         await ctx.scheduler.runAfter(0, internal.emails.sendMutualMatchEmail, {
           to: user.email,
-          userName: user.name,
-          matchName: matchUser.name,
+          userName: user.firstName,
+          matchName: matchUser.firstName,
           matchUrl: `${appUrl}/dashboard`,
         });
 
         // Send email to match user
         await ctx.scheduler.runAfter(0, internal.emails.sendMutualMatchEmail, {
           to: matchUser.email,
-          userName: matchUser.name,
-          matchName: user.name,
+          userName: matchUser.firstName,
+          matchName: user.firstName,
           matchUrl: `${appUrl}/dashboard`,
         });
       }

@@ -61,7 +61,7 @@ export const waitlistUser = mutation({
     // Send waitlist email
     await ctx.scheduler.runAfter(0, internal.emails.sendWaitlistEmail, {
       to: user.email,
-      userName: user.name,
+      userName: user.firstName,
     });
 
     console.log(
@@ -98,7 +98,7 @@ export const rejectUser = mutation({
     // Send rejection email
     await ctx.scheduler.runAfter(0, internal.emails.sendUserRejectedEmail, {
       to: user.email,
-      userName: user.name,
+      userName: user.firstName,
       reason: args.rejectionReason,
       guidance: args.guidance,
       uploadUrl: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/resubmit`,
@@ -167,7 +167,7 @@ export const approveUser = mutation({
     // Send approval email
     await ctx.scheduler.runAfter(0, internal.emails.sendUserApprovedEmail, {
       to: user.email,
-      userName: user.name,
+      userName: user.firstName,
       dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
     });
 
@@ -312,8 +312,8 @@ export const getAllMatches = query({
 
         return {
           ...match,
-          userName: user?.name,
-          matchUserName: matchUser?.name,
+          userName: user?.firstName,
+          matchUserName: matchUser?.firstName,
         };
       })
     );

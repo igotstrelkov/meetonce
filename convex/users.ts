@@ -75,7 +75,8 @@ export const internalCreateUser = internalMutation({
   args: {
     clerkId: v.string(),
     email: v.string(),
-    name: v.string(),
+    firstName: v.string(),
+    lastName: v.string(),
     age: v.number(),
     gender: v.string(),
     location: v.string(),
@@ -105,7 +106,8 @@ export const internalCreateUser = internalMutation({
     const userId = await ctx.db.insert("users", {
       clerkId: args.clerkId,
       email: args.email,
-      name: args.name,
+      firstName: args.firstName,
+      lastName: args.lastName,
       age: args.age,
       gender: args.gender,
       location: args.location,
@@ -140,7 +142,8 @@ export const createUserProfile = action({
   args: {
     clerkId: v.string(),
     email: v.string(),
-    name: v.string(),
+    firstName: v.string(),
+    lastName: v.string(),
     age: v.number(),
     gender: v.string(),
     location: v.string(),
@@ -170,7 +173,8 @@ export const createUserProfile = action({
 export const internalUpdateProfile = internalMutation({
   args: {
     userId: v.id("users"),
-    name: v.optional(v.string()),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
     age: v.optional(v.number()),
     location: v.optional(v.string()),
     bio: v.optional(v.string()),
@@ -199,7 +203,8 @@ export const internalUpdateProfile = internalMutation({
 export const updateProfile = action({
   args: {
     userId: v.id("users"),
-    name: v.optional(v.string()),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
     age: v.optional(v.number()),
     location: v.optional(v.string()),
     bio: v.optional(v.string()),
@@ -215,7 +220,8 @@ export const updateProfile = action({
     let embedding: number[] | undefined;
 
     if (
-      args.name ||
+      args.firstName ||
+      args.lastName ||
       args.age ||
       args.bio ||
       args.lookingFor ||

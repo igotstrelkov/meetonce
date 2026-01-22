@@ -19,14 +19,15 @@ export default function OnboardingPage() {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     age: 0,
     gender: "",
-    location: "Dublin",
+    location: "",
     jobTitle: "",
     interestedIn: "",
-    minAge: 18,
-    maxAge: 50,
+    minAge: 21,
+    maxAge: 35,
     bio: "",
     lookingFor: "",
     bioTranscript: "",
@@ -79,7 +80,8 @@ export default function OnboardingPage() {
       await createUser({
         clerkId: user.id,
         email: user.primaryEmailAddress?.emailAddress ?? "",
-        name: formData.name,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         age: formData.age,
         gender: formData.gender,
         location: formData.location,

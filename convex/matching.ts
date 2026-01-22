@@ -111,14 +111,14 @@ export const loadAndFilterCandidates = internalQuery({
       // Filter user's age preference for candidate
       if (user.minAge && candidate.age < user.minAge) {
         console.log(
-          `Filtered out ${candidate.name}: too young (${candidate.age} < ${user.minAge})`
+          `Filtered out ${candidate.firstName}: too young (${candidate.age} < ${user.minAge})`
         );
         continue;
       }
 
       if (user.maxAge && candidate.age > user.maxAge) {
         console.log(
-          `Filtered out ${candidate.name}: too old (${candidate.age} > ${user.maxAge})`
+          `Filtered out ${candidate.firstName}: too old (${candidate.age} > ${user.maxAge})`
         );
         continue;
       }
@@ -126,14 +126,14 @@ export const loadAndFilterCandidates = internalQuery({
       // Filter candidate's age preference for user (bidirectional check)
       if (candidate.minAge && user.age < candidate.minAge) {
         console.log(
-          `Filtered out ${candidate.name}: user too young for candidate`
+          `Filtered out ${candidate.firstName}: user too young for candidate`
         );
         continue;
       }
 
       if (candidate.maxAge && user.age > candidate.maxAge) {
         console.log(
-          `Filtered out ${candidate.name}: user too old for candidate`
+          `Filtered out ${candidate.firstName}: user too old for candidate`
         );
         continue;
       }
@@ -309,12 +309,14 @@ export const runMatchingBatch = internalAction({
     // Step 2: Process each user in the batch
     for (const user of batch) {
       if (matchedInBatch.has(user._id)) {
-        console.log(`Skipping ${user.name} - already matched in this batch`);
+        console.log(
+          `Skipping ${user.firstName} - already matched in this batch`
+        );
         continue;
       }
 
       if (!user.embedding) {
-        console.log(`Skipping ${user.name} - no embedding`);
+        console.log(`Skipping ${user.firstName} - no embedding`);
         continue;
       }
 
@@ -333,7 +335,7 @@ export const runMatchingBatch = internalAction({
       });
 
       console.log(
-        `Vector search found ${vectorResults.length} similar users for ${user.name}`
+        `Vector search found ${vectorResults.length} similar users for ${user.firstName}`
       );
 
       // Extract IDs and filter out self
@@ -343,7 +345,7 @@ export const runMatchingBatch = internalAction({
         .map((result) => result._id);
 
       if (candidateIds.length === 0) {
-        console.log(`No vector search candidates for ${user.name}`);
+        console.log(`No vector search candidates for ${user.firstName}`);
         continue;
       }
 
@@ -355,13 +357,13 @@ export const runMatchingBatch = internalAction({
 
       if (candidates.length === 0) {
         console.log(
-          `No unmatched candidates for ${user.name} after history filter`
+          `No unmatched candidates for ${user.firstName} after history filter`
         );
         continue;
       }
 
       console.log(
-        `${candidates.length} candidates after history filter for ${user.name}`
+        `${candidates.length} candidates after history filter for ${user.firstName}`
       );
 
       // Step 2c: Analyze top 20 candidates with LLM
@@ -390,7 +392,7 @@ export const runMatchingBatch = internalAction({
       for (const item of ranked) {
         if (item.score < 70) {
           console.log(
-            `Skipping ${item.candidate.name} - score ${item.score} < 70`
+            `Skipping ${item.candidate.firstName} - score ${item.score} < 70`
           );
           continue;
         }
@@ -415,7 +417,7 @@ export const runMatchingBatch = internalAction({
       }
 
       if (!matchData) {
-        console.log(`No valid match found for ${user.name}`);
+        console.log(`No valid match found for ${user.firstName}`);
         continue;
       }
 
@@ -438,7 +440,7 @@ export const runMatchingBatch = internalAction({
       matchedInBatch.add(matchData.matchUser._id);
 
       console.log(
-        `✅ Matched ${user.name} ↔ ${matchData.matchUser.name} (${matchData.score}% compatible)`
+        `✅ Matched ${user.firstName} ↔ ${matchData.matchUser.firstName} (${matchData.score}% compatible)`
       );
 
       // Step 2g: Send weekly match emails to both users
@@ -448,8 +450,8 @@ export const runMatchingBatch = internalAction({
       // Send email to user about their match (matchUser)
       await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
         to: user.email,
-        userName: user.name,
-        matchName: matchData.matchUser.name,
+        userName: user.firstName,
+        matchName: matchData.matchUser.firstName,
         matchAge: matchData.matchUser.age,
         matchUrl: dashboardUrl,
       });
@@ -458,8 +460,8 @@ export const runMatchingBatch = internalAction({
       // Send email to matchUser about their match (user)
       await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
         to: matchData.matchUser.email,
-        userName: matchData.matchUser.name,
-        matchName: user.name,
+        userName: matchData.matchUser.firstName,
+        matchName: user.firstName,
         matchAge: user.age,
         matchUrl: dashboardUrl,
       });

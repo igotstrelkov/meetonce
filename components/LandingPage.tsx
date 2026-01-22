@@ -75,7 +75,7 @@ export function LandingPage() {
             </Button> */}
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span>12,000+ people registered</span>
+              <span>500+ people registered</span>
             </div>
           </div>
         </section>
@@ -136,10 +136,10 @@ export function LandingPage() {
         <section className="py-16 md:py-20 bg-foreground text-background">
           <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { label: "Dates Arranged", value: "9,000+" },
+              { label: "Dates Arranged", value: "100+" },
               { label: "Success Rate", value: "69%" },
               { label: "Matches Satisfaction", value: "95%" },
-              { label: "Hours Saved", value: "50k+" },
+              { label: "Hours Saved", value: "1K+" },
             ].map((stat, i) => (
               <div key={i}>
                 <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">

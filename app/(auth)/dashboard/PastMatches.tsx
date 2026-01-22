@@ -85,7 +85,7 @@ function PastMatchItem({ pastMutualMatch }: PastMutualMatchProps) {
             <div className="shrink-0 relative w-[120px]">
               <Image
                 src={matchUser?.photoUrl || "/avatar.png"}
-                alt={matchUser?.name || "Match Photo"}
+                alt={matchUser?.firstName || "Match Photo"}
                 width={120}
                 height={120}
                 className={`w-full aspect-square object-cover rounded-2xl shadow-lg transition-opacity duration-300 ${
@@ -99,7 +99,7 @@ function PastMatchItem({ pastMutualMatch }: PastMutualMatchProps) {
             <div className="flex-1">
               <div className="mb-1">
                 <h3 className="text-xl font-bold">
-                  {matchUser.name.split(" ")[0]}, {matchUser.age}
+                  {matchUser.firstName}, {matchUser.age}
                 </h3>
                 <p className="text-sm text-gray-600">Week of {match.weekOf}</p>
               </div>

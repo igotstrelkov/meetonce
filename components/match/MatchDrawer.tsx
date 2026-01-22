@@ -33,7 +33,7 @@ export const MatchDrawer = ({ match, matchUser }: MatchDrawerProps) => {
             <div className="shrink-0 relative w-[120px]">
               <Image
                 src={matchUser?.photoUrl || "/avatar.png"}
-                alt={matchUser?.name || "Match Photo"}
+                alt={matchUser?.firstName || "Match Photo"}
                 width={120}
                 height={120}
                 className={`w-full aspect-square object-cover rounded-2xl shadow-lg transition-opacity duration-300 ${
@@ -52,7 +52,7 @@ export const MatchDrawer = ({ match, matchUser }: MatchDrawerProps) => {
             <div className="flex-1 space-y-3">
               <div>
                 <h3 className="text-xl font-bold">
-                  {matchUser.name.split(" ")[0]}, {matchUser.age}
+                  {matchUser.firstName}, {matchUser.age}
                 </h3>
                 <p className="text-sm text-gray-600">{matchUser.jobTitle}</p>
               </div>

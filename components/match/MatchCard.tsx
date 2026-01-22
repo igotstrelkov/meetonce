@@ -21,7 +21,7 @@ export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
           <div className="relative w-full max-w-md">
             <Image
               src={matchUser?.photoUrl || "/avatar.png"}
-              alt={matchUser?.name}
+              alt={matchUser?.firstName}
               width={500}
               height={500}
               className={`w-full aspect-square object-cover rounded-2xl shadow-lg transition-opacity duration-300 ${
@@ -36,7 +36,7 @@ export const MatchCard = ({ match, matchUser }: MatchCardProps) => {
         <div className="flex-1 space-y-8">
           {/* <div>
             <h3 className="text-lg font-bold">
-              {matchUser.name.split(" ")[0]}, {matchUser.age}
+              {matchUser.firstName}, {matchUser.age}
             </h3>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span>{matchUser.jobTitle}</span>
