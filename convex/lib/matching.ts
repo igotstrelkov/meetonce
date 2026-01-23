@@ -398,7 +398,7 @@ export async function suggestVenue(location: string): Promise<{
   name: string;
   address: string;
   placeId: string;
-  description: string;
+  rating: number;
 }> {
   // TODO: Integrate Google Places API
   // For now, return placeholder
@@ -406,7 +406,7 @@ export async function suggestVenue(location: string): Promise<{
     name: "The Local Café",
     address: `${location} city center`,
     placeId: "placeholder",
-    description: "A cozy café perfect for a first date",
+    rating: 4.5,
   };
 }
 

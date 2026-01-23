@@ -100,6 +100,8 @@ export default function AdminOverviewPage() {
                       src={user.photoUrl}
                       alt={user.firstName}
                       className="w-12 h-12 rounded-full object-cover"
+                      width={120}
+                      height={120}
                     />
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
@@ -114,7 +116,7 @@ export default function AdminOverviewPage() {
                     </p>
                     <p className="text-sm text-gray-600">{user.email}</p>
                     <p className="text-sm text-gray-500">
-                      {user.location} · {user.gender}
+                      {user.jobTitle} · {user.gender} · Co {user.location}
                     </p>
                   </div>
                 </div>

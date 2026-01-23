@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import imageCompression from "browser-image-compression";
 import { FileText, Image as ImageIcon, X } from "lucide-react";
-import Image from "next/image";
 import { useRef, useState } from "react";
 import StepWrapper from "./StepWrapper";
 
@@ -145,7 +144,7 @@ export default function DocumentStep({
             </div>
           ) : preview ? (
             <>
-              <Image
+              <img
                 src={preview}
                 alt="Document preview"
                 className="absolute inset-0 w-full h-full object-contain"

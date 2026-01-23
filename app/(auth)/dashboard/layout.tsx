@@ -42,7 +42,7 @@ export default function AdminLayout({
 
   if (currentUser.accountStatus === "rejected") {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center mx-4">
         <h2 className="text-2xl font-bold mb-2">Profile Needs Update</h2>
         <p className="text-gray-700 mb-4">
           {currentUser.accountRejectionReason ||
@@ -57,12 +57,12 @@ export default function AdminLayout({
 
   if (currentUser.accountStatus === "pending") {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center mx-4">
         <h2 className="text-2xl font-bold mb-2">Profile Under Review</h2>
         <p className="text-gray-700">
           Your profile is being reviewed by our team. You'll receive an email
-          within 24 hours when your profile is approved or if we need a
-          different photo.
+          within 24 hours when your profile is approved or if we need additional
+          information.
         </p>
       </div>
     );
@@ -70,7 +70,7 @@ export default function AdminLayout({
 
   if (currentUser.accountStatus === "waitlisted") {
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center mx-4">
         <h2 className="text-2xl font-bold mb-2">You're on the Waitlist</h2>
         <p className="text-gray-700 mb-2">
           Great news! Your profile has been reviewed and approved.

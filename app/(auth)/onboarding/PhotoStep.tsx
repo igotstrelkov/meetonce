@@ -206,7 +206,7 @@ export default function PhotoStep({
             <>
               <img
                 src={preview}
-                alt="Preview"
+                alt="Photo preview"
                 className="absolute inset-0 w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />

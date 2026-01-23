@@ -90,7 +90,7 @@ export default defineSchema({
       name: v.string(),
       address: v.string(),
       placeId: v.string(),
-      description: v.string(),
+      rating: v.number(),
     }),
 
     // Responses

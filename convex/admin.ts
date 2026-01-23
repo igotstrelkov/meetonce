@@ -140,22 +140,33 @@ export const getWaitlistedUsers = query({
   },
 });
 
+// Approve user from pending (with rating) or waitlisted (rating optional)
 export const approveUser = mutation({
   args: {
     userId: v.id("users"),
+    rating: v.optional(v.number()),
   },
   returns: v.id("users"),
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error("User not found");
 
-    if (user.accountStatus !== "waitlisted") {
-      throw new Error("User is not on the waitlist");
+    // Pending users require a rating
+    if (user.accountStatus === "pending" && args.rating === undefined) {
+      throw new Error("Rating is required for pending users");
     }
 
-    // Update status to approved
+    if (
+      user.accountStatus !== "pending" &&
+      user.accountStatus !== "waitlisted"
+    ) {
+      throw new Error("User must be pending or waitlisted to approve");
+    }
+
+    // Update status to approved (with rating if provided)
     await ctx.db.patch(args.userId, {
       accountStatus: "approved",
+      ...(args.rating !== undefined && { attractivenessRating: args.rating }),
       updatedAt: Date.now(),
       matchKey: makeMatchKey({
         accountStatus: "approved",
@@ -171,7 +182,9 @@ export const approveUser = mutation({
       dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
     });
 
-    console.log(`✅ Approved waitlisted user ${args.userId}`);
+    console.log(
+      `✅ Approved user ${args.userId}${args.rating ? ` with rating ${args.rating}` : ""}`
+    );
 
     return args.userId;
   },
@@ -193,7 +206,7 @@ export const getPlatformMetrics = query({
     const totalUsers = allUsers.length;
 
     const maleUsers = allUsers.filter(
-      (u) => u.gender === "male" && u.accountStatus === "approved"
+      (u) => u.gender === "Male" && u.accountStatus === "approved"
     ).length;
     const pendingUsers = allUsers.filter(
       (u) => u.accountStatus === "pending"
@@ -205,7 +218,7 @@ export const getPlatformMetrics = query({
       (u) => u.accountStatus === "approved"
     ).length;
     const femaleUsers = allUsers.filter(
-      (u) => u.gender === "female" && u.accountStatus === "approved"
+      (u) => u.gender === "Female" && u.accountStatus === "approved"
     ).length;
 
     return {

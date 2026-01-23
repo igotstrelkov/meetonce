@@ -64,6 +64,7 @@ export async function searchCoffeeShops(
     body: JSON.stringify({
       textQuery: query,
       includedType: "cafe",
+      minRating: 4.1,
       locationBias: {
         circle: {
           center: DUBLIN_CENTER,

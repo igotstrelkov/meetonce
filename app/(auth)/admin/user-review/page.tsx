@@ -16,30 +16,46 @@ import Image from "next/image";
 import { useState } from "react";
 
 type ReviewStep = "decision" | "rating";
+type RatingAction = "approve" | "waitlist";
 
 export default function UserReviewPage() {
   const pendingUsers = useQuery(api.admin.getPendingUsers);
   const waitlistUser = useMutation(api.admin.waitlistUser);
+  const approveUser = useMutation(api.admin.approveUser);
   const rejectUser = useMutation(api.admin.rejectUser);
 
   const [step, setStep] = useState<ReviewStep>("decision");
+  const [ratingAction, setRatingAction] = useState<RatingAction>("waitlist");
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
 
-  const handleWaitlistDecision = () => {
+  const handleApproveDecision = () => {
+    setRatingAction("approve");
     setStep("rating");
   };
 
-  const handleWaitlist = async (rating: number) => {
+  const handleWaitlistDecision = () => {
+    setRatingAction("waitlist");
+    setStep("rating");
+  };
+
+  const handleRatingSubmit = async (rating: number) => {
     if (!currentUser) return;
 
-    await waitlistUser({
-      userId: currentUser._id,
-      rating: rating,
-    });
+    if (ratingAction === "approve") {
+      await approveUser({
+        userId: currentUser._id,
+        rating: rating,
+      });
+    } else {
+      await waitlistUser({
+        userId: currentUser._id,
+        rating: rating,
+      });
+    }
 
-    // Reset for next photo
+    // Reset for next user
     setStep("decision");
     setSelectedRating(null);
   };
@@ -52,7 +68,7 @@ export default function UserReviewPage() {
       rejectionReason: rejectionReason || "Please resubmit a clearer photo",
     });
 
-    // Reset for next photo
+    // Reset for next user
     setRejectionReason("");
     setShowRejectModal(false);
     setStep("decision");
@@ -99,6 +115,8 @@ export default function UserReviewPage() {
                     src={currentUser.photoUrl}
                     alt="User photo"
                     className="w-full h-96 object-cover rounded-lg"
+                    width={400}
+                    height={400}
                   />
                 ) : (
                   <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
@@ -117,6 +135,8 @@ export default function UserReviewPage() {
                     src={currentUser.verificationDocUrl}
                     alt="Verification document"
                     className="w-full h-96 object-contain rounded-lg bg-gray-50"
+                    width={400}
+                    height={400}
                   />
                 ) : (
                   <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
@@ -129,10 +149,12 @@ export default function UserReviewPage() {
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold">
                 {currentUser.firstName} {currentUser.lastName},{" "}
-                {currentUser.age}, {currentUser.gender}, Co{" "}
-                {currentUser.location}, {currentUser.jobTitle}
+                {currentUser.age}
               </h3>
-              <p className="text-gray-600">{currentUser.location}</p>
+              <p className="text-gray-600">
+                {currentUser.jobTitle}, {currentUser.gender}, Co{" "}
+                {currentUser.location},
+              </p>
               <p className="text-sm text-gray-500 mt-2">
                 Resubmissions: {currentUser.accountResubmissionCount}
               </p>
@@ -152,16 +174,23 @@ export default function UserReviewPage() {
               </p>
             </div>
 
-            {/* Step 1: Decision (Waitlist or Reject) */}
+            {/* Step 1: Decision (Approve, Waitlist, or Reject) */}
             {step === "decision" && (
               <div className="p-4">
                 <div className="flex gap-4 justify-center">
                   <Button
+                    onClick={handleApproveDecision}
+                    size="lg"
+                    className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-6"
+                  >
+                    ✓ Approve
+                  </Button>
+                  <Button
                     onClick={handleWaitlistDecision}
                     size="lg"
-                    className="bg-green-600 hover:bg-green-700 text-lg px-8 py-6"
+                    className="bg-amber-500 hover:bg-amber-600 text-lg px-8 py-6"
                   >
-                    ✓ Add to waitlist
+                    ⏳ Waitlist
                   </Button>
                   <Button
                     onClick={() => setShowRejectModal(true)}
@@ -175,17 +204,19 @@ export default function UserReviewPage() {
               </div>
             )}
 
-            {/* Step 2: Rating (Only if Waitlisted) */}
+            {/* Step 2: Rating (for Approve or Waitlist) */}
             {step === "rating" && (
               <div>
-                <h3 className="text-xl font-bold mb-4">
-                  Step 2: Rate Attractiveness (1-10)
+                <h3 className="text-xl font-bold mb-4 text-center">
+                  {ratingAction === "approve"
+                    ? "Rate & Approve User (1-10)"
+                    : "Rate & Add to Waitlist (1-10)"}
                 </h3>
-                <div className="flex gap-2 justify-center">
+                <div className="flex gap-2 justify-center mb-4">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                     <button
                       key={num}
-                      onClick={() => handleWaitlist(num)}
+                      onClick={() => handleRatingSubmit(num)}
                       className={`w-14 h-14 rounded-lg text-lg font-bold transition-all ${
                         selectedRating === num
                           ? "bg-primary text-white scale-110"
@@ -195,6 +226,11 @@ export default function UserReviewPage() {
                       {num}
                     </button>
                   ))}
+                </div>
+                <div className="flex justify-center">
+                  <Button variant="outline" onClick={() => setStep("decision")}>
+                    ← Back
+                  </Button>
                 </div>
               </div>
             )}

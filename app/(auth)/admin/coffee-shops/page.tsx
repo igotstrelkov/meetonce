@@ -1,14 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery, useAction, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +11,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, Plus, Trash2, MapPin, Star, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { useAction, useMutation, useQuery } from "convex/react";
+import { ExternalLink, Plus, Search, Star, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 interface SearchResult {
   placeId: string;
@@ -105,12 +105,12 @@ export default function CoffeeShopsPage() {
     return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.address)}&destination_place_id=${place.placeId}`;
   };
 
-  const renderPriceLevel = (level?: number) => {
-    if (level === undefined) return null;
-    return "€".repeat(level + 1);
-  };
+  // const renderPriceLevel = (level?: number) => {
+  //   if (level === undefined) return null;
+  //   return "€".repeat(level + 1);
+  // };
 
-  if (!coffeeShops) {
+  if (coffeeShops === undefined) {
     return <LoadingSpinner />;
   }
 
@@ -166,11 +166,11 @@ export default function CoffeeShopsPage() {
                           {place.rating.toFixed(1)}
                         </Badge>
                       )}
-                      {place.priceLevel !== undefined && (
+                      {/* {place.priceLevel !== undefined && (
                         <Badge variant="outline" className="shrink-0">
                           {renderPriceLevel(place.priceLevel)}
                         </Badge>
-                      )}
+                      )} */}
                     </div>
                     <p className="text-sm text-gray-500 truncate">
                       {place.address}
@@ -200,11 +200,11 @@ export default function CoffeeShopsPage() {
           </div>
         )}
 
-        {searchResults.length === 0 && searchQuery && !isSearching && (
+        {/* {searchResults.length === 0 && searchQuery && !isSearching && (
           <p className="mt-4 text-sm text-gray-500">
             No results found. Try a different search term.
           </p>
-        )}
+        )} */}
       </Card>
 
       {/* Saved Coffee Shops */}
@@ -222,7 +222,7 @@ export default function CoffeeShopsPage() {
             {coffeeShops.map((shop) => (
               <div
                 key={shop._id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-between p-4 border rounded-lg transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -233,18 +233,32 @@ export default function CoffeeShopsPage() {
                         {shop.rating.toFixed(1)}
                       </Badge>
                     )}
-                    {shop.priceLevel !== undefined && (
+                    {/* {shop.priceLevel !== undefined && (
                       <Badge variant="outline" className="shrink-0">
                         {renderPriceLevel(shop.priceLevel)}
                       </Badge>
-                    )}
+                    )} */}
                   </div>
-                  <p className="text-sm text-gray-500 truncate">
-                    {shop.address}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-gray-500 truncate">
+                      {shop.address}
+                    </p>
+                    <ExternalLink
+                      className="h-3 w-3 ml-1 hover:text-gray-600"
+                      onClick={() =>
+                        window.open(
+                          getDirectionsUrl({
+                            placeId: shop.placeId,
+                            address: shop.address,
+                          }),
+                          "_blank"
+                        )
+                      }
+                    />
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 ml-4 shrink-0">
-                  <Button
+                  {/* <Button
                     size="sm"
                     variant="outline"
                     onClick={() =>
@@ -260,7 +274,7 @@ export default function CoffeeShopsPage() {
                     <MapPin className="h-4 w-4 mr-1" />
                     Directions
                     <ExternalLink className="h-3 w-3 ml-1" />
-                  </Button>
+                  </Button> */}
                   <Button
                     size="sm"
                     variant="ghost"

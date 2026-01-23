@@ -11,6 +11,7 @@ import {
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
+import { Star } from "lucide-react";
 
 export default function MatchDetailsModal({
   matchId,
@@ -81,7 +82,10 @@ export default function MatchDetailsModal({
                 {match.suggestedVenue.address}
               </div>
               <div className="text-gray-600 mt-1">
-                {match.suggestedVenue.description}
+                <Badge variant="secondary" className="shrink-0">
+                  <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
+                  {match.suggestedVenue.rating.toFixed(1)}
+                </Badge>
               </div>
             </div>
           </div>
