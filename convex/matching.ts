@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { Doc } from "./_generated/dataModel";
 import {
   internalAction,
@@ -10,7 +10,6 @@ import {
   analyzeCompatibility,
   formatProfile,
   getWeekOfString,
-  suggestVenue,
 } from "./lib/matching";
 import { makeMatchKey } from "./lib/utils";
 
@@ -304,6 +303,18 @@ export const runMatchingBatch = internalAction({
 
     console.log(`Found ${batch.length} users in this batch`);
 
+    // Fetch all active coffee shops for venue assignment
+    const coffeeShops = await ctx.runQuery(api.coffeeShops.getAllCoffeeShops, {
+      activeOnly: true,
+    });
+
+    if (coffeeShops.length === 0) {
+      console.log("⚠️ No active coffee shops found! Cannot create matches.");
+      return;
+    }
+
+    console.log(`☕ ${coffeeShops.length} coffee shops available for venues`);
+
     const matchedInBatch = new Set<string>();
 
     // Step 2: Process each user in the batch
@@ -421,8 +432,15 @@ export const runMatchingBatch = internalAction({
         continue;
       }
 
-      // Step 2e: Generate venue suggestion
-      const venue = await suggestVenue(user.location);
+      // Step 2e: Pick a random coffee shop as venue
+      const randomShop =
+        coffeeShops[Math.floor(Math.random() * coffeeShops.length)];
+      const venue = {
+        name: randomShop.name,
+        address: randomShop.address,
+        placeId: randomShop.placeId,
+        rating: randomShop.rating ?? 0,
+      };
 
       // Step 2f: Save match via mutation
       await ctx.runMutation(internal.matching.saveMatch, {

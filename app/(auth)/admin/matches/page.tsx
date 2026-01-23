@@ -30,7 +30,11 @@ export default function MatchesAdminPage() {
   });
 
   if (!matches || !stats || !weeks) {
-    return <LoadingSpinner />;
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (

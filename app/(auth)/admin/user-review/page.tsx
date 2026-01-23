@@ -76,7 +76,11 @@ export default function UserReviewPage() {
 
   // 1. Loading State
   if (pendingUsers === undefined) {
-    return <LoadingSpinner />;
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   // 2. Render State
@@ -96,11 +100,14 @@ export default function UserReviewPage() {
       {pendingUsers.length === 0 ? (
         <div className="flex items-center justify-center min-h-[300px]">
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-2">No Pending Users</h2>
+            {/* <h2 className="text-2xl font-bold mb-2">No Pending Users</h2> */}
             <p className="text-gray-600">All users have been reviewed</p>
           </div>
         </div>
       ) : (
+        // <div className="text-center py-12 text-gray-500">
+        //   All users have been reviewed
+        // </div>
         <>
           <div>
             {/* Display both selfie and verification document */}

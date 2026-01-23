@@ -12,12 +12,14 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { api } from "@/convex/_generated/api";
+import { getDirectionsUrl } from "@/convex/lib/googlePlaces";
 import { useMatchInteraction } from "@/hooks/useMatchInteraction";
 import { useQuery } from "convex/react";
 import {
   Calendar,
   Check,
   ChevronUp,
+  ExternalLink,
   Info,
   MapPin,
   MessageCircle,
@@ -151,7 +153,18 @@ export const ThisWeek = () => {
 
               {/* Match Details */}
               <div className="space-y-4">
-                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl">
+                <div
+                  className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl"
+                  onClick={() =>
+                    window.open(
+                      getDirectionsUrl({
+                        placeId: match.suggestedVenue.placeId,
+                        address: match.suggestedVenue.address,
+                      }),
+                      "_blank"
+                    )
+                  }
+                >
                   <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
                     <MapPin className="w-5 h-5 text-blue-500" />
                   </div>
@@ -159,10 +172,12 @@ export const ThisWeek = () => {
                     <h3 className="font-semibold text-gray-900">
                       Suggested Venue
                     </h3>
-                    <p className="text-gray-600">{match.suggestedVenue.name}</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {match.suggestedVenue.address}
-                    </p>
+                    <div className="flex items-center">
+                      <p className="text-gray-600">
+                        {match.suggestedVenue.name}
+                      </p>
+                      <ExternalLink className="h-3 w-3 ml-1 hover:text-gray-600" />
+                    </div>
                   </div>
                 </div>
 

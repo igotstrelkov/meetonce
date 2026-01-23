@@ -17,8 +17,9 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { getDirectionsUrl } from "@/convex/lib/googlePlaces";
 import { useAction, useMutation, useQuery } from "convex/react";
-import { ExternalLink, Plus, Search, Star, Trash2 } from "lucide-react";
+import { ExternalLink, MapPin, Plus, Search, Star, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 interface SearchResult {
@@ -101,17 +102,17 @@ export default function CoffeeShopsPage() {
     }
   };
 
-  const getDirectionsUrl = (place: { placeId: string; address: string }) => {
-    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.address)}&destination_place_id=${place.placeId}`;
-  };
-
   // const renderPriceLevel = (level?: number) => {
   //   if (level === undefined) return null;
   //   return "€".repeat(level + 1);
   // };
 
   if (coffeeShops === undefined) {
-    return <LoadingSpinner />;
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (
@@ -239,26 +240,12 @@ export default function CoffeeShopsPage() {
                       </Badge>
                     )} */}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm text-gray-500 truncate">
-                      {shop.address}
-                    </p>
-                    <ExternalLink
-                      className="h-3 w-3 ml-1 hover:text-gray-600"
-                      onClick={() =>
-                        window.open(
-                          getDirectionsUrl({
-                            placeId: shop.placeId,
-                            address: shop.address,
-                          }),
-                          "_blank"
-                        )
-                      }
-                    />
-                  </div>
+                  <p className="text-sm text-gray-500 truncate">
+                    {shop.address}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 ml-4 shrink-0">
-                  {/* <Button
+                  <Button
                     size="sm"
                     variant="outline"
                     onClick={() =>
@@ -274,7 +261,7 @@ export default function CoffeeShopsPage() {
                     <MapPin className="h-4 w-4 mr-1" />
                     Directions
                     <ExternalLink className="h-3 w-3 ml-1" />
-                  </Button> */}
+                  </Button>
                   <Button
                     size="sm"
                     variant="ghost"

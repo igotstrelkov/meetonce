@@ -10,7 +10,11 @@ export default function AnalyticsPage() {
   const outcomeMetrics = useQuery(api.admin.getDateOutcomeMetrics);
 
   if (!matchingMetrics || !outcomeMetrics) {
-    return <LoadingSpinner />;
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (

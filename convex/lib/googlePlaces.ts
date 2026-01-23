@@ -97,3 +97,10 @@ export async function searchCoffeeShops(
     priceLevel: mapPriceLevel(place.priceLevel),
   }));
 }
+
+export const getDirectionsUrl = (place: {
+  placeId: string;
+  address: string;
+}) => {
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.address)}&destination_place_id=${place.placeId}`;
+};

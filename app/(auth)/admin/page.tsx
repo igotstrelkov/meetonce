@@ -13,7 +13,12 @@ export default function AdminOverviewPage() {
   const waitlistedUsers = useQuery(api.admin.getWaitlistedUsers);
   const approveUser = useMutation(api.admin.approveUser);
 
-  if (!metrics) return <LoadingSpinner />;
+  if (!metrics)
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <LoadingSpinner />
+      </div>
+    );
 
   const handleApprove = async (userId: Id<"users">) => {
     await approveUser({ userId });

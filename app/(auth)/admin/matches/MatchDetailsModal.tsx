@@ -77,15 +77,17 @@ export default function MatchDetailsModal({
           <div>
             <h3 className="font-semibold mb-2">Suggested Venue</h3>
             <div className="text-sm">
-              <div className="font-medium">{match.suggestedVenue.name}</div>
+              <div className="flex items-center gap-2">
+                <div className="font-medium">{match.suggestedVenue.name}</div>
+                <div className="text-gray-600 mt-1">
+                  <Badge variant="secondary" className="shrink-0">
+                    <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
+                    {match.suggestedVenue.rating.toFixed(1)}
+                  </Badge>
+                </div>
+              </div>
               <div className="text-gray-600">
                 {match.suggestedVenue.address}
-              </div>
-              <div className="text-gray-600 mt-1">
-                <Badge variant="secondary" className="shrink-0">
-                  <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
-                  {match.suggestedVenue.rating.toFixed(1)}
-                </Badge>
               </div>
             </div>
           </div>
