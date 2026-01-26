@@ -112,12 +112,12 @@ function PastMatchItem({ pastMutualMatch }: PastMutualMatchProps) {
               {/* Venue Info */}
               {/* <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="w-4 h-4" />
-                <span>Saturday at 14:00</span>
+                <span>Saturday from 14:00 to 14:30</span>
               </div> */}
               {/* Week Info */}
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Calendar className="w-4 h-4" />
-                <span>Saturday at 14:00</span>
+                <span>Saturday from 14:00 to 14:30</span>
               </div>
 
               {/* Feedback Status */}

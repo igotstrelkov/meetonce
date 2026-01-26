@@ -101,7 +101,7 @@ export const ThisWeek = () => {
           hour: "numeric",
           minute: "numeric",
         })
-      : "Saturday at 14:00";
+      : "Saturday from 14:00 to 14:30";
 
   return (
     <div className="relative min-h-[calc(100vh-80px)] flex flex-col">
@@ -169,15 +169,14 @@ export const ThisWeek = () => {
                     <MapPin className="w-5 h-5 text-blue-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">
-                      Suggested Venue
-                    </h3>
                     <div className="flex items-center">
-                      <p className="text-gray-600">
-                        {match.suggestedVenue.name}
-                      </p>
+                      <h3 className="font-semibold text-gray-900">
+                        Suggested Venue
+                      </h3>
                       <ExternalLink className="h-3 w-3 ml-1 hover:text-gray-600" />
                     </div>
+
+                    <p className="text-gray-600">{match.suggestedVenue.name}</p>
                   </div>
                 </div>
 
