@@ -107,7 +107,7 @@ The script includes 20 pre-defined users:
 
 All test users have:
 
-- ✅ Unique email addresses (`name@test.meetonce.com`)
+- ✅ Unique email addresses (`name@test.meetonce.iem`)
 - ✅ Fake Clerk IDs (`test_name_timestamp`)
 - ✅ AI-generated embeddings (via OpenRouter API)
 - ✅ Realistic bios and interests
@@ -145,14 +145,14 @@ internal.seed.clearTestUsers()
 
 This will:
 
-- Find all users with `@test.meetonce.com` emails
+- Find all users with `@test.meetonce.iem` emails
 - Delete all test users from database
 - Display deletion count in logs
 
 ### Manual Cleanup
 
 1. Go to Convex Dashboard → Data → `users`
-2. Filter by email containing `@test.meetonce.com`
+2. Filter by email containing `@test.meetonce.iem`
 3. Delete manually if needed
 
 ## Common Use Cases

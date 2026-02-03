@@ -412,14 +412,14 @@ export const seedTestUsers = internalAction({
   },
   handler: async (
     ctx,
-    args
+    args,
   ): Promise<{ success: number; errors: number; total: number }> => {
     const count = args.count || TEST_USERS.length;
     const approved = args.approved !== false; // Default to true
     const usersToSeed = TEST_USERS.slice(0, count);
 
     console.log(
-      `🌱 Seeding ${usersToSeed.length} test users (approved: ${approved})...`
+      `🌱 Seeding ${usersToSeed.length} test users (approved: ${approved})...`,
     );
 
     let successCount = 0;
@@ -436,7 +436,7 @@ export const seedTestUsers = internalAction({
           internal.users.internalCreateUser,
           {
             clerkId: `test_${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}_${Date.now()}`,
-            email: `${user.firstName.toLowerCase()}.${user.lastName.toLowerCase()}@test.meetonce.com`,
+            email: `${user.firstName.toLowerCase()}.${user.lastName.toLowerCase()}@test.meetonce.iem`,
             firstName: user.firstName,
             lastName: user.lastName,
             age: user.age,
@@ -452,7 +452,7 @@ export const seedTestUsers = internalAction({
             photoStorageId: undefined, // No photos for test users
             verificationDocStorageId: undefined, // No documents for test users
             embedding,
-          }
+          },
         );
 
         // Approve user if requested
@@ -466,13 +466,13 @@ export const seedTestUsers = internalAction({
 
         successCount++;
         console.log(
-          `✅ Created user: ${user.firstName} ${user.lastName}${approved ? " (approved)" : ""}`
+          `✅ Created user: ${user.firstName} ${user.lastName}${approved ? " (approved)" : ""}`,
         );
       } catch (error) {
         errorCount++;
         console.error(
           `❌ Failed to create user ${user.firstName} ${user.lastName}:`,
-          error
+          error,
         );
       }
     }
@@ -498,8 +498,8 @@ export const clearTestUsers = internalAction({
     const allUsers = await ctx.runQuery(internal.users.getAllUsersInternal);
     const testUsers = allUsers.filter(
       (user: any) =>
-        user.email.endsWith("@test.meetonce.com") ||
-        user.clerkId.startsWith("test_")
+        user.email.endsWith("@test.meetonce.iem") ||
+        user.clerkId.startsWith("test_"),
     );
 
     console.log(`Found ${testUsers.length} test users to delete`);
@@ -514,7 +514,7 @@ export const clearTestUsers = internalAction({
       } catch (error) {
         console.error(
           `❌ Failed to delete ${user.firstName} ${user.lastName}:`,
-          error
+          error,
         );
       }
     }

@@ -91,6 +91,7 @@ proxy.ts (Clerk middleware)
 ### When to Use Actions vs Mutations
 
 Actions are **only** needed when you need:
+
 - `fetch()` for external API calls
 - `ctx.vectorSearch()` for vector search
 - `ctx.runAction()` to call other actions
@@ -192,5 +193,5 @@ NEXT_PUBLIC_VAPI_BIO_ASSISTANT_ID, NEXT_PUBLIC_VAPI_PREFERENCES_ASSISTANT_ID, NE
 
 ### Email Configuration
 
-- From: `MeetOnce <admin@meetonce.co>`
+- From: `MeetOnce <admin@meetonce.ie>`
 - Verify domain in Resend dashboard for production
