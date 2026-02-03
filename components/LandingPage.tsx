@@ -5,7 +5,6 @@ import {
   Ban,
   Check,
   Coffee,
-  Heart,
   Instagram,
   Lightbulb,
   Linkedin,
@@ -56,7 +55,7 @@ export function LandingPage() {
                 size="lg"
                 className="h-14 px-8 text-lg rounded-full shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
               >
-                Get Started — It&apos;s Free
+                Get Started, It&apos;s Free
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </SignInButton>
@@ -66,7 +65,7 @@ export function LandingPage() {
               className="h-14 px-8 text-lg rounded-full"
             >
               <Mic className="mr-2 w-5 h-5" />
-              See How It Works!!!
+              See How It Works
             </Button> */}
           </div>
 
@@ -109,7 +108,7 @@ export function LandingPage() {
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
                   Forget filling out endless forms. Have a natural conversation
-                  with our matchmaker AI, and we&apos;ll understand your values,
+                  with our AI matchmaker, and we&apos;ll understand your values,
                   communication style, and what truly matters to you in a
                   partner.
                 </p>
@@ -137,11 +136,10 @@ export function LandingPage() {
                         <Check className="w-3 h-3 text-white" />
                       </div>
                       <div>
-                        <span className="font-semibold">{item.label}</span>
-                        <span className="text-muted-foreground">
-                          {" "}
-                          — {item.desc}
-                        </span>
+                        <div className="font-semibold">{item.label}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {item.desc}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -155,7 +153,7 @@ export function LandingPage() {
                       <Mic className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <p className="font-semibold">Matchmaker AI</p>
+                      <p className="font-semibold">AI matchmaker</p>
                       <p className="text-sm text-muted-foreground">
                         Listening...
                       </p>
@@ -216,7 +214,7 @@ export function LandingPage() {
                   icon: Mic,
                   step: "01",
                   title: "Have a Conversation",
-                  desc: "Chat with our matchmaker AI for 5 minutes. No forms, no swiping, just talk about what you're looking for.",
+                  desc: "Chat with our AI matchmaker for 5 minutes. No forms, no swiping, just talk about what you're looking for.",
                 },
                 {
                   icon: Sparkles,
@@ -294,12 +292,15 @@ export function LandingPage() {
 
               <div className="p-8 rounded-3xl bg-muted/30 border border-border/50">
                 <div className="flex items-center gap-3 mb-8">
-                  <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                  {/* <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
                     <X className="w-5 h-5 text-muted-foreground" />
-                  </div>
+                  </div> */}
                   <h3 className="text-xl font-bold text-muted-foreground">
                     Typical Dating Apps
                   </h3>
+                  <span className="px-2.5 py-1 rounded-full border border-border/50 bg-muted/10 text-muted-foreground text-xs font-semibold">
+                    OLD
+                  </span>
                 </div>
                 <ul className="space-y-5">
                   {[
@@ -345,9 +346,9 @@ export function LandingPage() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-pink-500/20 rounded-full blur-3xl" />
                 <div className="relative">
                   <div className="flex items-center gap-3 mb-8">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
+                    {/* <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
                       <Heart className="w-5 h-5 text-white" />
-                    </div>
+                    </div> */}
                     <h3 className="text-xl font-bold">MeetOnce</h3>
                     <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
                       NEW
@@ -361,7 +362,7 @@ export function LandingPage() {
                       },
                       {
                         text: "Deep compatibility",
-                        sub: "Matchmaker AI understands values & personality",
+                        sub: "AI matchmaker understands values & personality",
                       },
                       {
                         text: "Straight to dates",
@@ -476,7 +477,7 @@ export function LandingPage() {
               {[
                 {
                   q: "How does MeetOnce work?",
-                  a: "It's simple: Have a 5-minute voice conversation with our matchmaker AI, and we'll understand what you're looking for. Every week, we'll send you one highly compatible match. If you both say yes, we set up the coffee date, time, place, everything. No swiping, no endless texting.",
+                  a: "It's simple: Have a 5-minute voice conversation with our AI matchmaker, and we'll understand what you're looking for. Every week, we'll send you one highly compatible match. If you both say yes, we set up the coffee date, time, place, everything. No swiping, no endless texting.",
                 },
                 {
                   q: "What will I know about my match beforehand?",
@@ -552,7 +553,7 @@ export function LandingPage() {
                       variant="secondary"
                       className="h-14 px-10 text-lg rounded-full shadow-lg"
                     >
-                      Get Started — It&apos;s Free
+                      Get Started, It&apos;s Free
                       <ArrowRight className="ml-2 w-5 h-5" />
                     </Button>
                   </SignInButton>
@@ -571,9 +572,9 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
+              {/* <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
                 <Heart className="w-4 h-4 text-white" />
-              </div>
+              </div> */}
               <span className="text-xl font-bold">MeetOnce</span>
             </div>
 
