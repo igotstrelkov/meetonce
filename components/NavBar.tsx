@@ -19,6 +19,7 @@ import {
   useUser,
 } from "@clerk/nextjs";
 import { useAction } from "convex/react";
+import { Heart } from "lucide-react";
 import { useState } from "react";
 
 export function NavBar() {
@@ -52,8 +53,11 @@ export function NavBar() {
 
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-background/80 backdrop-blur-md border-b border-border/40 mb-5">
-      <div className="flex items-center gap-2">
-        <span className="text-2xl font-bold tracking-tighter">MeetOnce</span>
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
+          <Heart className="w-4 h-4 text-white" />
+        </div>
+        <span className="text-xl font-bold">MeetOnce</span>
       </div>
       <nav className="flex items-center gap-6">
         <SignedOut>
