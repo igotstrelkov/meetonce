@@ -66,7 +66,7 @@ export function LandingPage() {
               className="h-14 px-8 text-lg rounded-full"
             >
               <Mic className="mr-2 w-5 h-5" />
-              See How It Works
+              See How It Works!!!
             </Button> */}
           </div>
 
