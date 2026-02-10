@@ -1,4 +1,4 @@
-import { CheckCircle2, Loader2, Mic } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Mic } from "lucide-react";
 
 export type VoiceState =
   | "idle"
@@ -6,19 +6,39 @@ export type VoiceState =
   | "recording"
   | "processing"
   | "complete"
-  | "error";
+  | "error"
+  | "validation_failed";
 
 interface VoiceStateIndicatorProps {
   state: VoiceState;
   error?: string;
+  validationError?: string;
   canProceed?: boolean;
 }
 
 export function VoiceStateIndicator({
   state,
   error,
+  validationError,
   canProceed,
 }: VoiceStateIndicatorProps) {
+  if (state === "validation_failed") {
+    return (
+      <div className="text-center">
+        <div className="flex items-center justify-center gap-2 text-amber-600">
+          <AlertCircle className="w-5 h-5" />
+          <span className="font-medium">More details needed</span>
+        </div>
+        <p className="text-sm text-amber-700 mt-1">
+          {validationError || "Please provide more information"}
+        </p>
+        <p className="text-sm text-gray-500 mt-2">
+          Try again with more specific details
+        </p>
+      </div>
+    );
+  }
+
   if (state === "complete" || canProceed) {
     return (
       <div className="text-center">

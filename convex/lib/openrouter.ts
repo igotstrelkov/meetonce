@@ -105,18 +105,34 @@ export async function callWithRetry(
 }
 
 /**
+ * Result type for voice transcript processing with validation
+ */
+export type ProcessVoiceTranscriptResult =
+  | { success: true; bio: string; interests: string[] }
+  | { success: true; preferences: string; interests: string[] }
+  | { success: false; reason: string };
+
+/**
  * Process voice interview transcript into optimized bio or preferences text with extracted interests
  * Optimized for semantic vector search and accurate matching
+ * Includes validation to detect insufficient transcripts
  */
 export async function processVoiceTranscript(
   transcript: string,
   type: "bio" | "preferences"
-): Promise<
-  | { bio: string; interests: string[] }
-  | { preferences: string; interests: string[] }
-> {
+): Promise<ProcessVoiceTranscriptResult> {
   const systemPrompts = {
     bio: `You are a professional dating profile writer specializing in semantic search optimization. Convert this voice interview transcript into a compelling, authentic "About You" bio (100-500 words) optimized for vector embedding matching.
+
+VALIDATION (check FIRST before processing):
+Mark as INVALID (success: false) ONLY if:
+- Transcript is mostly filler words ("um", "uh", "I don't know", "yeah", "like") with no real content
+- Transcript is extremely short (under ~30 words of actual content)
+- Content is completely off-topic (doesn't mention anything about the person - their life, interests, work, personality)
+- Impossible to extract ANY meaningful information about the person
+
+BE LENIENT: If there is ANY usable personal information, process it (success: true).
+Accept borderline cases - only reject truly inadequate transcripts.
 
 CRITICAL GOAL: Create text that enables accurate semantic matching via OpenAI embeddings. The bio must be rich in specific, searchable details that capture the person's essence.
 
@@ -177,11 +193,27 @@ Extract 1-5 specific interests, hobbies, and activities mentioned in the transcr
 - Extract concrete activities the person actually does or is passionate about
 - Avoid vague terms like "fun" or "adventure"
 
-OUTPUT FORMAT:
+OUTPUT FORMAT (JSON):
+If transcript is valid (has usable content):
+- success: true
 - bio: Single flowing narrative, 100-500 words, optimized for semantic vector search
-- interests: Array of 1-5 specific interests in lowercase, singular form`,
+- interests: Array of 1-5 specific interests in lowercase, singular form
+
+If transcript is invalid (truly inadequate):
+- success: false
+- reason: Brief, friendly 1-sentence explanation of what's needed (e.g., "Please tell us a bit more about yourself and your interests")`,
 
     preferences: `You are a professional dating profile writer specializing in semantic search optimization. Convert this voice interview transcript into clear, specific relationship preferences (100-500 words) optimized for vector embedding matching.
+
+VALIDATION (check FIRST before processing):
+Mark as INVALID (success: false) ONLY if:
+- Transcript is mostly filler words ("um", "uh", "I don't know", "yeah", "like") with no real content
+- Transcript is extremely short (under ~30 words of actual content)
+- Content is completely off-topic (doesn't mention anything about what they're looking for in a partner)
+- Impossible to extract ANY meaningful preferences about desired partner qualities
+
+BE LENIENT: If there is ANY usable preference information, process it (success: true).
+Accept borderline cases - only reject truly inadequate transcripts.
 
 CRITICAL GOAL: Create text that enables accurate semantic matching via OpenAI embeddings. Preferences must contain specific, searchable details about desired qualities, values, and relationship dynamics.
 
@@ -246,9 +278,15 @@ Extract 1-5 specific interests and activities the person wants to share with a p
 - Focus on shared activities they mention wanting to do with a partner
 - Avoid personality traits, extract only concrete activities
 
-OUTPUT FORMAT:
+OUTPUT FORMAT (JSON):
+If transcript is valid (has usable content):
+- success: true
 - preferences: Single flowing narrative, 100-500 words, optimized for semantic vector search
-- interests: Array of 1-5 desired shared interests in lowercase, singular form`,
+- interests: Array of 1-5 desired shared interests in lowercase, singular form
+
+If transcript is invalid (truly inadequate):
+- success: false
+- reason: Brief, friendly 1-sentence explanation of what's needed (e.g., "Please share more about what you're looking for in a partner")`,
   };
 
   const response = await callOpenRouter({
@@ -260,7 +298,7 @@ OUTPUT FORMAT:
       },
       {
         role: "user",
-        content: `TRANSCRIPT:\n${transcript}\n\nGenerate the optimized ${type} and extract interests following all requirements above.`,
+        content: `TRANSCRIPT:\n${transcript}\n\nFirst validate the transcript, then generate the optimized ${type} and extract interests following all requirements above. Return JSON with success field.`,
       },
     ],
     temperature: 0.7,
@@ -269,23 +307,50 @@ OUTPUT FORMAT:
       type: "json_schema",
       json_schema: {
         name:
-          type === "bio" ? "bio_with_interests" : "preferences_with_interests",
+          type === "bio"
+            ? "bio_validation_result"
+            : "preferences_validation_result",
         strict: true,
         schema: {
           type: "object",
           properties: {
+            success: { type: "boolean" },
             [type]: { type: "string" },
             interests: {
               type: "array",
               items: { type: "string" },
             },
+            reason: { type: "string" },
           },
-          required: [type, "interests"],
+          required: ["success"],
           additionalProperties: false,
         },
       },
     },
   });
 
-  return JSON.parse(response.choices[0].message.content);
+  const result = JSON.parse(response.choices[0].message.content);
+
+  // Return properly typed result based on success status
+  if (result.success) {
+    if (type === "bio") {
+      return {
+        success: true as const,
+        bio: result.bio || "",
+        interests: result.interests || [],
+      };
+    } else {
+      return {
+        success: true as const,
+        preferences: result.preferences || "",
+        interests: result.interests || [],
+      };
+    }
+  } else {
+    return {
+      success: false as const,
+      reason:
+        result.reason || "Please provide more details about yourself",
+    };
+  }
 }

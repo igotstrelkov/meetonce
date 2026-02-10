@@ -55,5 +55,16 @@ export function VoiceControls({
     );
   }
 
+  if (state === "validation_failed") {
+    return (
+      <div className="flex justify-center gap-3">
+        <Button onClick={onRetry} size="lg" className="gap-2">
+          <RotateCcw className="w-4 h-4" />
+          Try Again
+        </Button>
+      </div>
+    );
+  }
+
   return null;
 }

@@ -14,8 +14,8 @@ interface VoiceInterviewCardProps {
   onComplete: (
     transcript: string,
     result:
-      | { bio: string; interests: string[] }
-      | { preferences: string; interests: string[] }
+      | { success: true; bio: string; interests: string[] }
+      | { success: true; preferences: string; interests: string[] }
   ) => void;
   assistantId?: string;
   canProceed?: boolean;
@@ -28,6 +28,7 @@ export function VoiceInterviewCard({
   canProceed,
 }: VoiceInterviewCardProps) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const processTranscript = useAction(api.voice.processTranscript);
   const [hasRetried, setHasRetried] = useState(false);
 
@@ -39,15 +40,28 @@ export function VoiceInterviewCard({
 
     if (!transcript || transcript.trim().length === 0) {
       console.warn("⚠️ Empty transcript, skipping processing");
+      setValidationError("No response was recorded. Please try again.");
+      setState("validation_failed");
       return;
     }
 
     try {
       setIsProcessing(true);
+      setValidationError(null);
       console.log("🔄 Processing transcript...");
       const result = await processTranscript({ transcript, type });
-      console.log("✅ Transcript processed successfully:", result);
-      setHasRetried(false); // Reset retry flag on successful completion
+      console.log("✅ Transcript processed:", result);
+
+      if (!result.success) {
+        // Validation failed - show error and allow retry
+        console.log("⚠️ Validation failed:", result.reason);
+        setValidationError(result.reason);
+        setState("validation_failed");
+        return;
+      }
+
+      // Success - pass to parent
+      setHasRetried(false);
       onComplete(transcript, result);
       console.log("✅ onComplete called - Continue button should enable");
     } catch (error: any) {
@@ -70,10 +84,11 @@ export function VoiceInterviewCard({
 
   const handleRetry = () => {
     setHasRetried(true);
+    setValidationError(null);
     retry();
   };
 
-  const currentState = isProcessing ? "processing" : state;
+  const currentState = validationError ? "validation_failed" : isProcessing ? "processing" : state;
   const isWaveformActive =
     currentState === "connecting" ||
     currentState === "recording" ||
@@ -102,6 +117,7 @@ export function VoiceInterviewCard({
         <VoiceStateIndicator
           state={currentState}
           error={error || undefined}
+          validationError={validationError || undefined}
           canProceed={effectiveCanProceed}
         />
 

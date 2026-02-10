@@ -28,11 +28,12 @@ export default function PreferencesVoiceStep({
   const handleComplete = (
     transcript: string,
     result:
-      | { bio: string; interests: string[] }
-      | { preferences: string; interests: string[] }
+      | { success: true; bio: string; interests: string[] }
+      | { success: true; preferences: string; interests: string[] }
   ) => {
     // Type assertion - we know this is preferences step
     const preferencesResult = result as {
+      success: true;
       preferences: string;
       interests: string[];
     };

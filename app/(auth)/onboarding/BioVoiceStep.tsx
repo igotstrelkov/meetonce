@@ -28,11 +28,11 @@ export default function BioVoiceStep({
   const handleComplete = (
     transcript: string,
     result:
-      | { bio: string; interests: string[] }
-      | { preferences: string; interests: string[] }
+      | { success: true; bio: string; interests: string[] }
+      | { success: true; preferences: string; interests: string[] }
   ) => {
     // Type assertion - we know this is bio step
-    const bioResult = result as { bio: string; interests: string[] };
+    const bioResult = result as { success: true; bio: string; interests: string[] };
     updateData({
       bio: bioResult.bio,
       bioTranscript: transcript,
