@@ -46,7 +46,7 @@ export function LandingPage() {
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 leading-relaxed">
             We use advanced voice technology to understand who you really are,
             your values, personality, and what you&apos;re looking for. Then we
-            set up real coffee dates with people who actually fit.
+            set up a 30-minute coffee date with people who truly match.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
@@ -201,7 +201,7 @@ export function LandingPage() {
           <div className="max-w-6xl mx-auto px-4">
             <div className="text-center mb-12 md:mb-16">
               <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                From signup to coffee date
+                From signup to 30-minute coffee date
               </h2>
               <p className="text-lg md:text-xl text-muted-foreground">
                 Three steps. One week. Real connection.
@@ -477,7 +477,7 @@ export function LandingPage() {
               {[
                 {
                   q: "How does MeetOnce work?",
-                  a: "It's simple: Have a 5-minute voice conversation with our AI matchmaker, and we'll understand what you're looking for. Every week, we'll send you one highly compatible match. If you both say yes, we set up the coffee date, time, place, everything. No swiping, no endless texting.",
+                  a: "It's simple: Have a 5-minute voice conversation with our AI matchmaker, and we'll understand what you're looking for. Every week, we'll send you one highly compatible match. If you both say yes, we set up the 30-minute coffee date, time, place, everything. No swiping, no endless texting.",
                 },
                 {
                   q: "What will I know about my match beforehand?",

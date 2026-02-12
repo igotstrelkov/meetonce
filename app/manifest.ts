@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "MeetOnce | Stop swiping. Start meeting.",
+    name: "MeetOnce",
     short_name: "MeetOnce",
     description:
       "The first curated dating app made specifically for Dublin singles. 1 quality match per week.",

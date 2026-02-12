@@ -1,6 +1,6 @@
 import ConvexClientProvider from "@/components/ConvexClientProvider";
-import { NavBar } from "@/components/NavBar";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { NavBar } from "@/components/NavBar";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
