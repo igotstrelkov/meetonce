@@ -473,6 +473,17 @@ export const runMatchingBatch = internalAction({
         matchAge: matchData.matchUser.age,
         matchUrl: dashboardUrl,
       });
+      // Push notification to user
+      await ctx.scheduler.runAfter(
+        0,
+        internal.pushActions.sendPushToUser,
+        {
+          userId: user._id,
+          title: "You have a new match!",
+          body: `Check out ${matchData.matchUser.firstName}`,
+          url: "/dashboard",
+        }
+      );
       console.log(`📧 Email sent to ${user.email}`);
 
       // Send email to matchUser about their match (user)
@@ -483,6 +494,17 @@ export const runMatchingBatch = internalAction({
         matchAge: user.age,
         matchUrl: dashboardUrl,
       });
+      // Push notification to matchUser
+      await ctx.scheduler.runAfter(
+        0,
+        internal.pushActions.sendPushToUser,
+        {
+          userId: matchData.matchUser._id,
+          title: "You have a new match!",
+          body: `Check out ${user.firstName}`,
+          url: "/dashboard",
+        }
+      );
       console.log(`📧 Email sent to ${matchData.matchUser.email}`);
     }
 

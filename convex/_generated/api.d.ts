@@ -21,6 +21,8 @@ import type * as lib_utils from "../lib/utils.js";
 import type * as lib_vapi from "../lib/vapi.js";
 import type * as matches from "../matches.js";
 import type * as matching from "../matching.js";
+import type * as notifications from "../notifications.js";
+import type * as pushActions from "../pushActions.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 import type * as voice from "../voice.js";
@@ -45,6 +47,8 @@ declare const fullApi: ApiFromModules<{
   "lib/vapi": typeof lib_vapi;
   matches: typeof matches;
   matching: typeof matching;
+  notifications: typeof notifications;
+  pushActions: typeof pushActions;
   seed: typeof seed;
   users: typeof users;
   voice: typeof voice;

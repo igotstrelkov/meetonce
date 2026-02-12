@@ -425,6 +425,18 @@ export const checkUnreadAndSendEmail = internalMutation({
         unreadCount,
       });
 
+      // Push notification
+      await ctx.scheduler.runAfter(
+        0,
+        internal.pushActions.sendPushToUser,
+        {
+          userId: receiver._id,
+          title: `New message from ${args.senderName}`,
+          body: messagePreview,
+          url: `/chat/${args.matchId}`,
+        }
+      );
+
       // Update timestamp
       await ctx.db.patch(args.matchId, {
         lastNotificationEmailSentAt: now,

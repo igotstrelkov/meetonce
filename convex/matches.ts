@@ -221,6 +221,17 @@ export const respondToMatch = mutation({
           matchName: matchUser.firstName,
           matchUrl: `${appUrl}/dashboard`,
         });
+        // Push notification to user
+        await ctx.scheduler.runAfter(
+          0,
+          internal.pushActions.sendPushToUser,
+          {
+            userId: user._id,
+            title: "It's a Match!",
+            body: `You and ${matchUser.firstName} are both interested`,
+            url: "/dashboard",
+          }
+        );
 
         // Send email to match user
         await ctx.scheduler.runAfter(0, internal.emails.sendMutualMatchEmail, {
@@ -229,6 +240,17 @@ export const respondToMatch = mutation({
           matchName: user.firstName,
           matchUrl: `${appUrl}/dashboard`,
         });
+        // Push notification to match user
+        await ctx.scheduler.runAfter(
+          0,
+          internal.pushActions.sendPushToUser,
+          {
+            userId: matchUser._id,
+            title: "It's a Match!",
+            body: `You and ${user.firstName} are both interested`,
+            url: "/dashboard",
+          }
+        );
       }
     }
   },

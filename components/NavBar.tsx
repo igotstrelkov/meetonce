@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/convex/_generated/api";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import {
   SignInButton,
   SignUpButton,
@@ -19,6 +20,7 @@ import {
   useUser,
 } from "@clerk/nextjs";
 import { useAction } from "convex/react";
+import { Bell, BellOff } from "lucide-react";
 import { useState } from "react";
 
 export function NavBar() {
@@ -29,6 +31,13 @@ export function NavBar() {
 
   const { user } = useUser();
   const sendFeedback = useAction(api.emails.sendUserFeedback);
+  const {
+    isSupported: pushSupported,
+    isSubscribed: pushSubscribed,
+    isLoading: pushLoading,
+    subscribe: pushSubscribe,
+    unsubscribe: pushUnsubscribe,
+  } = usePushNotifications();
 
   const handleSubmit = async () => {
     if (!feedback.trim()) return;
@@ -72,6 +81,26 @@ export function NavBar() {
           </SignUpButton>
         </SignedOut>
         <SignedIn>
+          {pushSupported && (
+            <button
+              onClick={() =>
+                pushSubscribed ? pushUnsubscribe() : pushSubscribe()
+              }
+              disabled={pushLoading}
+              className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              title={
+                pushSubscribed
+                  ? "Disable push notifications"
+                  : "Enable push notifications"
+              }
+            >
+              {pushSubscribed ? (
+                <Bell className="w-5 h-5" />
+              ) : (
+                <BellOff className="w-5 h-5" />
+              )}
+            </button>
+          )}
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger>
               <div className="text-sm text-muted-foreground hover:text-foreground transition-colors">
