@@ -81,26 +81,6 @@ export function NavBar() {
           </SignUpButton>
         </SignedOut>
         <SignedIn>
-          {pushSupported && (
-            <button
-              onClick={() =>
-                pushSubscribed ? pushUnsubscribe() : pushSubscribe()
-              }
-              disabled={pushLoading}
-              className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-              title={
-                pushSubscribed
-                  ? "Disable push notifications"
-                  : "Enable push notifications"
-              }
-            >
-              {pushSubscribed ? (
-                <Bell className="w-5 h-5" />
-              ) : (
-                <BellOff className="w-5 h-5" />
-              )}
-            </button>
-          )}
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger>
               <div className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -130,6 +110,26 @@ export function NavBar() {
               </div>
             </DialogContent>
           </Dialog>
+          {pushSupported && (
+            <button
+              onClick={() =>
+                pushSubscribed ? pushUnsubscribe() : pushSubscribe()
+              }
+              disabled={pushLoading}
+              className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              title={
+                pushSubscribed
+                  ? "Disable push notifications"
+                  : "Enable push notifications"
+              }
+            >
+              {pushSubscribed ? (
+                <Bell className="w-5 h-5" />
+              ) : (
+                <BellOff className="w-5 h-5" />
+              )}
+            </button>
+          )}
           <UserButton />
         </SignedIn>
       </nav>

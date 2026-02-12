@@ -1,4 +1,4 @@
-const CACHE_NAME = "meetonce-v1";
+const CACHE_NAME = "meetonce-v2";
 
 // App shell files to cache on install
 const PRECACHE_ASSETS = ["/", "/dashboard"];
@@ -29,8 +29,11 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
-  // Skip non-GET requests and chrome-extension URLs
+  // Skip non-GET requests, chrome-extension URLs, and third-party requests
   if (request.method !== "GET" || !request.url.startsWith("http")) {
+    return;
+  }
+  if (!request.url.startsWith(self.location.origin)) {
     return;
   }
 
