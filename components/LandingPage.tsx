@@ -115,13 +115,13 @@ export function LandingPage() {
               </div>
               <div className="hidden sm:block w-px h-4 bg-white/20" />
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-primary" />
+                <MapPin className="w-4 h-4 text-green-500/80" />
                 <span>Dublin only</span>
               </div>
               <div className="hidden sm:block w-px h-4 bg-white/20" />
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-500/80" />
-                <span>Free for first 1000 members</span>
+                <span>Free during launch</span>
               </div>
             </div>
           </div>
