@@ -1,79 +1,18 @@
-const CACHE_NAME = "meetonce-v2";
+// Install: activate immediately
+self.addEventListener("install", () => self.skipWaiting());
 
-// App shell files to cache on install
-const PRECACHE_ASSETS = ["/", "/dashboard"];
-
-// Install: precache app shell
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
-  );
-  self.skipWaiting();
-});
-
-// Activate: clean old caches
+// Activate: claim clients immediately
 self.addEventListener("activate", (event) => {
+  // Clean up any old caches from previous versions
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
+      Promise.all(keys.map((key) => caches.delete(key)))
     )
   );
   self.clients.claim();
 });
 
-// Fetch: network-first for navigations, cache-first for static assets
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-
-  // Skip non-GET requests, chrome-extension URLs, and third-party requests
-  if (request.method !== "GET" || !request.url.startsWith("http")) {
-    return;
-  }
-  if (!request.url.startsWith(self.location.origin)) {
-    return;
-  }
-
-  // Navigation requests: network-first with cache fallback
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return response;
-        })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match("/")))
-    );
-    return;
-  }
-
-  // Static assets (JS, CSS, images, fonts): cache-first
-  if (
-    request.destination === "script" ||
-    request.destination === "style" ||
-    request.destination === "image" ||
-    request.destination === "font"
-  ) {
-    event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
-          fetch(request).then((response) => {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-            return response;
-          })
-      )
-    );
-    return;
-  }
-});
-
-// Push notification handler (for future use)
+// Push notification handler
 self.addEventListener("push", (event) => {
   if (event.data) {
     const data = event.data.json();

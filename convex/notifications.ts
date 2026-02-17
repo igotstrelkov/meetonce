@@ -9,16 +9,16 @@ import {
 // ===== QUERIES =====
 
 export const getMySubscriptionStatus = query({
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<boolean | null> => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return false;
+    if (!identity) return null;
 
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
-    if (!user) return false;
+    if (!user) return null;
 
     const subscription = await ctx.db
       .query("pushSubscriptions")
@@ -46,7 +46,7 @@ export const saveSubscription = mutation({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
-    if (!user) throw new Error("User not found");
+    if (!user) return null;
 
     // Check if this endpoint already exists
     const existing = await ctx.db
@@ -111,4 +111,3 @@ export const deleteSubscriptionById = internalMutation({
     await ctx.db.delete(args.subscriptionId);
   },
 });
-

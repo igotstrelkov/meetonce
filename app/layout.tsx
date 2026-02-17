@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MeetOnce | Stop swiping. Start meeting.",
+  title: "MeetOnce | One match. One coffee. Once a week.",
   description:
     "The first curated dating app made specifically for Dublin singles. 1 quality match per week. Real dates, not endless swiping.",
   appleWebApp: {
