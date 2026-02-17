@@ -81,11 +81,11 @@ export const ThisWeek = () => {
   if (matchData === null || !match || !matchUser) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 space-y-4">
-        <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
-          <Calendar className="w-10 h-10 text-blue-500" />
+        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
+          <Calendar className="w-10 h-10 text-primary" />
         </div>
         <h2 className="text-2xl font-bold">No Match This Week</h2>
-        <p className="text-gray-500 max-w-md">
+        <p className="text-muted-foreground max-w-md">
           We're still looking for your perfect match. New matches are released
           every Monday morning!
         </p>
@@ -142,19 +142,19 @@ export const ThisWeek = () => {
             <div className="space-y-6">
               {/* Desktop Header */}
               <div className="hidden md:block">
-                <div className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold mb-4">
+                <div className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold mb-4">
                   {match.compatibilityScore}% Match
                 </div>
                 <h1 className="text-4xl font-bold mb-2">
                   {matchUser.firstName}, {matchUser.age}
                 </h1>
-                <p className="text-xl text-gray-500">{matchUser.jobTitle}</p>
+                <p className="text-xl text-muted-foreground">{matchUser.jobTitle}</p>
               </div>
 
               {/* Match Details */}
               <div className="space-y-4">
                 <div
-                  className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl"
+                  className="flex items-start gap-4 p-4 bg-muted/50 rounded-2xl"
                   onClick={() =>
                     window.open(
                       getDirectionsUrl({
@@ -165,35 +165,35 @@ export const ThisWeek = () => {
                     )
                   }
                 >
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
-                    <MapPin className="w-5 h-5 text-blue-500" />
+                  <div className="w-10 h-10 bg-background rounded-full flex items-center justify-center shadow-sm shrink-0">
+                    <MapPin className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <div className="flex items-center">
-                      <h3 className="font-semibold text-gray-900">
+                      <h3 className="font-semibold text-foreground">
                         Suggested Venue
                       </h3>
-                      <ExternalLink className="h-3 w-3 ml-1 hover:text-gray-600" />
+                      <ExternalLink className="h-3 w-3 ml-1 hover:text-muted-foreground" />
                     </div>
 
-                    <p className="text-gray-600">{match.suggestedVenue.name}</p>
+                    <p className="text-muted-foreground">{match.suggestedVenue.name}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
+                <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-2xl">
+                  <div className="w-10 h-10 bg-background rounded-full flex items-center justify-center shadow-sm shrink-0">
                     <Calendar className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">When</h3>
-                    <p className="text-gray-600">{scheduledText}</p>
+                    <h3 className="font-semibold text-foreground">When</h3>
+                    <p className="text-muted-foreground">{scheduledText}</p>
                   </div>
                 </div>
               </div>
 
               {/* "View More" Trigger */}
               <DrawerTrigger asChild>
-                <button className="w-full flex items-center justify-center gap-2 text-gray-500 hover:text-gray-900 font-medium text-sm transition-colors group">
+                <button className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-gray-900 font-medium text-sm transition-colors group">
                   <Info className="w-4 h-4" />
                   View full analysis
                   <ChevronUp className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
@@ -202,7 +202,7 @@ export const ThisWeek = () => {
             </div>
 
             {/* Action Area */}
-            <div className="mt-8 pt-8 border-t border-gray-100">
+            <div className="mt-8 pt-8 border-t border-border">
               {myResponse === "pending" ? (
                 <div className="grid grid-cols-2 gap-4">
                   <Button
@@ -218,7 +218,7 @@ export const ThisWeek = () => {
                   <Button
                     onClick={handleInterested}
                     size="lg"
-                    className="h-14 text-lg bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/10"
+                    className="h-14 text-lg bg-foreground hover:bg-foreground/90 text-background shadow-lg shadow-foreground/10"
                     disabled={isSubmitting}
                   >
                     <Check className="w-5 h-5 mr-2" />
@@ -259,9 +259,9 @@ export const ThisWeek = () => {
                   )}
                 </div>
               ) : (
-                <div className="bg-gray-50 rounded-2xl p-6 text-center">
-                  <h3 className="font-bold text-gray-900">Skipped</h3>
-                  <p className="text-gray-500">
+                <div className="bg-muted/50 rounded-2xl p-6 text-center">
+                  <h3 className="font-bold text-foreground">Skipped</h3>
+                  <p className="text-muted-foreground">
                     You passed on this match. Check back next Monday!
                   </p>
                 </div>
@@ -273,7 +273,7 @@ export const ThisWeek = () => {
         {/* Hidden Feedback Form Overlay */}
         {showPassFeedback && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl">
+            <div className="bg-background rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl">
               <PassFeedbackForm
                 onSubmit={handlePassComplete}
                 onCancel={() => setShowPassFeedback(false)}
