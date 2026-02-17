@@ -21,9 +21,12 @@ import {
 } from "@clerk/nextjs";
 import { useAction } from "convex/react";
 import { Bell, BellOff } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 export function NavBar() {
+  const pathname = usePathname();
+  const isLanding = pathname === "/";
   const [open, setOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,22 +63,36 @@ export function NavBar() {
   };
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 bg-background/80 backdrop-blur-md border-b border-border/40 mb-5">
+    <header
+      className={`flex items-center justify-between px-6 py-4 ${
+        isLanding
+          ? "absolute top-0 left-0 right-0 z-50 bg-transparent"
+          : "bg-background/80 backdrop-blur-md border-b border-border/40 mb-5"
+      }`}
+    >
       <div className="flex items-center gap-3">
-        {/* <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
-          <Heart className="w-4 h-4 text-white" />
-        </div> */}
-        <span className="text-xl font-bold">MeetOnce</span>
+        <span className={`text-xl font-bold ${isLanding ? "text-white" : ""}`}>
+          MeetOnce
+        </span>
       </div>
       <nav className="flex items-center gap-6">
         <SignedOut>
           <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-            <button className="text-sm font-medium hover:text-primary transition-colors">
+            <button
+              className={`text-sm font-medium transition-colors ${
+                isLanding
+                  ? "text-white/70 hover:text-white"
+                  : "hover:text-primary"
+              }`}
+            >
               Log In
             </button>
           </SignInButton>
           <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
-            <Button variant="default" className="rounded-full px-6">
+            <Button
+              variant={isLanding ? "secondary" : "default"}
+              className="rounded-full px-6"
+            >
               Sign Up
             </Button>
           </SignUpButton>

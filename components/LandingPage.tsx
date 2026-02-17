@@ -18,7 +18,6 @@ import {
   ShieldCheck,
   Sparkles,
   Twitter,
-  X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -53,7 +52,7 @@ function AnimatedCounter({
           }, duration / steps);
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.3 },
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -88,7 +87,7 @@ export function LandingPage() {
             <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-black tracking-tight mb-8 leading-[1.05]">
               One match.
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-pink-500 to-primary">
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-pink-500 to-primary">
                 One coffee.
               </span>
               <br />
@@ -133,7 +132,7 @@ export function LandingPage() {
               </div>
               <div className="hidden sm:block w-px h-4 bg-white/20" />
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-white/50" />
+                <ShieldCheck className="w-4 h-4 text-green-500/80" />
                 <span>Every profile verified</span>
               </div>
             </div>
@@ -145,11 +144,11 @@ export function LandingPage() {
           <div className="max-w-2xl mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-black mb-6 leading-tight tracking-tight">
-                Dating in Dublin is
-                <br />
+                Dating in Dublin is broken.
+                {/* <br />
                 <span className="text-muted-foreground">
                   absolutely broken.
-                </span>
+                </span> */}
               </h2>
               <p className="text-lg text-muted-foreground">
                 You already know this. You&apos;ve lived it.
@@ -191,7 +190,7 @@ export function LandingPage() {
             <p className="text-2xl md:text-4xl font-black tracking-tight leading-tight">
               Swipe culture turned dating into a game.
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-pink-500">
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-pink-500">
                 We&apos;re turning it back into a date.
               </span>
             </p>
@@ -210,7 +209,7 @@ export function LandingPage() {
                 Less noise. More dates.
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-light">
-                We stripped dating back to what actually matters: meeting
+                We stripped dating back to what actually matters, meeting
                 someone face to face.
               </p>
             </div>
@@ -234,7 +233,7 @@ export function LandingPage() {
                     </p>
                   </div>
                   <div className="flex items-center justify-center">
-                    <div className="text-[8rem] md:text-[10rem] font-black text-white/[0.06] leading-none select-none">
+                    <div className="text-[8rem] md:text-[10rem] font-black text-white/10 leading-none select-none">
                       1
                     </div>
                   </div>
@@ -265,7 +264,7 @@ export function LandingPage() {
                   key={i}
                   className="group flex flex-col p-8 rounded-2xl bg-background border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-pink-500/20 flex items-center justify-center mb-5 text-primary group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-linear-to-br from-primary/20 to-pink-500/20 flex items-center justify-center mb-5 text-primary group-hover:scale-110 transition-transform">
                     <item.icon className="w-6 h-6" />
                   </div>
                   <h3 className="text-lg font-bold mb-2">{item.title}</h3>
@@ -289,9 +288,9 @@ export function LandingPage() {
                 </div>
                 <h2 className="text-3xl md:text-5xl font-black mb-6 leading-tight tracking-tight">
                   Talk to us like you&apos;d talk to
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-pink-500">
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-pink-500">
                     {" "}
-                    a good friend
+                    a good friend.
                   </span>
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 leading-relaxed font-light">
@@ -319,7 +318,7 @@ export function LandingPage() {
                     },
                   ].map((item, i) => (
                     <div key={i} className="flex items-start gap-3">
-                      <div className="mt-1 w-5 h-5 rounded-md bg-gradient-to-r from-primary to-pink-500 flex items-center justify-center shrink-0">
+                      <div className="mt-1 w-5 h-5 rounded-md bg-linear-to-r from-primary to-pink-500 flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 text-white" />
                       </div>
                       <div>
@@ -355,7 +354,7 @@ export function LandingPage() {
                       </div>
                       {/* Chat header */}
                       <div className="px-5 pb-4 flex items-center gap-3 border-b border-border/50">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-pink-500 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-linear-to-r from-primary to-pink-500 flex items-center justify-center">
                           <Mic className="w-5 h-5 text-white" />
                         </div>
                         <div>
@@ -399,7 +398,7 @@ export function LandingPage() {
                                   animationDelay: `${i * 0.08}s`,
                                 }}
                               />
-                            )
+                            ),
                           )}
                         </div>
                       </div>
@@ -420,7 +419,7 @@ export function LandingPage() {
           <div className="max-w-6xl mx-auto px-4">
             <div className="text-center mb-14">
               <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">
-                How it works
+                How it works.
               </h2>
               <p className="text-lg text-muted-foreground font-light">
                 Sign up on Sunday. Sit down for coffee by Friday.
@@ -461,7 +460,7 @@ export function LandingPage() {
                   <span className="text-5xl font-black text-primary/10 group-hover:text-primary/20 transition-colors mb-4">
                     {step.step}
                   </span>
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-pink-500/20 flex items-center justify-center mb-5 text-primary group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-linear-to-br from-primary/20 to-pink-500/20 flex items-center justify-center mb-5 text-primary group-hover:scale-110 transition-transform">
                     <step.icon className="w-6 h-6" />
                   </div>
                   <h3 className="text-lg font-bold mb-2">{step.title}</h3>
@@ -637,29 +636,12 @@ export function LandingPage() {
         </section>
 
         {/* Scarcity / Founding Members — Progress bar */}
-        <section className="py-20 md:py-32 bg-muted/20">
+        {/* <section className="py-20 md:py-32 bg-muted/20">
           <div className="max-w-3xl mx-auto px-4 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-10">
               <MapPin className="w-4 h-4" />
               Dublin-Only Launch
             </div>
-            <h2 className="text-3xl md:text-5xl font-black mb-6 leading-tight tracking-tight">
-              This is a Dublin thing.
-              <br />
-              <span className="text-muted-foreground">For now.</span>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-4 leading-relaxed font-light">
-              We&apos;re launching exclusively in Dublin because great things
-              start small. The first 1,000 members become Founding Members,
-              which means free access for life and first priority on every
-              feature we build.
-            </p>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed font-light">
-              We&apos;re not trying to be everywhere. We&apos;re trying to fix
-              dating in one city first. Yours.
-            </p>
-
-            {/* Progress bar */}
             <div className="max-w-md mx-auto">
               <div className="flex justify-between text-sm mb-3">
                 <span className="font-semibold">
@@ -670,24 +652,30 @@ export function LandingPage() {
               </div>
               <div className="h-3 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-primary to-pink-500 rounded-full transition-all duration-1000"
+                  className="h-full bg-linear-to-r from-primary to-pink-500 rounded-full transition-all duration-1000"
                   style={{ width: "47.5%" }}
                 />
               </div>
               <p className="text-sm text-muted-foreground mt-3">
-                Less than 525 founding spots remaining
+                We&apos;re launching exclusively in Dublin because great things
+                start small. The first 1,000 members become Founding Members,
+                which means free access for life and first priority on every
+                feature we build.
               </p>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* FAQ Section */}
         <section className="py-20 md:py-32">
           <div className="max-w-3xl mx-auto px-4">
             <div className="text-center mb-14">
               <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">
-                Questions people actually ask
+                Questions people actually ask.
               </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-light">
+                We get it. You're skeptical. Here's the deal.
+              </p>
             </div>
             <div className="space-y-2">
               {[
@@ -834,8 +822,8 @@ export function LandingPage() {
               </a>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-border/50 text-center text-sm text-muted-foreground">
-            <p>Built in Dublin. For Dublin.</p>
+          <div className="mt-8 pt-8 text-center text-sm text-muted-foreground border-t border-border/50">
+            <p>Made with ❤️ in Dublin.</p>
           </div>
         </div>
       </footer>
