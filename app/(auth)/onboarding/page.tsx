@@ -106,7 +106,7 @@ export default function OnboardingPage() {
   return (
     <div className="max-w-xl mx-auto space-y-8 px-4">
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
           <h1 className="text-3xl font-bold">Create Your Profile</h1>
           <div className="text-sm text-gray-600">Step {currentStep} of 5</div>
         </div>

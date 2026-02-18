@@ -163,6 +163,7 @@ export default defineSchema({
     // Core Feedback
     dateHappened: v.union(
       v.literal("yes"),
+      v.literal("no_show"),
       v.literal("cancelled_by_them"),
       v.literal("cancelled_by_me"),
       v.literal("rescheduled")

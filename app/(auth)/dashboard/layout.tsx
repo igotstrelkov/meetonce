@@ -41,6 +41,24 @@ export default function AdminLayout({
   }
 
   if (currentUser.accountStatus === "rejected") {
+    if (currentUser.accountRejectionReason === "ghosting") {
+      return (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center mx-4">
+          <h2 className="text-2xl font-bold text-red-700 mb-2">
+            Account Removed
+          </h2>
+          <p className="text-gray-700 mb-2">
+            Your account has been permanently removed due to our zero-tolerance
+            ghosting policy.
+          </p>
+          <p className="text-gray-600 text-sm">
+            You confirmed interest in your match, engaged in chat, and did not
+            show up for the date. This decision is final and cannot be appealed.
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center mx-4">
         <h2 className="text-2xl font-bold mb-2">Profile Needs Update</h2>

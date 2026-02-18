@@ -94,6 +94,10 @@ export const FeedbackForm = ({
               <Label htmlFor="yes">Yes</Label>
             </div>
             <div className="flex items-center space-x-2">
+              <RadioGroupItem value="no_show" id="no_show" />
+              <Label htmlFor="no_show">They didn't show up</Label>
+            </div>
+            <div className="flex items-center space-x-2">
               <RadioGroupItem
                 value="cancelled_by_them"
                 id="cancelled_by_them"

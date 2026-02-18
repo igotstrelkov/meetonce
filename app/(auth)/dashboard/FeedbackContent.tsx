@@ -66,6 +66,12 @@ export function FeedbackContent({
                       Date Completed
                     </div>
                   )}
+                  {outcome?.dateHappened === "no_show" && (
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-800 rounded-full text-sm font-medium">
+                      <XCircle className="w-4 h-4" />
+                      They Didn't Show Up
+                    </div>
+                  )}
                   {outcome?.dateHappened === "cancelled_by_them" && (
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-800 rounded-full text-sm font-medium">
                       <XCircle className="w-4 h-4" />

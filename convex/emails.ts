@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import GhostingBan from "../emails/GhostingBan";
 import MutualMatch from "../emails/MutualMatch";
 import NewMessage from "../emails/NewMessage";
 import PhotoApproved from "../emails/PhotoApproved";
@@ -7,6 +8,7 @@ import SecondDateContact from "../emails/SecondDateContact";
 import Waitlist from "../emails/Waitlist";
 import WeeklyMatch from "../emails/WeeklyMatch";
 import { action, internalAction } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 export const sendWaitlistEmail = internalAction({
   args: {
@@ -321,6 +323,49 @@ export const sendNewMessageEmail = internalAction({
     } catch (error) {
       console.error("❌ Email error:", error);
       // Don't throw - email failures should not block message delivery
+    }
+  },
+});
+
+export const sendGhostingBanEmail = internalAction({
+  args: {
+    userId: v.id("users"),
+    to: v.string(),
+    userName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Ban the user in DB
+    await ctx.runMutation(internal.users.internalUpdateAccountStatus, {
+      userId: args.userId,
+      accountStatus: "rejected",
+      accountRejectionReason: "ghosting",
+    });
+
+    console.log(`
+      ====== GHOSTING BAN EMAIL ======
+      To: ${args.to}
+      Subject: Your MeetOnce account has been removed
+
+      Hi ${args.userName},
+
+      Your account has been permanently removed for ghosting.
+      ================================
+    `);
+
+    const { Resend } = await import("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    try {
+      await resend.emails.send({
+        from: "MeetOnce <admin@meetonce.ie>",
+        to: args.to,
+        subject: "Your MeetOnce account has been removed",
+        react: GhostingBan({ userName: args.userName }),
+      });
+      console.log(`✅ Ghosting ban email sent to ${args.to}`);
+    } catch (error) {
+      console.error("❌ Email error:", error);
+      throw error;
     }
   },
 });

@@ -48,6 +48,7 @@ export const submitDateFeedback = mutation({
     weekOf: v.string(),
     dateHappened: v.union(
       v.literal("yes"),
+      v.literal("no_show"),
       v.literal("cancelled_by_them"),
       v.literal("cancelled_by_me"),
       v.literal("rescheduled")
@@ -114,6 +115,25 @@ export const submitDateFeedback = mutation({
               userName: matchUser.firstName,
               matchName: user.firstName,
               matchEmail: user.email,
+            }
+          );
+        }
+      }
+    }
+
+    // Ghosting detection: ban the other user if they cancelled on a mutual match
+    if (args.dateHappened === "cancelled_by_them" || args.dateHappened === "no_show") {
+      const match = await ctx.db.get(args.matchId);
+      if (match?.mutualMatch === true) {
+        const ghoster = await ctx.db.get(args.matchUserId);
+        if (ghoster) {
+          await ctx.scheduler.runAfter(
+            0,
+            internal.emails.sendGhostingBanEmail,
+            {
+              userId: args.matchUserId,
+              to: ghoster.email,
+              userName: ghoster.firstName,
             }
           );
         }
