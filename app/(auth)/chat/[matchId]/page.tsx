@@ -19,10 +19,7 @@ export default function ChatPage({
   const { matchId: rawMatchId } = use(params);
   const matchId = rawMatchId as Id<"weeklyMatches">;
 
-  // Get current user
   const currentUser = useQuery(api.users.getCurrentUser);
-
-  // Get match by ID
   const matchData = useQuery(api.matches.getMatchById, { matchId });
 
   if (!currentUser || !matchData) {
@@ -31,17 +28,15 @@ export default function ChatPage({
 
   const { match, user, matchUser } = matchData;
 
-  // Determine who is the partner
   const isCurrentUserUser = user._id === currentUser._id;
   const partner = isCurrentUserUser ? matchUser : user;
 
-  // Check if mutual match exists
   if (!match.mutualMatch) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center max-w-md">
           <h1 className="text-2xl font-bold mb-4">Chat Not Available</h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-muted-foreground mb-6">
             Chat is only available after both users express interest.
           </p>
           <Button onClick={() => router.push("/dashboard")}>
@@ -62,7 +57,8 @@ export default function ChatPage({
           photoUrl: partner.photoUrl,
         }}
         currentUserId={currentUser._id}
-        expiresAt={match.expiresAt}
+        isExpired={match.status === "expired"}
+        venueName={match.suggestedVenue.name}
       />
     </div>
   );

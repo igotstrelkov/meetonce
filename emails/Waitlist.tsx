@@ -2,7 +2,9 @@ import {
   Body,
   Container,
   Head,
+  Hr,
   Html,
+  Preview,
   Section,
   Text,
 } from "@react-email/components";
@@ -15,33 +17,35 @@ export default function Waitlist({ userName }: WaitlistProps) {
   return (
     <Html>
       <Head />
+      <Preview>Your profile was reviewed — you're on the waitlist.</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Section style={header}>
-            <Text style={heading}>You're on the Waitlist!</Text>
+          {/* Wordmark */}
+          <Section style={wordmarkSection}>
+            <Text style={wordmark}>MeetOnce</Text>
           </Section>
 
+          <Hr style={divider} />
+
+          {/* Main content */}
           <Section style={content}>
             <Text style={greeting}>Hi {userName},</Text>
 
-            <Text style={intro}>
-              Great news! Your profile has been reviewed and approved by our
-              team.
+            <Text style={body}>
+              Your profile has been reviewed and you're on the waitlist. We
+              activate accounts in batches to keep the matching quality high —
+              you'll hear from us as soon as a spot opens up.
             </Text>
 
-            <Text style={intro}>
-              You're currently on our waitlist as we carefully manage our
-              community to ensure the best matching experience for everyone.
-            </Text>
+            <Text style={body}>No action needed on your end.</Text>
 
-            <Text style={intro}>
-              We'll notify you via email as soon as your account is fully
-              activated and you can start receiving matches.
-            </Text>
+            <Text style={signature}>— The MeetOnce Team</Text>
+          </Section>
 
-            <Text style={footer}>
-              Thank you for your patience. We're excited to have you join
-              MeetOnce soon!
+          {/* Footer */}
+          <Section style={footerSection}>
+            <Text style={footerText}>
+              MeetOnce · One curated match, every week.
             </Text>
           </Section>
         </Container>
@@ -50,20 +54,70 @@ export default function Waitlist({ userName }: WaitlistProps) {
   );
 }
 
-const main = { backgroundColor: "#f6f9fc", fontFamily: "sans-serif" };
-const container = { margin: "0 auto", padding: "20px", maxWidth: "600px" };
-const header = { textAlign: "center" as const, padding: "20px 0" };
-const heading = { fontSize: "28px", fontWeight: "bold", color: "#f59e0b" };
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
+const main = {
+  backgroundColor: "#f5f5f3",
+  fontFamily:
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif",
+};
+
+const container = {
+  margin: "0 auto",
+  padding: "0 20px 48px",
+  maxWidth: "560px",
+};
+
+const wordmarkSection = {
+  padding: "36px 0 0",
+  textAlign: "center" as const,
+};
+
+const wordmark = {
+  fontSize: "20px",
+  fontWeight: "700",
+  color: "#111",
+  margin: "0",
+  letterSpacing: "-0.02em",
+};
+
+const divider = {
+  borderColor: "#e5e5e3",
+  margin: "24px 0",
+};
+
 const content = {
   backgroundColor: "#ffffff",
+  borderRadius: "12px",
   padding: "40px",
-  borderRadius: "8px",
 };
-const greeting = { fontSize: "18px", marginBottom: "20px" };
-const intro = { fontSize: "16px", lineHeight: "24px", marginBottom: "20px" };
-const footer = {
+
+const greeting = {
+  fontSize: "16px",
+  color: "#111",
+  margin: "0 0 12px",
+};
+
+const body = {
+  fontSize: "15px",
+  lineHeight: "24px",
+  color: "#6b7280",
+  margin: "0 0 16px",
+};
+
+const signature = {
   fontSize: "14px",
-  color: "#666",
-  marginTop: "30px",
+  color: "#9ca3af",
+  margin: "24px 0 0",
+};
+
+const footerSection = {
+  padding: "28px 0 0",
   textAlign: "center" as const,
+};
+
+const footerText = {
+  fontSize: "12px",
+  color: "#9ca3af",
+  margin: "0",
 };

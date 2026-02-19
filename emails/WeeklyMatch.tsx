@@ -3,7 +3,9 @@ import {
   Button,
   Container,
   Head,
+  Hr,
   Html,
+  Preview,
   Section,
   Text,
 } from "@react-email/components";
@@ -24,29 +26,55 @@ export default function WeeklyMatch({
   return (
     <Html>
       <Head />
+      <Preview>
+        {`${matchName}, ${String(matchAge)} is your match this week — 24 hours to respond.`}
+      </Preview>
       <Body style={main}>
         <Container style={container}>
-          <Section style={header}>
-            <Text style={heading}>✨ Your Weekly Match</Text>
+          {/* Wordmark */}
+          <Section style={wordmarkSection}>
+            <Text style={wordmark}>MeetOnce</Text>
           </Section>
 
+          <Hr style={divider} />
+
+          {/* Main content */}
           <Section style={content}>
             <Text style={greeting}>Hi {userName},</Text>
 
-            <Text style={intro}>
-              We've found someone special for you this week!
+            <Text style={body}>
+              Your match this week is ready. Take a look and let us know if
+              you&apos;re interested.
             </Text>
 
-            <Text style={matchInfo}>
-              Meet {matchName}, {matchAge}
-            </Text>
+            {/* Match hero */}
+            <Section style={matchCard}>
+              <Text style={matchLabel}>Your match</Text>
+              <Text style={matchNameStyle}>
+                {matchName}, {matchAge}
+              </Text>
+            </Section>
 
-            <Button style={button} href={matchUrl}>
-              View Your Match
-            </Button>
+            {/* CTA */}
+            <Section style={buttonSection}>
+              <Button style={button} href={matchUrl}>
+                Meet {matchName}
+              </Button>
+            </Section>
 
-            <Text style={footer}>
-              Respond by Friday to let them know you're interested!
+            {/* 24h urgency */}
+            <Section style={urgencyBox}>
+              <Text style={urgencyText}>
+                You have <strong>24 hours</strong> to respond. If you
+                don&apos;t, the match passes automatically.
+              </Text>
+            </Section>
+          </Section>
+
+          {/* Footer */}
+          <Section style={footerSection}>
+            <Text style={footerText}>
+              MeetOnce · One curated match, every week.
             </Text>
           </Section>
         </Container>
@@ -55,36 +83,119 @@ export default function WeeklyMatch({
   );
 }
 
-const main = { backgroundColor: "#f6f9fc", fontFamily: "sans-serif" };
-const container = { margin: "0 auto", padding: "20px", maxWidth: "600px" };
-const header = { textAlign: "center" as const, padding: "20px 0" };
-const heading = { fontSize: "28px", fontWeight: "bold", color: "#333" };
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
+const main = {
+  backgroundColor: "#f5f5f3",
+  fontFamily:
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif",
+};
+
+const container = {
+  margin: "0 auto",
+  padding: "0 20px 48px",
+  maxWidth: "560px",
+};
+
+const wordmarkSection = {
+  padding: "36px 0 0",
+  textAlign: "center" as const,
+};
+
+const wordmark = {
+  fontSize: "20px",
+  fontWeight: "700",
+  color: "#111",
+  margin: "0",
+  letterSpacing: "-0.02em",
+};
+
+const divider = {
+  borderColor: "#e5e5e3",
+  margin: "24px 0",
+};
+
 const content = {
   backgroundColor: "#ffffff",
+  borderRadius: "12px",
   padding: "40px",
-  borderRadius: "8px",
 };
-const greeting = { fontSize: "18px", marginBottom: "20px" };
-const intro = { fontSize: "16px", lineHeight: "24px", marginBottom: "30px" };
-const matchInfo = {
-  fontSize: "24px",
-  fontWeight: "bold",
-  textAlign: "center" as const,
-};
-const button = {
-  backgroundColor: "#ec4899",
-  color: "#ffffff",
-  padding: "12px 40px",
-  borderRadius: "4px",
+
+const greeting = {
   fontSize: "16px",
-  fontWeight: "bold" as const,
+  color: "#111",
+  margin: "0 0 12px",
+};
+
+const body = {
+  fontSize: "15px",
+  lineHeight: "24px",
+  color: "#6b7280",
+  margin: "0 0 32px",
+};
+
+const matchCard = {
+  backgroundColor: "#f9f9f7",
+  borderRadius: "8px",
+  padding: "28px 24px",
+  textAlign: "center" as const,
+  margin: "0 0 32px",
+};
+
+const matchLabel = {
+  fontSize: "11px",
+  fontWeight: "600" as const,
+  color: "#9ca3af",
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.08em",
+  margin: "0 0 10px",
+};
+
+const matchNameStyle = {
+  fontSize: "34px",
+  fontWeight: "700" as const,
+  color: "#111",
+  letterSpacing: "-0.02em",
+  margin: "0",
+};
+
+const buttonSection = {
+  textAlign: "center" as const,
+  margin: "0 0 28px",
+};
+
+const button = {
+  backgroundColor: "#111",
+  color: "#ffffff",
+  padding: "14px 48px",
+  borderRadius: "8px",
+  fontSize: "15px",
+  fontWeight: "600" as const,
   textDecoration: "none",
   display: "inline-block",
-  margin: "30px auto",
 };
-const footer = {
+
+const urgencyBox = {
+  backgroundColor: "#fffbeb",
+  border: "1px solid #fde68a",
+  borderRadius: "8px",
+  padding: "14px 18px",
+};
+
+const urgencyText = {
   fontSize: "14px",
-  color: "#666",
-  marginTop: "30px",
+  color: "#92400e",
+  margin: "0",
+  lineHeight: "22px",
+};
+
+const footerSection = {
+  padding: "28px 0 0",
   textAlign: "center" as const,
+};
+
+const footerText = {
+  fontSize: "12px",
+  color: "#9ca3af",
+  margin: "0",
 };

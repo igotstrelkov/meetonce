@@ -229,7 +229,7 @@ export const saveMatch = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    const oneWeek = 7 * 24 * 60 * 60 * 1000;
+    const oneDay = 24 * 60 * 60 * 1000;
 
     await ctx.db.insert("weeklyMatches", {
       userId: args.userId,
@@ -254,8 +254,36 @@ export const saveMatch = internalMutation({
 
       // Timestamps
       sentAt: now,
-      expiresAt: now + oneWeek,
+      expiresAt: now + oneDay,
     });
+  },
+});
+
+export const expireStaleMatches = internalMutation({
+  handler: async (ctx) => {
+    const now = Date.now();
+
+    const stale = await ctx.db
+      .query("weeklyMatches")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("status"), "sent"),
+          q.eq(q.field("mutualMatch"), false),
+          q.lt(q.field("expiresAt"), now)
+        )
+      )
+      .collect();
+
+    for (const match of stale) {
+      await ctx.db.patch(match._id, {
+        status: "expired",
+        userResponse: match.userResponse === "pending" ? "passed" : match.userResponse,
+        matchResponse: match.matchResponse === "pending" ? "passed" : match.matchResponse,
+      });
+    }
+
+    console.log(`⏰ Expired ${stale.length} stale matches`);
+    return { expired: stale.length };
   },
 });
 

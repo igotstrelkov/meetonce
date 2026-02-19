@@ -1,48 +1,68 @@
 "use client";
 
 import { ChevronLeft } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useState } from "react";
 
 interface ChatHeaderProps {
-  matchUserName: string;
-  expiresAt: number;
-  unreadCount: number;
+  name: string;
+  photoUrl: string | null;
+  venueName: string;
+  isExpired: boolean;
 }
 
 export function ChatHeader({
-  matchUserName,
-  expiresAt,
-  unreadCount,
+  name,
+  photoUrl,
+  venueName,
+  isExpired,
 }: ChatHeaderProps) {
   const router = useRouter();
-
-  // Check if chat is expired
-  const isExpired = useMemo(() => Date.now() > expiresAt, [expiresAt]);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
-    <div className="flex items-center justify-between pb-4 border-b">
-      <div className="flex items-center gap-3">
-        <ChevronLeft size={35} onClick={() => router.push("/dashboard")} />
-        <div>
-          <h3 className="font-semibold text-gray-900">
-            {matchUserName.split(" ")[0]}
-          </h3>
-          <div className="flex items-center gap-1 text-sm text-gray-600">
-            <span>
-              {isExpired
-                ? "Chat Has Expired"
-                : "Chat is active until Friday, 11:59 PM"}
-            </span>
-          </div>
-        </div>
+    <div className="flex items-center gap-3 pb-3 border-b">
+      {/* Back button */}
+      <button
+        onClick={() => router.push("/dashboard")}
+        className="p-2 -ml-2 rounded-full hover:bg-muted transition-colors shrink-0"
+        aria-label="Back to dashboard"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+
+      {/* Avatar */}
+      <div className="relative w-9 h-9 shrink-0">
+        <Image
+          src={photoUrl || "/avatar.png"}
+          alt={name}
+          fill
+          className={`object-cover rounded-full transition-opacity duration-300 ${
+            imageLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          onLoad={() => setImageLoaded(true)}
+        />
       </div>
 
-      {unreadCount > 0 && (
-        <div className="bg-orange-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
-          {unreadCount} new
-        </div>
-      )}
+      {/* Name + venue */}
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-foreground leading-tight">{name}</p>
+        <p
+          className={`text-xs truncate flex items-center gap-1 ${
+            isExpired ? "text-red-500" : "text-muted-foreground"
+          }`}
+        >
+          {isExpired ? (
+            "Chat has ended"
+          ) : (
+            <>
+              {/* <MapPin className="w-3 h-3 shrink-0" /> */}
+              {venueName} at 14:00
+            </>
+          )}
+        </p>
+      </div>
     </div>
   );
 }

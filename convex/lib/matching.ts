@@ -256,7 +256,7 @@ You MUST respond with valid JSON in this exact format:
       },
     },
     temperature: 0.5,
-    max_tokens: 800,
+    max_tokens: 1500,
   });
 
   const content = response.choices[0].message.content;

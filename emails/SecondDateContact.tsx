@@ -2,7 +2,9 @@ import {
   Body,
   Container,
   Head,
+  Hr,
   Html,
+  Preview,
   Section,
   Text,
 } from "@react-email/components";
@@ -21,37 +23,46 @@ export default function SecondDateContact({
   return (
     <Html>
       <Head />
+      <Preview>
+        You and {matchName} both want to meet again — here's how to reach them.
+      </Preview>
       <Body style={main}>
         <Container style={container}>
-          <Section style={header}>
-            <Text style={heading}>🎉 Mutual Second Date Interest!</Text>
+          {/* Wordmark */}
+          <Section style={wordmarkSection}>
+            <Text style={wordmark}>MeetOnce</Text>
           </Section>
 
+          <Hr style={divider} />
+
+          {/* Main content */}
           <Section style={content}>
             <Text style={greeting}>Hi {userName},</Text>
 
-            <Text style={intro}>
-              Amazing news! Both you and {matchName} want to meet again!
+            <Text style={body}>
+              You and {matchName} both said you'd meet again. Here's their
+              contact — reach out and make it happen.
             </Text>
 
-            <div style={contactBox}>
-              <Text style={contactLabel}>Their Contact Information:</Text>
-              <Text style={contactInfo}>
-                Email:{" "}
+            {/* Contact card */}
+            <Section style={contactCard}>
+              <Text style={contactLabel}>{matchName}</Text>
+              <Text style={contactEmail}>
                 <a href={`mailto:${matchEmail}`} style={emailLink}>
                   {matchEmail}
                 </a>
               </Text>
-            </div>
+            </Section>
 
-            <Text style={callToAction}>
-              Reach out and plan your second date! We're so excited for you
-              both.
+            <Text style={note}>
+              Drop them a message and sort out the details. Good luck.
             </Text>
+          </Section>
 
-            <Text style={footer}>
-              This is a great sign that our matching algorithm is working well.
-              We'd love to hear how it goes!
+          {/* Footer */}
+          <Section style={footerSection}>
+            <Text style={footerText}>
+              MeetOnce · One curated match, every week.
             </Text>
           </Section>
         </Container>
@@ -60,50 +71,102 @@ export default function SecondDateContact({
   );
 }
 
-const main = { backgroundColor: "#f6f9fc", fontFamily: "sans-serif" };
-const container = { margin: "0 auto", padding: "20px", maxWidth: "600px" };
-const header = { textAlign: "center" as const, padding: "20px 0" };
-const heading = { fontSize: "28px", fontWeight: "bold", color: "#ec4899" };
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
+const main = {
+  backgroundColor: "#f5f5f3",
+  fontFamily:
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif",
+};
+
+const container = {
+  margin: "0 auto",
+  padding: "0 20px 48px",
+  maxWidth: "560px",
+};
+
+const wordmarkSection = {
+  padding: "36px 0 0",
+  textAlign: "center" as const,
+};
+
+const wordmark = {
+  fontSize: "20px",
+  fontWeight: "700",
+  color: "#111",
+  margin: "0",
+  letterSpacing: "-0.02em",
+};
+
+const divider = {
+  borderColor: "#e5e5e3",
+  margin: "24px 0",
+};
+
 const content = {
   backgroundColor: "#ffffff",
+  borderRadius: "12px",
   padding: "40px",
-  borderRadius: "8px",
 };
-const greeting = { fontSize: "18px", marginBottom: "20px" };
-const intro = { fontSize: "16px", lineHeight: "24px", marginBottom: "30px" };
-const contactBox = {
-  backgroundColor: "#fdf2f8",
-  padding: "20px",
-  borderRadius: "8px",
-  marginBottom: "20px",
-};
-const contactLabel = {
+
+const greeting = {
   fontSize: "16px",
-  fontWeight: "bold" as const,
-  color: "#831843",
-  marginBottom: "12px",
+  color: "#111",
+  margin: "0 0 12px",
 };
-const contactInfo = {
-  fontSize: "16px",
-  color: "#333",
-  marginBottom: "8px",
-};
-const emailLink = {
-  color: "#ec4899",
-  textDecoration: "none",
-  fontWeight: "bold" as const,
-};
-const callToAction = {
-  fontSize: "16px",
+
+const body = {
+  fontSize: "15px",
   lineHeight: "24px",
-  marginBottom: "20px",
-  textAlign: "center" as const,
-  fontWeight: "bold" as const,
-  color: "#831843",
+  color: "#6b7280",
+  margin: "0 0 32px",
 };
-const footer = {
-  fontSize: "14px",
-  color: "#666",
-  marginTop: "30px",
+
+const contactCard = {
+  backgroundColor: "#f9f9f7",
+  borderRadius: "8px",
+  padding: "24px",
   textAlign: "center" as const,
+  margin: "0 0 28px",
+};
+
+const contactLabel = {
+  fontSize: "11px",
+  fontWeight: "600" as const,
+  color: "#9ca3af",
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.08em",
+  margin: "0 0 10px",
+};
+
+const contactEmail = {
+  fontSize: "20px",
+  fontWeight: "600" as const,
+  color: "#111",
+  margin: "0",
+  letterSpacing: "-0.01em",
+};
+
+const emailLink = {
+  color: "#111",
+  textDecoration: "underline",
+};
+
+const note = {
+  fontSize: "14px",
+  lineHeight: "22px",
+  color: "#9ca3af",
+  margin: "0",
+  textAlign: "center" as const,
+};
+
+const footerSection = {
+  padding: "28px 0 0",
+  textAlign: "center" as const,
+};
+
+const footerText = {
+  fontSize: "12px",
+  color: "#9ca3af",
+  margin: "0",
 };

@@ -1,8 +1,9 @@
+import { AutoSubscribeNotifications } from "@/components/AutoSubscribeNotifications";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { NavBar } from "@/components/NavBar";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider, SignedIn } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
@@ -52,6 +53,9 @@ export default function RootLayout({
             <NavBar />
             <ServiceWorkerRegistration />
             <InstallPrompt />
+            <SignedIn>
+              <AutoSubscribeNotifications />
+            </SignedIn>
             {children}
           </ConvexClientProvider>
         </ClerkProvider>

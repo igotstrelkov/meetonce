@@ -3,7 +3,9 @@ import {
   Button,
   Container,
   Head,
+  Hr,
   Html,
+  Preview,
   Section,
   Text,
 } from "@react-email/components";
@@ -23,36 +25,51 @@ export default function NewMessage({
   matchUrl,
   unreadCount,
 }: NewMessageProps) {
-  const messageCount =
-    unreadCount === 1 ? "1 new message" : `${unreadCount} new messages`;
+  const countLabel =
+    unreadCount === 1 ? "1 unread message" : `${unreadCount} unread messages`;
 
   return (
     <Html>
       <Head />
+      <Preview>
+        {senderName}: "{messagePreview}"
+      </Preview>
       <Body style={main}>
         <Container style={container}>
-          <Section style={header}>
-            <Text style={heading}>💬 New Message!</Text>
+          {/* Wordmark */}
+          <Section style={wordmarkSection}>
+            <Text style={wordmark}>MeetOnce</Text>
           </Section>
 
+          <Hr style={divider} />
+
+          {/* Main content */}
           <Section style={content}>
             <Text style={greeting}>Hi {receiverName},</Text>
 
-            <Text style={intro}>
-              {senderName} sent you a message! You have {messageCount} waiting
-              for you.
+            <Text style={body}>
+              {senderName} sent you a message. You have {countLabel} waiting.
             </Text>
 
-            <div style={messageBox}>
-              <Text style={messageLabel}>Latest Message:</Text>
+            {/* Message preview */}
+            <Section style={messageCard}>
+              <Text style={messageLabel}>{senderName}</Text>
               <Text style={messageText}>"{messagePreview}"</Text>
-            </div>
+            </Section>
 
-            <Button style={button} href={matchUrl}>
-              View Messages
-            </Button>
+            {/* CTA */}
+            <Section style={buttonSection}>
+              <Button style={button} href={matchUrl}>
+                Reply to {senderName}
+              </Button>
+            </Section>
+          </Section>
 
-            <Text style={footer}>Chat is active until Friday, 11:59 PM</Text>
+          {/* Footer */}
+          <Section style={footerSection}>
+            <Text style={footerText}>
+              MeetOnce · One curated match, every week.
+            </Text>
           </Section>
         </Container>
       </Body>
@@ -60,52 +77,104 @@ export default function NewMessage({
   );
 }
 
-const main = { backgroundColor: "#f6f9fc", fontFamily: "sans-serif" };
-const container = { margin: "0 auto", padding: "20px", maxWidth: "600px" };
-const header = { textAlign: "center" as const, padding: "20px 0" };
-const heading = { fontSize: "28px", fontWeight: "bold", color: "#ec4899" };
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
+const main = {
+  backgroundColor: "#f5f5f3",
+  fontFamily:
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif",
+};
+
+const container = {
+  margin: "0 auto",
+  padding: "0 20px 48px",
+  maxWidth: "560px",
+};
+
+const wordmarkSection = {
+  padding: "36px 0 0",
+  textAlign: "center" as const,
+};
+
+const wordmark = {
+  fontSize: "20px",
+  fontWeight: "700",
+  color: "#111",
+  margin: "0",
+  letterSpacing: "-0.02em",
+};
+
+const divider = {
+  borderColor: "#e5e5e3",
+  margin: "24px 0",
+};
+
 const content = {
   backgroundColor: "#ffffff",
+  borderRadius: "12px",
   padding: "40px",
-  borderRadius: "8px",
 };
-const greeting = { fontSize: "18px", marginBottom: "20px" };
-const intro = { fontSize: "16px", lineHeight: "24px", marginBottom: "30px" };
-const messageBox = {
-  backgroundColor: "#f3f4f6",
-  padding: "20px",
-  borderRadius: "8px",
-  marginBottom: "20px",
-  borderLeft: "4px solid #ec4899",
+
+const greeting = {
+  fontSize: "16px",
+  color: "#111",
+  margin: "0 0 12px",
 };
-const messageLabel = {
-  fontSize: "12px",
-  fontWeight: "bold" as const,
+
+const body = {
+  fontSize: "15px",
+  lineHeight: "24px",
   color: "#6b7280",
-  marginBottom: "8px",
-  textTransform: "uppercase" as const,
-  letterSpacing: "0.5px",
+  margin: "0 0 32px",
 };
+
+const messageCard = {
+  backgroundColor: "#f9f9f7",
+  borderLeft: "3px solid #d1d5db",
+  borderRadius: "0 8px 8px 0",
+  padding: "16px 20px",
+  margin: "0 0 32px",
+};
+
+const messageLabel = {
+  fontSize: "11px",
+  fontWeight: "600" as const,
+  color: "#9ca3af",
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.08em",
+  margin: "0 0 8px",
+};
+
 const messageText = {
   fontSize: "15px",
+  lineHeight: "24px",
   color: "#374151",
-  lineHeight: "22px",
+  margin: "0",
   fontStyle: "italic" as const,
 };
+
+const buttonSection = {
+  textAlign: "center" as const,
+};
+
 const button = {
-  backgroundColor: "#ec4899",
+  backgroundColor: "#111",
   color: "#ffffff",
-  padding: "12px 40px",
-  borderRadius: "4px",
-  fontSize: "16px",
-  fontWeight: "bold" as const,
+  padding: "14px 48px",
+  borderRadius: "8px",
+  fontSize: "15px",
+  fontWeight: "600" as const,
   textDecoration: "none",
   display: "inline-block",
-  margin: "30px auto",
 };
-const footer = {
-  fontSize: "14px",
-  color: "#666",
-  marginTop: "30px",
+
+const footerSection = {
+  padding: "28px 0 0",
   textAlign: "center" as const,
+};
+
+const footerText = {
+  fontSize: "12px",
+  color: "#9ca3af",
+  margin: "0",
 };

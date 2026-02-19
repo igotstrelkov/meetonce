@@ -3,7 +3,9 @@ import {
   Button,
   Container,
   Head,
+  Hr,
   Html,
+  Preview,
   Section,
   Text,
 } from "@react-email/components";
@@ -22,36 +24,52 @@ export default function MutualMatch({
   return (
     <Html>
       <Head />
+      <Preview>
+        You and {matchName} both said yes — start planning your date.
+      </Preview>
       <Body style={main}>
         <Container style={container}>
-          <Section style={header}>
-            <Text style={heading}>🎉 It's a Match!</Text>
+          {/* Wordmark */}
+          <Section style={wordmarkSection}>
+            <Text style={wordmark}>MeetOnce</Text>
           </Section>
 
+          <Hr style={divider} />
+
+          {/* Main content */}
           <Section style={content}>
             <Text style={greeting}>Hi {userName},</Text>
 
-            <Text style={intro}>
-              Exciting news! {matchName} is interested too! You both want to
-              meet, so it's time to plan your date.
+            <Text style={body}>
+              {matchName} said yes too. You have a mutual match — time to make
+              it happen.
             </Text>
 
-            <div style={sectionBox}>
-              <Text style={sectionTitle}>💬 Start Chatting Now!</Text>
-              <Text style={chatNote}>
-                You can now chat directly in the app! Head to your dashboard to
-                start the conversation and plan your date together. Chat is
-                active until Friday at 11:59 PM.
-              </Text>
-            </div>
+            {/* Match hero */}
+            <Section style={matchCard}>
+              <Text style={matchLabel}>Mutual match</Text>
+              <Text style={matchNameStyle}>{matchName}</Text>
+              <Text style={matchSub}>You both want to meet</Text>
+            </Section>
 
-            <Button style={button} href={matchUrl}>
-              Start Chatting Now
-            </Button>
+            {/* CTA */}
+            <Section style={buttonSection}>
+              <Button style={button} href={matchUrl}>
+                Open chat with {matchName}
+              </Button>
+            </Section>
 
-            <Text style={footer}>
-              Use the in-app chat to coordinate your schedules and plan your
-              perfect date. Have a wonderful time getting to know each other!
+            {/* Info */}
+            <Text style={note}>
+              Head to the app to coordinate the details. The venue and time have
+              already been suggested — just show up.
+            </Text>
+          </Section>
+
+          {/* Footer */}
+          <Section style={footerSection}>
+            <Text style={footerText}>
+              MeetOnce · One curated match, every week.
             </Text>
           </Section>
         </Container>
@@ -60,48 +78,120 @@ export default function MutualMatch({
   );
 }
 
-const main = { backgroundColor: "#f6f9fc", fontFamily: "sans-serif" };
-const container = { margin: "0 auto", padding: "20px", maxWidth: "600px" };
-const header = { textAlign: "center" as const, padding: "20px 0" };
-const heading = { fontSize: "28px", fontWeight: "bold", color: "#F54927" };
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
+const main = {
+  backgroundColor: "#f5f5f3",
+  fontFamily:
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif",
+};
+
+const container = {
+  margin: "0 auto",
+  padding: "0 20px 48px",
+  maxWidth: "560px",
+};
+
+const wordmarkSection = {
+  padding: "36px 0 0",
+  textAlign: "center" as const,
+};
+
+const wordmark = {
+  fontSize: "20px",
+  fontWeight: "700",
+  color: "#111",
+  margin: "0",
+  letterSpacing: "-0.02em",
+};
+
+const divider = {
+  borderColor: "#e5e5e3",
+  margin: "24px 0",
+};
+
 const content = {
   backgroundColor: "#ffffff",
+  borderRadius: "12px",
   padding: "40px",
-  borderRadius: "8px",
 };
-const greeting = { fontSize: "18px", marginBottom: "20px" };
-const intro = { fontSize: "16px", lineHeight: "24px", marginBottom: "30px" };
-const sectionBox = {
-  backgroundColor: "#fdf2f8",
-  padding: "20px",
-  borderRadius: "8px",
-  marginBottom: "20px",
-};
-const sectionTitle = {
-  fontSize: "18px",
-  fontWeight: "bold" as const,
-  color: "#F54927",
-  marginBottom: "12px",
-};
-const chatNote = {
-  fontSize: "13px",
-  color: "#F54927",
-  fontStyle: "italic" as const,
-};
-const button = {
-  backgroundColor: "#F54927",
-  color: "#ffffff",
-  padding: "12px 40px",
-  borderRadius: "4px",
+
+const greeting = {
   fontSize: "16px",
-  fontWeight: "bold" as const,
+  color: "#111",
+  margin: "0 0 12px",
+};
+
+const body = {
+  fontSize: "15px",
+  lineHeight: "24px",
+  color: "#6b7280",
+  margin: "0 0 32px",
+};
+
+const matchCard = {
+  backgroundColor: "#f0fdf4",
+  border: "1px solid #bbf7d0",
+  borderRadius: "8px",
+  padding: "28px 24px",
+  textAlign: "center" as const,
+  margin: "0 0 32px",
+};
+
+const matchLabel = {
+  fontSize: "11px",
+  fontWeight: "600" as const,
+  color: "#16a34a",
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.08em",
+  margin: "0 0 10px",
+};
+
+const matchNameStyle = {
+  fontSize: "34px",
+  fontWeight: "700" as const,
+  color: "#111",
+  letterSpacing: "-0.02em",
+  margin: "0 0 6px",
+};
+
+const matchSub = {
+  fontSize: "14px",
+  color: "#16a34a",
+  margin: "0",
+};
+
+const buttonSection = {
+  textAlign: "center" as const,
+  margin: "0 0 28px",
+};
+
+const button = {
+  backgroundColor: "#111",
+  color: "#ffffff",
+  padding: "14px 48px",
+  borderRadius: "8px",
+  fontSize: "15px",
+  fontWeight: "600" as const,
   textDecoration: "none",
   display: "inline-block",
-  margin: "30px auto",
 };
-const footer = {
+
+const note = {
   fontSize: "14px",
-  color: "#666",
-  marginTop: "30px",
+  lineHeight: "22px",
+  color: "#9ca3af",
+  margin: "0",
   textAlign: "center" as const,
+};
+
+const footerSection = {
+  padding: "28px 0 0",
+  textAlign: "center" as const,
+};
+
+const footerText = {
+  fontSize: "12px",
+  color: "#9ca3af",
+  margin: "0",
 };

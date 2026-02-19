@@ -154,13 +154,13 @@ export const sendMessage = mutation({
       throw new Error("Cannot send messages until both users are interested");
     }
 
-    // Check match hasn't expired (Friday 11:59pm)
-    const now = Date.now();
-    if (now > match.expiresAt) {
+    // Check match hasn't been expired
+    if (match.status === "expired") {
       throw new Error(
         "This chat has expired. Complete post-date feedback to continue."
       );
     }
+    const now = Date.now();
 
     // Validate content
     const trimmedContent = args.content.trim();
@@ -320,10 +320,16 @@ export const cleanupExpiredMessages = internalMutation({
     const now = Date.now();
     const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
-    // Find all expired matches (expired more than 7 days ago)
+    // Find terminal matches (expired or completed) whose expiresAt is >7 days ago.
+    // Excludes status="sent" so active mutual-match chats are never touched.
     const expiredMatches = await ctx.db
       .query("weeklyMatches")
-      .filter((q) => q.lt(q.field("expiresAt"), sevenDaysAgo))
+      .filter((q) =>
+        q.and(
+          q.lt(q.field("expiresAt"), sevenDaysAgo),
+          q.neq(q.field("status"), "sent")
+        )
+      )
       .collect();
 
     let totalDeleted = 0;

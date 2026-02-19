@@ -3,7 +3,7 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import { ChatHeader } from "./ChatHeader";
 import { MessageInput } from "./MessageInput";
 import { MessageList } from "./MessageList";
@@ -16,75 +16,50 @@ interface ChatInterfaceProps {
     photoUrl: string | null;
   };
   currentUserId: Id<"users">;
-  expiresAt: number;
+  isExpired: boolean;
+  venueName: string;
 }
 
 export function ChatInterface({
   matchId,
   matchUser,
   currentUserId,
-  expiresAt,
+  isExpired,
+  venueName,
 }: ChatInterfaceProps) {
-  // Query messages with real-time updates
-  const messages = useQuery(api.chat.getMessages, { matchId }) || [];
+  const messages = useQuery(api.chat.getMessages, { matchId }) ?? [];
+  const unreadCount = useQuery(api.chat.getUnreadCount, { matchId }) ?? 0;
 
-  // Query unread count
-  const unreadCount = useQuery(api.chat.getUnreadCount, { matchId }) || 0;
-
-  // Mutations
   const sendMessage = useMutation(api.chat.sendMessage);
   const markAsRead = useMutation(api.chat.markMessagesAsRead);
 
-  // Mark messages as read when viewing chat
   useEffect(() => {
     if (unreadCount > 0) {
       markAsRead({ matchId });
     }
   }, [unreadCount, matchId, markAsRead]);
 
-  // Check if chat is expired
-  const isExpired = useMemo(() => Date.now() > expiresAt, [expiresAt]);
-
   const handleSendMessage = useCallback(
     async (content: string) => {
-      try {
-        await sendMessage({ matchId, content });
-      } catch (error) {
-        console.error("Failed to send message:", error);
-        throw error;
-      }
+      await sendMessage({ matchId, content });
     },
-    [sendMessage, matchId]
+    [sendMessage, matchId],
   );
 
   return (
-    <div className="space-y-4">
-      {/* Chat card */}
-      <>
-        <div
-          className="flex flex-col"
-          style={{ height: "calc(100dvh - 120px)" }}
-        >
-          {/* Header */}
-          <ChatHeader
-            matchUserName={matchUser.name}
-            expiresAt={expiresAt}
-            unreadCount={unreadCount}
-          />
+    <div className="flex flex-col" style={{ height: "calc(100dvh - 80px)" }}>
+      <ChatHeader
+        name={matchUser.name}
+        photoUrl={matchUser.photoUrl}
+        venueName={venueName}
+        isExpired={isExpired}
+      />
 
-          {/* Message list */}
-          <div className="flex-1 overflow-hidden py-4">
-            <MessageList messages={messages} currentUserId={currentUserId} />
-          </div>
+      <div className="flex-1 overflow-hidden">
+        <MessageList messages={messages} currentUserId={currentUserId} />
+      </div>
 
-          {/* Input */}
-          <MessageInput
-            onSendMessage={handleSendMessage}
-            disabled={false}
-            isExpired={isExpired}
-          />
-        </div>
-      </>
+      <MessageInput onSendMessage={handleSendMessage} isExpired={isExpired} />
     </div>
   );
 }
