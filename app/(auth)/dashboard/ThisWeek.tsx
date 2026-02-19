@@ -96,11 +96,24 @@ export const ThisWeek = () => {
     weekOf: match?.weekOf,
   });
 
+  const celebrationKey = match?._id
+    ? `meetonce_celebrated_${match._id}`
+    : null;
+
   useEffect(() => {
-    if (!match?.mutualMatch) return;
-    const t = setTimeout(() => setCelebrationDone(true), 2500);
+    if (!match?.mutualMatch || !celebrationKey) return;
+    // Already played for this match — skip immediately
+    if (localStorage.getItem(celebrationKey)) {
+      setCelebrationDone(true);
+      return;
+    }
+    // First time — play the interstitial, then persist
+    const t = setTimeout(() => {
+      setCelebrationDone(true);
+      localStorage.setItem(celebrationKey, "1");
+    }, 2500);
     return () => clearTimeout(t);
-  }, [match?.mutualMatch]);
+  }, [match?.mutualMatch, celebrationKey]);
 
   // ── Loading ────────────────────────────────────────────────────────────────
   if (matchData === undefined) {
