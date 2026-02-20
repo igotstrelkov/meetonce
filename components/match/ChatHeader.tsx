@@ -58,7 +58,7 @@ export function ChatHeader({
           ) : (
             <>
               {/* <MapPin className="w-3 h-3 shrink-0" /> */}
-              {venueName} at 14:00
+              {venueName} at 2PM
             </>
           )}
         </p>

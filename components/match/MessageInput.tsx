@@ -64,7 +64,7 @@ export function MessageInput({ onSendMessage, isExpired }: MessageInputProps) {
   }
 
   return (
-    <div className="border-t pt-3">
+    <div className="border-t py-3">
       <div className="flex items-end gap-2 bg-muted/50 rounded-2xl px-4 py-2.5">
         {/* Auto-resizing textarea */}
         <textarea
