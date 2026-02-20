@@ -14,10 +14,10 @@ crons.weekly(
   internal.matching.weeklyMatchGeneration,
 );
 
-// Run Monday at 11 PM UTC — 24 hours after Sunday match generation
+// Run Monday at 11 PM UTC — 24 hours (+1) after Sunday match generation
 crons.weekly(
   "expire-stale-matches",
-  { dayOfWeek: "monday", hourUTC: 24, minuteUTC: 0 },
+  { dayOfWeek: "tuesday", hourUTC: 0, minuteUTC: 0 },
   internal.matching.expireStaleMatches,
 );
 

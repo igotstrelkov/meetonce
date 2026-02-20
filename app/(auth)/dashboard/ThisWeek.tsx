@@ -96,9 +96,7 @@ export const ThisWeek = () => {
     weekOf: match?.weekOf,
   });
 
-  const celebrationKey = match?._id
-    ? `meetonce_celebrated_${match._id}`
-    : null;
+  const celebrationKey = match?._id ? `meetonce_celebrated_${match._id}` : null;
 
   useEffect(() => {
     if (!match?.mutualMatch || !celebrationKey) return;
@@ -181,7 +179,7 @@ export const ThisWeek = () => {
           hour: "numeric",
           minute: "numeric",
         })
-      : "Saturday at 14:00";
+      : "Saturday at 2PM";
 
   // ══════════════════════════════════════════════════════════════════════════
   // CELEBRATION INTERSTITIAL
@@ -558,7 +556,6 @@ export const ThisWeek = () => {
               </ul>
             </div>
           )}
-
         </div>
 
         {/* Spacer so fixed bar never covers content */}
