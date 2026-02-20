@@ -13,7 +13,7 @@ import {
 } from "./lib/matching";
 import { makeMatchKey } from "./lib/utils";
 
-// ===== QUERIES (Read-only database operations) =====
+// ===== QUERIES =====
 
 export const getUnmatchedUsersBatch = internalQuery({
   args: {
@@ -24,40 +24,25 @@ export const getUnmatchedUsersBatch = internalQuery({
   handler: async (ctx, args) => {
     const { skip, limit, weekOf } = args;
 
-    // Get all eligible users
-    const allEligible = await ctx.db
-      .query("users")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("accountStatus"), "approved"),
-          q.eq(q.field("vacationMode"), false)
-        )
-      )
+    // Use by_week index — O(matches_this_week) instead of full table scan
+    const thisWeekMatches = await ctx.db
+      .query("weeklyMatches")
+      .withIndex("by_week", (q) => q.eq("weekOf", weekOf))
       .collect();
 
-    // Filter out users who already have matches this week
-    const unmatched: Doc<"users">[] = [];
-    for (const user of allEligible) {
-      const hasMatch = await ctx.db
-        .query("weeklyMatches")
-        .withIndex("by_user_and_week", (q) =>
-          q.eq("userId", user._id).eq("weekOf", weekOf)
-        )
-        .first();
+    const matchedIds = new Set<string>(
+      thisWeekMatches.flatMap((m) => [m.userId, m.matchUserId])
+    );
 
-      const hasReverseMatch = await ctx.db
-        .query("weeklyMatches")
-        .withIndex("by_match_user_and_week", (q) =>
-          q.eq("matchUserId", user._id).eq("weekOf", weekOf)
-        )
-        .first();
+    // Use by_account_status index — only scans approved users, not all users
+    const approvedUsers = await ctx.db
+      .query("users")
+      .withIndex("by_account_status", (q) => q.eq("accountStatus", "approved"))
+      .filter((q) => q.eq(q.field("vacationMode"), false))
+      .collect();
 
-      if (!hasMatch && !hasReverseMatch) {
-        unmatched.push(user);
-      }
-    }
+    const unmatched = approvedUsers.filter((u) => !matchedIds.has(u._id));
 
-    // Return paginated batch
     return unmatched.slice(skip, skip + limit);
   },
 });
@@ -68,140 +53,88 @@ export const loadAndFilterCandidates = internalQuery({
     candidateIds: v.array(v.id("users")),
   },
   handler: async (ctx, args) => {
-    const candidates = [];
-
-    // Load the user to get their preferences
     const user = await ctx.db.get(args.userId);
     if (!user) return [];
 
-    for (const candidateId of args.candidateIds) {
-      // Skip self
-      if (candidateId === args.userId) continue;
+    // Run all candidate checks in parallel — 3 reads per candidate fire simultaneously
+    const results = await Promise.all(
+      args.candidateIds
+        .filter((id) => id !== args.userId)
+        .map(async (candidateId) => {
+          const [candidate, previousMatch, reversePreviousMatch] =
+            await Promise.all([
+              ctx.db.get(candidateId),
+              ctx.db
+                .query("weeklyMatches")
+                .withIndex("by_user_and_match", (q) =>
+                  q
+                    .eq("userId", args.userId)
+                    .eq("matchUserId", candidateId)
+                )
+                .first(),
+              ctx.db
+                .query("weeklyMatches")
+                .withIndex("by_match_and_user", (q) =>
+                  q
+                    .eq("matchUserId", args.userId)
+                    .eq("userId", candidateId)
+                )
+                .first(),
+            ]);
 
-      // Load candidate document
-      const candidate = await ctx.db.get(candidateId);
-      if (!candidate) continue;
+          if (!candidate) return null;
+          if (candidate.accountStatus !== "approved" || candidate.vacationMode)
+            return null;
+          if (previousMatch || reversePreviousMatch) return null;
 
-      // Filter: Must have approved photo and not be on vacation
-      if (candidate.accountStatus !== "approved" || candidate.vacationMode) {
-        continue;
-      }
+          // Age preference filters (both directions)
+          if (user.minAge && candidate.age < user.minAge) return null;
+          if (user.maxAge && candidate.age > user.maxAge) return null;
+          if (candidate.minAge && user.age < candidate.minAge) return null;
+          if (candidate.maxAge && user.age > candidate.maxAge) return null;
 
-      // Check if already matched with this user (in any week)
-      const previousMatch = await ctx.db
-        .query("weeklyMatches")
-        .withIndex("by_user_and_match", (q) =>
-          q.eq("userId", args.userId).eq("matchUserId", candidateId)
-        )
-        .first();
+          // Attractiveness compatibility (±2)
+          const userRating = user.attractivenessRating ?? 5;
+          const candidateRating = candidate.attractivenessRating ?? 5;
+          if (Math.abs(userRating - candidateRating) > 2) return null;
 
-      const reversePreviousMatch = await ctx.db
-        .query("weeklyMatches")
-        .withIndex("by_match_and_user", (q) =>
-          q.eq("matchUserId", args.userId).eq("userId", candidateId)
-        )
-        .first();
+          return candidate;
+        })
+    );
 
-      // Only include if never matched before
-      if (!previousMatch && !reversePreviousMatch) {
-        candidates.push(candidate);
-      }
-
-      // Filter user's age preference for candidate
-      if (user.minAge && candidate.age < user.minAge) {
-        console.log(
-          `Filtered out ${candidate.firstName}: too young (${candidate.age} < ${user.minAge})`
-        );
-        continue;
-      }
-
-      if (user.maxAge && candidate.age > user.maxAge) {
-        console.log(
-          `Filtered out ${candidate.firstName}: too old (${candidate.age} > ${user.maxAge})`
-        );
-        continue;
-      }
-
-      // Filter candidate's age preference for user (bidirectional check)
-      if (candidate.minAge && user.age < candidate.minAge) {
-        console.log(
-          `Filtered out ${candidate.firstName}: user too young for candidate`
-        );
-        continue;
-      }
-
-      if (candidate.maxAge && user.age > candidate.maxAge) {
-        console.log(
-          `Filtered out ${candidate.firstName}: user too old for candidate`
-        );
-        continue;
-      }
-    }
-
-    return candidates;
+    return results.filter((c): c is Doc<"users"> => c !== null);
   },
 });
 
-export const validateMatch = internalQuery({
-  args: {
-    userId: v.id("users"),
-    candidateId: v.id("users"),
-    userRating: v.optional(v.number()),
-    candidateRating: v.optional(v.number()),
-  },
+export const getUser = internalQuery({
+  args: { userId: v.id("users") },
   handler: async (ctx, args) => {
-    // Check 1: Never matched before (with pass history check)
-    const previousMatchAsUser = await ctx.db
-      .query("weeklyMatches")
-      .withIndex("by_user_and_match", (q) =>
-        q.eq("userId", args.userId).eq("matchUserId", args.candidateId)
-      )
-      .first();
-
-    const previousMatchAsMatch = await ctx.db
-      .query("weeklyMatches")
-      .withIndex("by_match_and_user", (q) =>
-        q.eq("matchUserId", args.userId).eq("userId", args.candidateId)
-      )
-      .first();
-
-    // If they've been matched before, check if either person passed
-    if (previousMatchAsUser || previousMatchAsMatch) {
-      const match = previousMatchAsUser || previousMatchAsMatch;
-
-      const userResponse =
-        match!.userId === args.userId
-          ? match!.userResponse
-          : match!.matchResponse;
-
-      const candidateResponse =
-        match!.userId === args.candidateId
-          ? match!.userResponse
-          : match!.matchResponse;
-
-      // Don't re-match if either person passed
-      if (userResponse === "passed" || candidateResponse === "passed") {
-        return false;
-      }
-
-      // Also don't re-match if they were already matched (even if both interested)
-      return false;
-    }
-
-    // Check 2: Attractiveness compatibility (±2 points)
-    const userRating = args.userRating ?? 5;
-    const candidateRating = args.candidateRating ?? 5;
-    const ratingDiff = Math.abs(userRating - candidateRating);
-
-    if (ratingDiff > 2) {
-      return false;
-    }
-
-    return true;
+    return await ctx.db.get(args.userId);
   },
 });
 
-// ===== MUTATION (Write to database) =====
+export const hasMatchThisWeek = internalQuery({
+  args: { userId: v.id("users"), weekOf: v.string() },
+  handler: async (ctx, args) => {
+    const [asUser, asMatchUser] = await Promise.all([
+      ctx.db
+        .query("weeklyMatches")
+        .withIndex("by_user_and_week", (q) =>
+          q.eq("userId", args.userId).eq("weekOf", args.weekOf)
+        )
+        .first(),
+      ctx.db
+        .query("weeklyMatches")
+        .withIndex("by_match_user_and_week", (q) =>
+          q.eq("matchUserId", args.userId).eq("weekOf", args.weekOf)
+        )
+        .first(),
+    ]);
+    return !!(asUser || asMatchUser);
+  },
+});
+
+// ===== MUTATIONS =====
 
 export const saveMatch = internalMutation({
   args: {
@@ -228,6 +161,42 @@ export const saveMatch = internalMutation({
     }),
   },
   handler: async (ctx, args) => {
+    // Deduplication guard — handles races between parallel processUserMatch actions.
+    // Mutations are serialized in Convex so this check + insert is atomic.
+    const [u1AsUser, u1AsMatch, u2AsUser, u2AsMatch] = await Promise.all([
+      ctx.db
+        .query("weeklyMatches")
+        .withIndex("by_user_and_week", (q) =>
+          q.eq("userId", args.userId).eq("weekOf", args.weekOf)
+        )
+        .first(),
+      ctx.db
+        .query("weeklyMatches")
+        .withIndex("by_match_user_and_week", (q) =>
+          q.eq("matchUserId", args.userId).eq("weekOf", args.weekOf)
+        )
+        .first(),
+      ctx.db
+        .query("weeklyMatches")
+        .withIndex("by_user_and_week", (q) =>
+          q.eq("userId", args.matchUserId).eq("weekOf", args.weekOf)
+        )
+        .first(),
+      ctx.db
+        .query("weeklyMatches")
+        .withIndex("by_match_user_and_week", (q) =>
+          q.eq("matchUserId", args.matchUserId).eq("weekOf", args.weekOf)
+        )
+        .first(),
+    ]);
+
+    if (u1AsUser || u1AsMatch || u2AsUser || u2AsMatch) {
+      console.log(
+        `⚠️ Duplicate save prevented: ${args.userId} <-> ${args.matchUserId}`
+      );
+      return;
+    }
+
     const now = Date.now();
     const oneDay = 24 * 60 * 60 * 1000;
 
@@ -241,18 +210,15 @@ export const saveMatch = internalMutation({
       redFlags: args.redFlags,
       suggestedVenue: args.suggestedVenue,
 
-      // Responses
       userResponse: "pending",
       matchResponse: "pending",
       userRespondedAt: undefined,
       matchRespondedAt: undefined,
       mutualMatch: false,
 
-      // Status
       status: "sent",
       dateScheduled: false,
 
-      // Timestamps
       sentAt: now,
       expiresAt: now + oneDay,
     });
@@ -277,8 +243,10 @@ export const expireStaleMatches = internalMutation({
     for (const match of stale) {
       await ctx.db.patch(match._id, {
         status: "expired",
-        userResponse: match.userResponse === "pending" ? "passed" : match.userResponse,
-        matchResponse: match.matchResponse === "pending" ? "passed" : match.matchResponse,
+        userResponse:
+          match.userResponse === "pending" ? "passed" : match.userResponse,
+        matchResponse:
+          match.matchResponse === "pending" ? "passed" : match.matchResponse,
       });
     }
 
@@ -287,7 +255,7 @@ export const expireStaleMatches = internalMutation({
   },
 });
 
-// ===== ACTIONS (Orchestration + External API calls + Vector Search) =====
+// ===== ACTIONS =====
 
 export const weeklyMatchGeneration = internalAction({
   handler: async (ctx) => {
@@ -295,7 +263,6 @@ export const weeklyMatchGeneration = internalAction({
 
     const weekOf = getWeekOfString();
 
-    // Start the batch process
     await ctx.scheduler.runAfter(0, internal.matching.runMatchingBatch, {
       skip: 0,
       batchSize: 50,
@@ -306,6 +273,11 @@ export const weeklyMatchGeneration = internalAction({
   },
 });
 
+/**
+ * Coordinator: fetches a batch of unmatched users and schedules
+ * a processUserMatch action for each one. Actions run in parallel
+ * across Convex's worker pool — no more serial per-user processing.
+ */
 export const runMatchingBatch = internalAction({
   args: {
     skip: v.number(),
@@ -315,9 +287,8 @@ export const runMatchingBatch = internalAction({
   handler: async (ctx, args) => {
     const { skip, batchSize, weekOf } = args;
 
-    console.log(`📦 Processing batch: skip=${skip}, size=${batchSize}`);
+    console.log(`📦 Scheduling batch: skip=${skip}, size=${batchSize}`);
 
-    // Step 1: Fetch batch of unmatched users
     const batch = await ctx.runQuery(internal.matching.getUnmatchedUsersBatch, {
       skip,
       limit: batchSize,
@@ -329,218 +300,22 @@ export const runMatchingBatch = internalAction({
       return;
     }
 
-    console.log(`Found ${batch.length} users in this batch`);
+    // Schedule each eligible user as an independent action — parallel execution
+    await Promise.all(
+      batch
+        .filter((user) => user.embedding)
+        .map((user) =>
+          ctx.scheduler.runAfter(0, internal.matching.processUserMatch, {
+            userId: user._id,
+            weekOf,
+          })
+        )
+    );
 
-    // Fetch all active coffee shops for venue assignment
-    const coffeeShops = await ctx.runQuery(api.coffeeShops.getAllCoffeeShops, {
-      activeOnly: true,
-    });
+    console.log(`📤 Scheduled ${batch.length} user actions`);
 
-    if (coffeeShops.length === 0) {
-      console.log("⚠️ No active coffee shops found! Cannot create matches.");
-      return;
-    }
-
-    console.log(`☕ ${coffeeShops.length} coffee shops available for venues`);
-
-    const matchedInBatch = new Set<string>();
-
-    // Step 2: Process each user in the batch
-    for (const user of batch) {
-      if (matchedInBatch.has(user._id)) {
-        console.log(
-          `Skipping ${user.firstName} - already matched in this batch`
-        );
-        continue;
-      }
-
-      if (!user.embedding) {
-        console.log(`Skipping ${user.firstName} - no embedding`);
-        continue;
-      }
-
-      const matchKey = makeMatchKey({
-        accountStatus: "approved",
-        vacationMode: false,
-        gender: user.interestedIn,
-      });
-
-      // Step 2a: Vector search for similar users (MUST be in action!)
-      // ctx.vectorSearch returns Array<{_id, _score}>
-      const vectorResults = await ctx.vectorSearch("users", "by_embedding", {
-        vector: user.embedding,
-        limit: 256, // Max limit, we'll narrow down
-        filter: (q) => q.eq("matchKey", matchKey),
-      });
-
-      console.log(
-        `Vector search found ${vectorResults.length} similar users for ${user.firstName}`
-      );
-
-      // Extract IDs and filter out self
-      const candidateIds = vectorResults
-        .filter((result) => result._id !== user._id)
-        .slice(0, 100) // Top 100 by similarity
-        .map((result) => result._id);
-
-      if (candidateIds.length === 0) {
-        console.log(`No vector search candidates for ${user.firstName}`);
-        continue;
-      }
-
-      // Step 2b: Load candidate documents and filter by match history
-      const candidates = await ctx.runQuery(
-        internal.matching.loadAndFilterCandidates,
-        { userId: user._id, candidateIds }
-      );
-
-      if (candidates.length === 0) {
-        console.log(
-          `No unmatched candidates for ${user.firstName} after history filter`
-        );
-        continue;
-      }
-
-      console.log(
-        `${candidates.length} candidates after history filter for ${user.firstName}`
-      );
-
-      // Step 2c: Analyze top 20 candidates with LLM
-      const top20 = candidates.slice(0, 20);
-      const analyzed = await Promise.all(
-        top20.map(async (candidate) => {
-          const compatibility = await analyzeCompatibility(
-            formatProfile(user),
-            formatProfile(candidate)
-          );
-          return {
-            candidate,
-            score: compatibility.totalScore,
-            explanation: compatibility.explanation,
-            dimensionScores: compatibility.dimensionScores,
-            redFlags: compatibility.redFlags,
-          };
-        })
-      );
-
-      // Sort by compatibility score
-      const ranked = analyzed.sort((a, b) => b.score - a.score);
-
-      // Step 2d: Find first valid match
-      let matchData = null;
-      for (const item of ranked) {
-        if (item.score < 70) {
-          console.log(
-            `Skipping ${item.candidate.firstName} - score ${item.score} < 70`
-          );
-          continue;
-        }
-
-        const isValid = await ctx.runQuery(internal.matching.validateMatch, {
-          userId: user._id,
-          candidateId: item.candidate._id,
-          userRating: user.attractivenessRating,
-          candidateRating: item.candidate.attractivenessRating,
-        });
-
-        if (isValid) {
-          matchData = {
-            matchUser: item.candidate,
-            score: item.score,
-            explanation: item.explanation,
-            dimensionScores: item.dimensionScores,
-            redFlags: item.redFlags,
-          };
-          break;
-        }
-      }
-
-      if (!matchData) {
-        console.log(`No valid match found for ${user.firstName}`);
-        continue;
-      }
-
-      // Step 2e: Pick a random coffee shop as venue
-      const randomShop =
-        coffeeShops[Math.floor(Math.random() * coffeeShops.length)];
-      const venue = {
-        name: randomShop.name,
-        address: randomShop.address,
-        placeId: randomShop.placeId,
-        rating: randomShop.rating ?? 0,
-      };
-
-      // Step 2f: Save match via mutation
-      await ctx.runMutation(internal.matching.saveMatch, {
-        userId: user._id,
-        matchUserId: matchData.matchUser._id,
-        weekOf,
-        compatibilityScore: matchData.score,
-        explanation: matchData.explanation,
-        dimensionScores: matchData.dimensionScores,
-        redFlags: matchData.redFlags,
-        suggestedVenue: venue,
-      });
-
-      matchedInBatch.add(user._id);
-      matchedInBatch.add(matchData.matchUser._id);
-
-      console.log(
-        `✅ Matched ${user.firstName} ↔ ${matchData.matchUser.firstName} (${matchData.score}% compatible)`
-      );
-
-      // Step 2g: Send weekly match emails to both users
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-      const dashboardUrl = `${appUrl}/dashboard`;
-
-      // Send email to user about their match (matchUser)
-      await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
-        to: user.email,
-        userName: user.firstName,
-        matchName: matchData.matchUser.firstName,
-        matchAge: matchData.matchUser.age,
-        matchUrl: dashboardUrl,
-      });
-      // Push notification to user
-      await ctx.scheduler.runAfter(
-        0,
-        internal.pushActions.sendPushToUser,
-        {
-          userId: user._id,
-          title: "You have a new match!",
-          body: `Check out ${matchData.matchUser.firstName}`,
-          url: "/dashboard",
-        }
-      );
-      console.log(`📧 Email sent to ${user.email}`);
-
-      // Send email to matchUser about their match (user)
-      await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
-        to: matchData.matchUser.email,
-        userName: matchData.matchUser.firstName,
-        matchName: user.firstName,
-        matchAge: user.age,
-        matchUrl: dashboardUrl,
-      });
-      // Push notification to matchUser
-      await ctx.scheduler.runAfter(
-        0,
-        internal.pushActions.sendPushToUser,
-        {
-          userId: matchData.matchUser._id,
-          title: "You have a new match!",
-          body: `Check out ${user.firstName}`,
-          url: "/dashboard",
-        }
-      );
-      console.log(`📧 Email sent to ${matchData.matchUser.email}`);
-    }
-
-    console.log(`Batch complete. Matched ${matchedInBatch.size / 2} pairs.`);
-
-    // Step 3: Recursively schedule next batch if more users remain
+    // Schedule next batch if more users remain
     if (batch.length === batchSize) {
-      console.log("📤 Scheduling next batch...");
       await ctx.scheduler.runAfter(0, internal.matching.runMatchingBatch, {
         skip: skip + batchSize,
         batchSize,
@@ -552,7 +327,171 @@ export const runMatchingBatch = internalAction({
   },
 });
 
-// ===== TESTING FUNCTION =====
+/**
+ * Handles the full matching pipeline for a single user.
+ * Runs independently and in parallel with other users' actions.
+ */
+export const processUserMatch = internalAction({
+  args: {
+    userId: v.id("users"),
+    weekOf: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Early exit: another action may have already matched this user
+    const alreadyMatched = await ctx.runQuery(
+      internal.matching.hasMatchThisWeek,
+      { userId: args.userId, weekOf: args.weekOf }
+    );
+    if (alreadyMatched) {
+      console.log(`Skipping ${args.userId} — already matched this week`);
+      return;
+    }
+
+    const user = await ctx.runQuery(internal.matching.getUser, {
+      userId: args.userId,
+    });
+    if (!user?.embedding) {
+      console.log(`Skipping ${args.userId} — no embedding`);
+      return;
+    }
+
+    const matchKey = makeMatchKey({
+      accountStatus: "approved",
+      vacationMode: false,
+      gender: user.interestedIn,
+    });
+
+    // Vector search (must be in action)
+    const vectorResults = await ctx.vectorSearch("users", "by_embedding", {
+      vector: user.embedding,
+      limit: 256,
+      filter: (q) => q.eq("matchKey", matchKey),
+    });
+
+    console.log(
+      `Vector search found ${vectorResults.length} candidates for ${user.firstName}`
+    );
+
+    const candidateIds = vectorResults
+      .filter((r) => r._id !== args.userId)
+      .slice(0, 100)
+      .map((r) => r._id);
+
+    if (!candidateIds.length) {
+      console.log(`No vector candidates for ${user.firstName}`);
+      return;
+    }
+
+    const candidates = await ctx.runQuery(
+      internal.matching.loadAndFilterCandidates,
+      { userId: args.userId, candidateIds }
+    );
+
+    if (!candidates.length) {
+      console.log(`No filtered candidates for ${user.firstName}`);
+      return;
+    }
+
+    console.log(
+      `${candidates.length} candidates after filtering for ${user.firstName}`
+    );
+
+    // Sequential LLM analysis with early exit — stop at first score ≥ 70.
+    // Candidates are sorted by vector similarity, the best proxy for compatibility.
+    let matchData = null;
+    for (const candidate of candidates.slice(0, 20)) {
+      const compatibility = await analyzeCompatibility(
+        formatProfile(user),
+        formatProfile(candidate)
+      );
+
+      console.log(`Scored ${candidate.firstName}: ${compatibility.totalScore}`);
+
+      if (compatibility.totalScore >= 70) {
+        matchData = {
+          matchUser: candidate,
+          score: compatibility.totalScore,
+          explanation: compatibility.explanation,
+          dimensionScores: compatibility.dimensionScores,
+          redFlags: compatibility.redFlags,
+        };
+        break;
+      }
+    }
+
+    if (!matchData) {
+      console.log(`No valid match found for ${user.firstName}`);
+      return;
+    }
+
+    const coffeeShops = await ctx.runQuery(api.coffeeShops.getAllCoffeeShops, {
+      activeOnly: true,
+    });
+    if (!coffeeShops.length) {
+      console.log("⚠️ No active coffee shops, cannot create match");
+      return;
+    }
+
+    const randomShop =
+      coffeeShops[Math.floor(Math.random() * coffeeShops.length)];
+    const venue = {
+      name: randomShop.name,
+      address: randomShop.address,
+      placeId: randomShop.placeId,
+      rating: randomShop.rating ?? 0,
+    };
+
+    // saveMatch handles deduplication atomically — safe under parallel execution
+    await ctx.runMutation(internal.matching.saveMatch, {
+      userId: args.userId,
+      matchUserId: matchData.matchUser._id,
+      weekOf: args.weekOf,
+      compatibilityScore: matchData.score,
+      explanation: matchData.explanation,
+      dimensionScores: matchData.dimensionScores,
+      redFlags: matchData.redFlags,
+      suggestedVenue: venue,
+    });
+
+    console.log(
+      `✅ Matched ${user.firstName} ↔ ${matchData.matchUser.firstName} (${matchData.score}%)`
+    );
+
+    const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
+
+    await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
+      to: user.email,
+      userName: user.firstName,
+      matchName: matchData.matchUser.firstName,
+      matchAge: matchData.matchUser.age,
+      matchUrl: dashboardUrl,
+    });
+    await ctx.scheduler.runAfter(0, internal.pushActions.sendPushToUser, {
+      userId: args.userId,
+      title: "You have a new match!",
+      body: `Check out ${matchData.matchUser.firstName}`,
+      url: "/dashboard",
+    });
+    console.log(`📧 Notified ${user.email}`);
+
+    await ctx.scheduler.runAfter(0, internal.emails.sendWeeklyMatchEmail, {
+      to: matchData.matchUser.email,
+      userName: matchData.matchUser.firstName,
+      matchName: user.firstName,
+      matchAge: user.age,
+      matchUrl: dashboardUrl,
+    });
+    await ctx.scheduler.runAfter(0, internal.pushActions.sendPushToUser, {
+      userId: matchData.matchUser._id,
+      title: "You have a new match!",
+      body: `Check out ${user.firstName}`,
+      url: "/dashboard",
+    });
+    console.log(`📧 Notified ${matchData.matchUser.email}`);
+  },
+});
+
+// ===== TESTING =====
 
 export const testMatchingAlgorithm = internalAction({
   handler: async (ctx) => {
@@ -560,7 +499,7 @@ export const testMatchingAlgorithm = internalAction({
 
     await ctx.scheduler.runAfter(0, internal.matching.runMatchingBatch, {
       skip: 0,
-      batchSize: 5, // Small batch for testing
+      batchSize: 5,
       weekOf: getWeekOfString(),
     });
 
