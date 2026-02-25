@@ -62,7 +62,7 @@ export function NavBar() {
       }`}
     >
       <div className="flex items-center gap-3">
-        <span className={`text-xl font-bold ${isLanding ? "text-white" : ""}`}>
+        <span className={`text-xl font-bold ${isLanding ? "text-black" : ""}`}>
           MeetOnce
         </span>
       </div>
@@ -72,7 +72,7 @@ export function NavBar() {
             <button
               className={`text-sm font-medium transition-colors ${
                 isLanding
-                  ? "text-white/70 hover:text-white"
+                  ? "text-black/70 hover:text-black"
                   : "hover:text-primary"
               }`}
             >

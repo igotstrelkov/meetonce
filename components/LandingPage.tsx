@@ -9,474 +9,664 @@ import {
   Instagram,
   Linkedin,
   MapPin,
-  Mic,
   Quote,
   ShieldCheck,
   Sparkles,
   Twitter,
+  Users,
+  X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-function AnimatedCounter({
-  target,
-  suffix = "",
-}: {
-  target: number;
-  suffix?: string;
-}) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const hasAnimated = useRef(false);
+// ─── Animated number counter ──────────────────────────────────────────────────
+function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
+  const [value, setValue] = useState(0);
+  const el = useRef<HTMLSpanElement>(null);
+  const fired = useRef(false);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          const duration = 2000;
-          const steps = 60;
-          const increment = target / steps;
-          let current = 0;
-          const timer = setInterval(() => {
-            current += increment;
-            if (current >= target) {
-              setCount(target);
-              clearInterval(timer);
-            } else {
-              setCount(Math.floor(current));
-            }
-          }, duration / steps);
-        }
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting || fired.current) return;
+        fired.current = true;
+        const STEPS = 60;
+        const INTERVAL = 2000 / STEPS;
+        let i = 0;
+        const id = setInterval(() => {
+          i++;
+          setValue(i >= STEPS ? to : Math.round((to / STEPS) * i));
+          if (i >= STEPS) clearInterval(id);
+        }, INTERVAL);
       },
-      { threshold: 0.3 },
+      { threshold: 0.4 },
     );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [target]);
+    if (el.current) obs.observe(el.current);
+    return () => obs.disconnect();
+  }, [to]);
 
   return (
-    <span ref={ref}>
-      {count}
+    <span ref={el}>
+      {value}
       {suffix}
     </span>
   );
 }
 
-export function LandingPage() {
-  return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20 overflow-x-hidden">
-      <main>
-        {/* ================================================ */}
-        {/* HERO — "We banned ghosting." Dark, massive, minimal */}
-        {/* Visual: Full viewport, near-black bg, centered type */}
-        {/* Font: text-8xl font-black, maximum visual weight */}
-        {/* Whitespace: Very generous, content breathes */}
-        {/* ================================================ */}
-        <section className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-20 bg-foreground text-background overflow-hidden">
-          <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbHRlcj0idXJsKCNhKSIgb3BhY2l0eT0iMC4xNSIvPjwvc3ZnPg==')]" />
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/20 rounded-full blur-[120px]" />
+// ─── Live countdown clock ─────────────────────────────────────────────────────
+function Countdown() {
+  const deadline = useRef<number>(0);
+  const [t, setT] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
-          <div className="relative max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 text-white/80 text-sm font-medium mb-10 backdrop-blur-sm">
-              <MapPin className="w-4 h-4" />
-              <span>Now Live in Dublin</span>
+  useEffect(() => {
+    if (!deadline.current) {
+      const d = new Date();
+      d.setDate(d.getDate() + 42);
+      d.setHours(23, 59, 59, 0);
+      deadline.current = d.getTime();
+    }
+    const tick = () => {
+      const rem = Math.max(0, (deadline.current - Date.now()) / 1000);
+      setT({
+        d: Math.floor(rem / 86400),
+        h: Math.floor((rem % 86400) / 3600),
+        m: Math.floor((rem % 3600) / 60),
+        s: Math.floor(rem % 60),
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="flex items-end justify-center gap-2 md:gap-3">
+      {(
+        [
+          { v: t.d, label: "days" },
+          { v: t.h, label: "hours" },
+          { v: t.m, label: "min" },
+          { v: t.s, label: "sec" },
+        ] as const
+      ).map(({ v, label }, i) => (
+        <div key={i} className="flex flex-col items-center gap-1.5">
+          <div className="w-[66px] md:w-20 h-[66px] md:h-20 rounded-2xl bg-foreground text-background flex items-center justify-center text-2xl md:text-3xl font-black tabular-nums tracking-tight">
+            {String(v).padStart(2, "0")}
+          </div>
+          <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            {label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Reusable CTA wrapper ─────────────────────────────────────────────────────
+function JoinButton({
+  label,
+  variant = "default",
+  size = "lg",
+  className = "",
+}: {
+  label: string;
+  variant?: "default" | "outline" | "secondary";
+  size?: "sm" | "default" | "lg";
+  className?: string;
+}) {
+  return (
+    <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+      <Button
+        size={size}
+        variant={variant}
+        className={`font-bold rounded-xl transition-all duration-300 hover:scale-[1.02] ${className}`}
+      >
+        {label}
+        <ArrowRight className="ml-2 w-4 h-4" />
+      </Button>
+    </SignInButton>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+export function LandingPage() {
+  const [bannerVisible, setBannerVisible] = useState(true);
+  const [stickyNav, setStickyNav] = useState(false);
+  const [mobileCTA, setMobileCTA] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+
+  // Show sticky elements after scrolling past the hero
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        const past = !e.isIntersecting;
+        setStickyNav(past);
+        setMobileCTA(past);
+      },
+      { threshold: 0 },
+    );
+    obs.observe(hero);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background text-foreground font-sans overflow-x-hidden">
+
+      {/* ── URGENCY BANNER ─────────────────────────────────────────────── */}
+      {bannerVisible && (
+        <div className="relative bg-foreground text-background text-xs md:text-sm font-semibold text-center py-2.5 px-10">
+          <span className="text-primary">⚡</span>{" "}
+          Applications for women closing soon · Only{" "}
+          <span className="underline underline-offset-2">50 spots left</span> ·{" "}
+          <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+            <button className="underline underline-offset-2 hover:no-underline cursor-pointer">
+              Apply free →
+            </button>
+          </SignInButton>
+          <button
+            onClick={() => setBannerVisible(false)}
+            aria-label="Dismiss"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 opacity-60 hover:opacity-100 transition-opacity"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* ── STICKY NAV (appears after hero scrolls out) ──────────────── */}
+      <div
+        className={`fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border transition-all duration-300 ${
+          stickyNav
+            ? "translate-y-0 opacity-100 pointer-events-auto"
+            : "-translate-y-full opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
+          <span className="text-lg font-black tracking-tight">MeetOnce</span>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:block text-xs text-muted-foreground">
+              50 spots left
+            </span>
+            <JoinButton label="Join Free" size="sm" className="h-9 px-5 text-sm" />
+          </div>
+        </div>
+      </div>
+
+      <main>
+        {/* ── 1. HERO ─────────────────────────────────────────────────── */}
+        <section
+          ref={heroRef}
+          className="relative min-h-screen flex flex-col items-center justify-center px-4 py-24 overflow-hidden"
+        >
+          {/* Warm glow */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] rounded-full bg-primary/8 blur-[160px]"
+          />
+
+          <div className="relative max-w-5xl mx-auto text-center">
+            {/* Location pill */}
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border bg-muted text-muted-foreground text-xs font-bold uppercase tracking-wider mb-10">
+              <MapPin className="w-3 h-3" />
+              Dublin, Ireland
             </div>
 
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 leading-[1.05]">
-              We banned
+            {/* Headline */}
+            <h1 className="text-[clamp(2.8rem,11vw,7.5rem)] font-black leading-[0.93] tracking-tighter uppercase mb-7">
+              We Banned
               <br />
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-pink-500 to-primary">
-                ghosting.
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-pink-400 to-primary">
+                Ghosting.
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-12 leading-relaxed font-light">
-              MeetOnce is Dublin&apos;s dating app with standards. One curated
-              match per week. Real coffee dates. And a zero-tolerance policy for
-              people who waste your time.
+            {/* Subheadline */}
+            <p className="text-lg md:text-xl text-muted-foreground max-w-lg mx-auto leading-relaxed mb-9">
+              MeetOnce is Dublin&apos;s strict dating app. One curated match per
+              week. Real coffee dates. Zero tolerance for flakes.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
-              <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                <Button
-                  size="lg"
-                  className="h-14 px-10 text-lg rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 font-semibold"
-                >
-                  Apply to Join
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </SignInButton>
+            {/* Primary CTA */}
+            <div className="flex justify-center mb-5">
+              <JoinButton
+                label="Join the Founding Members"
+                className="h-14 px-12 text-lg shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/25"
+              />
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-white/60">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-green-500/80" />
-                <span>Verified profiles only</span>
-              </div>
-              <div className="hidden sm:block w-px h-4 bg-white/20" />
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-green-500/80" />
-                <span>Dublin only</span>
-              </div>
-              <div className="hidden sm:block w-px h-4 bg-white/20" />
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500/80" />
-                <span>Free during launch</span>
-              </div>
+            {/* Micro trust line */}
+            <p className="text-sm text-muted-foreground mb-11">
+              500+ Dublin singles already waiting.{" "}
+              <span className="font-bold text-foreground">
+                Real matches only.
+              </span>
+            </p>
+
+            {/* Trust badges */}
+            <div className="flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                Verified profiles only
+              </span>
+              <span className="hidden sm:block w-px h-4 bg-border" />
+              <span className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-emerald-500" />
+                Dublin only
+              </span>
+              <span className="hidden sm:block w-px h-4 bg-border" />
+              <span className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-500" />
+                Completely free
+              </span>
             </div>
+          </div>
+
+          {/* Scroll nudge */}
+          <div
+            aria-hidden
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 opacity-30"
+          >
+            <div className="w-px h-8 bg-foreground animate-bounce" />
+            <span className="text-[10px] font-bold uppercase tracking-widest">
+              Scroll
+            </span>
           </div>
         </section>
 
-        {/* ================================================ */}
-        {/* THE PROBLEM — Editorial manifesto, Dublin-specific */}
-        {/* Visual: Light bg, centered column, stacked statements */}
-        {/* Font: text-xl regular weight, muted, building tension */}
-        {/* Final line: Bold, full foreground color, the kicker */}
-        {/* ================================================ */}
-        <section className="py-20 md:py-32">
-          <div className="max-w-2xl mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-black mb-6 leading-tight tracking-tight">
-                Dublin, we need to talk.
-              </h2>
-            </div>
+        {/* ── 2. MANIFESTO ────────────────────────────────────────────── */}
+        <section className="py-24 md:py-36 bg-muted/30">
+          <div className="max-w-xl mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-14">
+              Dublin, we need to talk.
+            </h2>
 
-            <div className="space-y-6 text-center">
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+            <div className="space-y-6 text-lg md:text-xl text-muted-foreground leading-relaxed">
+              <p>
                 You matched with 200 people this year.
                 <br />
                 You went on three dates.
               </p>
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+              <p>
                 Half were here for a stag weekend.
                 <br />
                 The other half vanished after day two.
               </p>
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                You&apos;ve been ghosted so many times
+              <p>
+                You&apos;ve been ghosted so often
                 <br />
-                you&apos;ve started doing it back.
+                you started doing it back.
               </p>
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                And somehow, this is called "dating".
-              </p>
-              <p className="text-xl md:text-2xl font-bold text-foreground pt-6">
-                It&apos;s not a you problem. It&apos;s a standards problem.
-              </p>
+              <p>And somehow, this is called &ldquo;dating.&rdquo;</p>
+            </div>
+
+            <p className="mt-10 text-2xl md:text-3xl font-black text-foreground leading-snug">
+              It&apos;s not a you problem.
+              <br />
+              It&apos;s a standards problem.
+            </p>
+
+            <div className="mt-12">
+              <JoinButton
+                label="See How We Do It"
+                variant="outline"
+                className="h-13 px-9 text-base border-foreground/20 hover:bg-foreground hover:text-background"
+              />
             </div>
           </div>
         </section>
 
-        {/* ================================================ */}
-        {/* THE MEETONCE STANDARD — The key differentiator */}
-        {/* Visual: Dark bg, left-border accent on each rule */}
-        {/* Font: Rule titles text-2xl bold, body text-base light */}
-        {/* Whitespace: Generous vertical spacing between rules */}
-        {/* Feels like a code of conduct carved in stone */}
-        {/* ================================================ */}
-        <section className="py-20 md:py-32 bg-foreground text-background relative overflow-hidden">
-          <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbHRlcj0idXJsKCNhKSIgb3BhY2l0eT0iMC4xNSIvPjwvc3ZnPg==')]" />
-          <div className="relative max-w-4xl mx-auto px-4">
+        {/* ── 3. HOW IT WORKS ─────────────────────────────────────────── */}
+        <section className="py-24 md:py-36">
+          <div className="max-w-5xl mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tight">
-                The MeetOnce Standard
-              </h2>
-              <p className="text-lg text-white/60 max-w-2xl mx-auto font-light">
-                This isn&apos;t a suggestion. It&apos;s how it works.
-              </p>
-            </div>
-
-            <div className="space-y-10 max-w-3xl mx-auto">
-              <div className="border-l-2 border-primary pl-8">
-                <h3 className="text-xl md:text-2xl font-bold mb-3">
-                  If you match, you respond.
-                </h3>
-                <p className="text-white/60 leading-relaxed">
-                  You get one match per week. One. The least you can do is say
-                  yes or no. Silence isn&apos;t an option here.
-                </p>
-              </div>
-
-              <div className="border-l-2 border-primary pl-8">
-                <h3 className="text-xl md:text-2xl font-bold mb-3">
-                  If you confirm, you show up.
-                </h3>
-                <p className="text-white/60 leading-relaxed">
-                  Confirm a date and don&apos;t show? You&apos;re removed.
-                  Permanently. No warnings. No second chances. We respect
-                  everyone&apos;s time equally.
-                </p>
-              </div>
-
-              <div className="border-l-2 border-primary pl-8">
-                <h3 className="text-xl md:text-2xl font-bold mb-3">
-                  If you meet, you&apos;re honest.
-                </h3>
-                <p className="text-white/60 leading-relaxed">
-                  After every date, both people share brief feedback. Not a
-                  review. Just honesty. It makes every future match better.
-                </p>
-              </div>
-            </div>
-
-            <div className="text-center mt-16">
-              <p className="text-lg text-white/50 font-light italic">
-                We&apos;re not trying to be harsh. We&apos;re trying to be worth
-                your time.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ================================================ */}
-        {/* HOW IT WORKS — 3 steps, outcome-focused, minimal */}
-        {/* Visual: Light bg, 3-column grid, numbered cards */}
-        {/* Font: Step numbers text-5xl muted, titles text-lg bold */}
-        {/* CTA placement: Below steps, centered */}
-        {/* ================================================ */}
-        <section className="py-20 md:py-32">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="text-center mb-14">
-              <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-3">
                 How it works.
               </h2>
-              <p className="text-lg text-muted-foreground font-light">
-                Three steps. No swiping involved.
+              <p className="text-muted-foreground text-lg">
+                Three steps. No swiping.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: Mic,
-                  step: "01",
-                  title: "Have a Conversation",
-                  desc: "Five minutes. No forms, no quizzes. Just talk about what you actually want. We listen for the things a profile can't capture.",
-                },
-                {
-                  icon: Sparkles,
-                  step: "02",
-                  title: "Get Your Match",
-                  desc: "Every week, one person. Selected on values, lifestyle, and what you said matters. Not an algorithm guessing from swipe patterns.",
-                },
-                {
-                  icon: Coffee,
-                  step: "03",
-                  title: "Show Up for Coffee",
-                  desc: "Both interested? We pick the spot. You show up. That's it. That's the whole app.",
-                },
-              ].map((step, i) => (
+            <div className="grid md:grid-cols-3 gap-6 mb-14">
+              {(
+                [
+                  {
+                    Icon: Sparkles,
+                    n: "01",
+                    title: "Confirm a date",
+                    body: "One curated match per week, selected for you. No scrolling, no algorithm, no swiping.",
+                  },
+                  {
+                    Icon: Coffee,
+                    n: "02",
+                    title: "Show up",
+                    body: "Coffee arranged, time and place set. You just show up. That's it. That's the whole app.",
+                  },
+                  {
+                    Icon: ShieldCheck,
+                    n: "03",
+                    title: "Standards enforced",
+                    body: "Ghosting or no-shows mean removal. Permanently. No warnings. We protect everyone's time.",
+                  },
+                ] as const
+              ).map(({ Icon, n, title, body }, i) => (
                 <div
                   key={i}
-                  className="group relative flex flex-col p-8 rounded-2xl bg-background border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500"
+                  className="group flex flex-col gap-5 p-8 rounded-2xl border border-border/60 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 bg-background"
                 >
-                  {/* <span className="text-5xl font-black text-primary/10 group-hover:text-primary/20 transition-colors mb-4">
-                    {step.step}
-                  </span> */}
-                  <div className="w-12 h-12 rounded-xl bg-linear-to-br from-primary/20 to-pink-500/20 flex items-center justify-center mb-5 text-primary group-hover:scale-110 transition-transform">
-                    <step.icon className="w-6 h-6" />
+                  <div className="flex items-center justify-between">
+                    <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-4xl font-black text-muted/40 tabular-nums">
+                      {n}
+                    </span>
                   </div>
-                  <h3 className="text-lg font-bold mb-2">{step.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {step.desc}
-                  </p>
+                  <div>
+                    <h3 className="font-bold text-lg mb-1.5">{title}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {body}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
+
+            <div className="text-center">
+              <JoinButton
+                label="Get Your Match"
+                className="h-14 px-10 text-base shadow-lg shadow-primary/20"
+              />
+            </div>
           </div>
         </section>
 
-        {/* ================================================ */}
-        {/* SOCIAL PROOF — Editorial testimonials + stats */}
-        {/* Visual: Muted bg, asymmetric grid (3+2 cols) */}
-        {/* Featured testimonial: Dark card, large quote */}
-        {/* Stats bar: Dark bg, 4 columns, animated counters */}
-        {/* ================================================ */}
-        <section className="py-20 md:py-32 bg-muted/20">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="text-center mb-14">
-              <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">
-                Dublin&apos;s already talking.
+        {/* ── 4. ZERO TOLERANCE ───────────────────────────────────────── */}
+        <section className="py-24 md:py-36 bg-foreground text-background relative overflow-hidden">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.022] [background-image:repeating-linear-gradient(0deg,transparent,transparent_39px,rgba(255,255,255,0.3)_39px,rgba(255,255,255,0.3)_40px),repeating-linear-gradient(90deg,transparent,transparent_39px,rgba(255,255,255,0.3)_39px,rgba(255,255,255,0.3)_40px)]"
+          />
+
+          <div className="relative max-w-4xl mx-auto px-4">
+            {/* Shield */}
+            <div className="flex justify-center mb-12">
+              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
+                <ShieldCheck className="w-7 h-7 text-white/75" />
+              </div>
+            </div>
+
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
+                Zero tolerance.
+                <br />
+                Maximum respect.
               </h2>
-              <p className="text-lg text-muted-foreground font-light">
+              <p className="text-white/50 text-lg max-w-md mx-auto">
+                This isn&apos;t a guideline. It&apos;s the contract.
+              </p>
+            </div>
+
+            <div className="max-w-2xl mx-auto space-y-10 mb-14">
+              {(
+                [
+                  {
+                    title: "We don't reward flaky behavior.",
+                    body: "If someone confirms a date and doesn't show up, they lose access. No appeals. No warnings. No second chances.",
+                  },
+                  {
+                    title: "Your time is precious.",
+                    body: "Our standards protect it. Every person who makes it through review has committed to showing up — or losing access forever.",
+                  },
+                  {
+                    title: "If you meet, you're honest.",
+                    body: "After every date, brief feedback from both sides. Not a review. Just honesty. It makes every future match better.",
+                  },
+                ] as const
+              ).map(({ title, body }, i) => (
+                <div key={i} className="border-l-2 border-primary pl-8">
+                  <h3 className="text-xl font-bold mb-2">{title}</h3>
+                  <p className="text-white/55 leading-relaxed">{body}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center space-y-3">
+              <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="h-14 px-10 text-base font-bold rounded-xl hover:scale-[1.02] transition-all duration-300"
+                >
+                  Join the Club
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </SignInButton>
+              <p className="text-white/35 text-sm italic">
+                We&apos;re not trying to be harsh. We&apos;re trying to be
+                worth your time.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 5. SOCIAL PROOF ─────────────────────────────────────────── */}
+        <section className="py-24 md:py-36 bg-muted/30">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-3">
+                Real people. Real dates.
+                <br />
+                No games.
+              </h2>
+              <p className="text-muted-foreground text-lg">
                 Early members. Real reactions.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-5 gap-6 mb-14">
-              <div className="md:col-span-3 flex flex-col justify-between p-10 rounded-2xl bg-foreground text-background relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-[80px]" />
+            {/* Featured + two stacked */}
+            <div className="grid md:grid-cols-3 gap-6 mb-10">
+              <div className="md:col-span-2 relative flex flex-col justify-between p-10 rounded-2xl bg-foreground text-background overflow-hidden">
+                <div
+                  aria-hidden
+                  className="absolute top-0 right-0 w-60 h-60 bg-primary/12 rounded-full blur-[90px]"
+                />
                 <div className="relative">
-                  <Quote className="w-10 h-10 text-white/15 mb-6" />
-                  <p className="text-xl md:text-2xl leading-relaxed mb-8 font-light">
-                    &ldquo;He showed up on time, knew the plan, and we actually
-                    talked for two hours. I&apos;d forgotten what that felt
-                    like. Turns out dating is easy when both people actually
-                    want to be there.&rdquo;
+                  <Quote className="w-9 h-9 text-white/10 mb-6" />
+                  <p className="text-xl md:text-2xl font-light leading-relaxed mb-8">
+                    &ldquo;Finally, a dating app where people actually show up.
+                    Dublin&apos;s dating just got serious.&rdquo;
                   </p>
                   <div>
-                    <p className="font-semibold text-lg">Sarah, 29</p>
-                    <p className="text-sm text-white/60">Portobello</p>
+                    <p className="font-bold text-lg">Aoife, 26</p>
+                    <p className="text-sm text-white/50 flex items-center gap-1.5 mt-0.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      Verified Member · Ranelagh
+                    </p>
                   </div>
                 </div>
               </div>
 
-              <div className="md:col-span-2 flex flex-col gap-6">
-                <div className="flex-1 flex flex-col p-8 rounded-2xl bg-background border border-border/50">
-                  <Quote className="w-7 h-7 text-primary/20 mb-4" />
-                  <p className="text-foreground leading-relaxed mb-6 flex-1">
-                    &ldquo;The no-tolerance thing isn&apos;t harsh. It&apos;s
-                    the most respectful thing a dating app has ever done. It
-                    means everyone there is actually serious.&rdquo;
-                  </p>
-                  <div>
-                    <p className="font-semibold">Cian, 32</p>
-                    <p className="text-sm text-muted-foreground">Smithfield</p>
-                  </div>
-                </div>
-                <div className="flex-1 flex flex-col p-8 rounded-2xl bg-background border border-border/50">
-                  <Quote className="w-7 h-7 text-primary/20 mb-4" />
-                  <p className="text-foreground leading-relaxed mb-6 flex-1">
-                    &ldquo;Deleted Hinge the day I signed up. If an app
-                    won&apos;t even hold people accountable for showing up, why
-                    would I trust it to find me someone good?&rdquo;
-                  </p>
-                  <div>
-                    <p className="font-semibold">Aoife, 27</p>
-                    <p className="text-sm text-muted-foreground">Ranelagh</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl bg-foreground text-background p-10 md:p-14 relative overflow-hidden">
-              <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbHRlcj0idXJsKCNhKSIgb3BhY2l0eT0iMC4xNSIvPjwvc3ZnPg==')]" />
-              <div className="relative grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                {[
-                  { label: "Dublin Singles Joined", value: 475, suffix: "+" },
-                  { label: "Real Dates Arranged", value: 100, suffix: "+" },
-                  {
-                    label: "Ghosts Tolerated",
-                    value: 0,
-                    suffix: "",
-                  },
-                  { label: "Second Date Rate", value: 68, suffix: "%" },
-                ].map((stat, i) => (
-                  <div key={i}>
-                    <div className="text-3xl md:text-5xl font-black mb-2 tracking-tight text-white">
-                      <AnimatedCounter
-                        target={stat.value}
-                        suffix={stat.suffix}
-                      />
-                    </div>
-                    <div className="text-sm md:text-base text-white/60 font-medium">
-                      {stat.label}
+              <div className="flex flex-col gap-6">
+                {(
+                  [
+                    {
+                      quote:
+                        "I can trust that my time isn't wasted. One curated match a week is perfect.",
+                      name: "Sarah, 29",
+                      location: "Portobello",
+                    },
+                    {
+                      quote:
+                        "No more ghosting, no more endless texting. Love this app.",
+                      name: "Emma, 24",
+                      location: "Smithfield",
+                    },
+                  ] as const
+                ).map(({ quote, name, location }, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 flex flex-col p-7 rounded-2xl bg-background border border-border/60"
+                  >
+                    <Quote className="w-6 h-6 text-primary/20 mb-4" />
+                    <p className="text-foreground leading-relaxed mb-5 flex-1 text-sm">
+                      &ldquo;{quote}&rdquo;
+                    </p>
+                    <div>
+                      <p className="font-semibold text-sm">{name}</p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                        Verified · {location}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Stats bar */}
+            <div className="rounded-2xl bg-foreground text-background p-10 md:p-14 relative overflow-hidden mb-12">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-[0.022] [background-image:repeating-linear-gradient(0deg,transparent,transparent_39px,rgba(255,255,255,0.3)_39px,rgba(255,255,255,0.3)_40px),repeating-linear-gradient(90deg,transparent,transparent_39px,rgba(255,255,255,0.3)_39px,rgba(255,255,255,0.3)_40px)]"
+              />
+              <div className="relative grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                {(
+                  [
+                    { n: 500, s: "+", label: "Dublin singles joined" },
+                    { n: 100, s: "+", label: "Real dates arranged" },
+                    { n: 0, s: "", label: "Ghosts tolerated" },
+                    { n: 68, s: "%", label: "Second date rate" },
+                  ] as const
+                ).map(({ n, s, label }, i) => (
+                  <div key={i}>
+                    <div className="text-3xl md:text-5xl font-black tracking-tight mb-1.5">
+                      <Counter to={n} suffix={s} />
+                    </div>
+                    <div className="text-xs md:text-sm text-white/50 font-medium leading-snug">
+                      {label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="text-center">
+              <JoinButton
+                label="Request Access"
+                className="h-14 px-10 text-base shadow-lg shadow-primary/20"
+              />
+            </div>
           </div>
         </section>
 
-        {/* ================================================ */}
-        {/* SCARCITY — Dublin-only launch, founding members */}
-        {/* Visual: Light bg, centered, progress bar accent */}
-        {/* Creates urgency without desperation */}
-        {/* ================================================ */}
-        {/* <section className="py-20 md:py-32">
-          <div className="max-w-3xl mx-auto px-4 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-10">
-              <MapPin className="w-4 h-4" />
-              Dublin-Only Launch
+        {/* ── 6. SCARCITY / FOMO ──────────────────────────────────────── */}
+        <section className="py-24 md:py-36">
+          <div className="max-w-xl mx-auto px-4 text-center">
+            <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-10">
+              <Users className="w-3.5 h-3.5" />
+              Limited founding members
             </div>
-            <h2 className="text-3xl md:text-5xl font-black mb-6 leading-tight tracking-tight">
-              This is a Dublin thing.
+
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6 leading-[1.1]">
+              Applications for women
               <br />
-              <span className="text-muted-foreground">For now.</span>
+              are closing soon.
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed font-light">
-              We&apos;re not trying to be everywhere. We&apos;re fixing dating
-              in one city first. The first 1,000 members get founding access for
-              life.
+
+            <p className="text-muted-foreground text-lg leading-relaxed mb-12">
+              Next intake in 6 weeks.
+              <br />
+              Only serious Dublin singles allowed.
             </p>
 
-            <div className="max-w-md mx-auto">
-              <div className="flex justify-between text-sm mb-3">
-                <span className="font-semibold">
-                  <span className="text-primary">475</span> / 1,000 Founding
-                  Members
+            <div className="mb-12">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-6">
+                Current intake closes in
+              </p>
+              <Countdown />
+            </div>
+
+            {/* Spot meter */}
+            <div className="max-w-sm mx-auto mb-12">
+              <div className="flex justify-between text-sm font-medium mb-2.5">
+                <span>
+                  <span className="text-primary font-bold">50 spots</span>{" "}
+                  remaining
                 </span>
-                <span className="text-muted-foreground">47.5% claimed</span>
+                <span className="text-muted-foreground">90% claimed</span>
               </div>
-              <div className="h-3 bg-muted rounded-full overflow-hidden">
+              <div className="h-2.5 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-linear-to-r from-primary to-pink-500 rounded-full transition-all duration-1000"
-                  style={{ width: "47.5%" }}
+                  className="h-full rounded-full bg-linear-to-r from-primary to-pink-500"
+                  style={{ width: "90%" }}
                 />
               </div>
-              <p className="text-sm text-muted-foreground mt-3">
-                Less than 525 founding spots remaining
-              </p>
             </div>
-          </div>
-        </section> */}
 
-        {/* ================================================ */}
-        {/* FAQ — Clean accordion, skepticism-aware */}
-        {/* Visual: Light bg, max-w-3xl, bordered details */}
-        {/* ================================================ */}
-        <section className="py-20 md:py-32 bg-muted/20">
-          <div className="max-w-3xl mx-auto px-4">
+            <JoinButton
+              label="Apply Now"
+              className="h-14 px-12 text-base shadow-lg shadow-primary/20"
+            />
+          </div>
+        </section>
+
+        {/* ── 7. FAQ ──────────────────────────────────────────────────── */}
+        <section className="py-24 md:py-36 bg-muted/30">
+          <div className="max-w-2xl mx-auto px-4">
             <div className="text-center mb-14">
-              <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-3">
                 Questions people actually ask.
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-light">
+              <p className="text-muted-foreground">
                 Fair. Here&apos;s the deal.
               </p>
             </div>
-            <div className="space-y-2">
-              {[
-                {
-                  q: "How is this different from Hinge or Bumble?",
-                  a: "Those apps give you hundreds of options and hope you figure it out. We give you one. Every week, one match based on deep compatibility. And if someone confirms a date and doesn't show, they're gone. No other app does that.",
-                },
-                {
-                  q: "Why only one match per week?",
-                  a: "Because choice overload kills good decisions. One match forces intention. You pay attention. You show up. And if it doesn't work out, there's another one next week.",
-                },
-                {
-                  q: "What happens if someone ghosts?",
-                  a: "They're removed. Permanently. Confirm a date and don't show? Gone. No warnings, no second chances. That's the whole point of MeetOnce.",
-                },
-                {
-                  q: "What's the voice conversation about?",
-                  a: "Think of it like telling a friend what you're looking for. Five minutes, totally natural. We pick up on your values, energy and communication style. Things a text bio can never capture.",
-                },
-                {
-                  q: "Where do the dates happen?",
-                  a: "Public coffee spots across Dublin that we've vetted. Safe, casual, zero pressure. You show up, have a coffee, and see if there's something there.",
-                },
-                {
-                  q: "What if I don't like my match?",
-                  a: "Pass and you'll get a new one next week. No penalty for passing. The penalty is for confirming a date and not showing up. There's a difference.",
-                },
-                {
-                  q: "Is it actually free?",
-                  a: "Completely free during the Dublin launch. The first 1,000 members get founding access for life. After that, we'll see.",
-                },
-              ].map((item, i) => (
+
+            <div className="space-y-1.5 mb-14">
+              {(
+                [
+                  {
+                    q: "How is this different from Hinge or Bumble?",
+                    a: "Those apps give you hundreds of options and hope you figure it out. We give you one. Every week, one match based on deep compatibility. And if someone confirms a date and doesn't show, they're gone. No other app does that.",
+                  },
+                  {
+                    q: "Why only one match per week?",
+                    a: "Because choice overload kills good decisions. One match forces intention. You pay attention. You show up. And if it doesn't work out, there's another one next week.",
+                  },
+                  {
+                    q: "What happens if someone ghosts?",
+                    a: "They're removed. Permanently. Confirm a date and don't show? Gone. No warnings, no second chances. That's the whole point of MeetOnce.",
+                  },
+                  {
+                    q: "What's the voice conversation about?",
+                    a: "Think of it like telling a friend what you're looking for. Five minutes, totally natural. We pick up on your values, energy and communication style — things a text bio can never capture.",
+                  },
+                  {
+                    q: "Where do the dates happen?",
+                    a: "Public coffee spots across Dublin that we've vetted. Safe, casual, zero pressure. You show up, have a coffee, and see if there's something there.",
+                  },
+                  {
+                    q: "What if I don't like my match?",
+                    a: "Pass and you'll get a new one next week. No penalty for passing. The penalty is for confirming a date and not showing up. There's a difference.",
+                  },
+                  {
+                    q: "Is it actually free?",
+                    a: "Completely free during the Dublin launch. The first 1,000 members get founding access for life. After that, we'll see.",
+                  },
+                ] as const
+              ).map(({ q, a }, i) => (
                 <details
                   key={i}
-                  className="group rounded-xl overflow-hidden border border-border/50 bg-background"
+                  className="group rounded-xl border border-border/50 bg-background overflow-hidden"
                 >
-                  <summary className="flex items-center justify-between p-5 cursor-pointer list-none font-semibold text-[15px] hover:bg-muted/30 transition-colors">
-                    {item.q}
-                    <div className="shrink-0 ml-4 w-7 h-7 rounded-lg bg-muted flex items-center justify-center transition-transform group-open:rotate-180">
+                  <summary className="flex items-center justify-between px-6 py-5 cursor-pointer list-none font-semibold text-[15px] hover:bg-muted/40 transition-colors">
+                    {q}
+                    <span className="shrink-0 ml-4 w-7 h-7 rounded-lg bg-muted flex items-center justify-center group-open:rotate-180 transition-transform duration-200">
                       <svg
-                        width="14"
-                        height="14"
+                        width="13"
+                        height="13"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -487,110 +677,122 @@ export function LandingPage() {
                       >
                         <path d="m6 9 6 6 6-6" />
                       </svg>
-                    </div>
+                    </span>
                   </summary>
-                  <div className="px-5 pb-5 text-muted-foreground text-sm leading-relaxed">
-                    {item.a}
-                  </div>
+                  <p className="px-6 pb-5 text-muted-foreground text-sm leading-relaxed">
+                    {a}
+                  </p>
                 </details>
               ))}
+            </div>
+
+            {/* FAQ-bottom CTA — catches skeptics who read everything */}
+            <div className="text-center">
+              <p className="text-muted-foreground mb-6">
+                Still not sure?{" "}
+                <span className="font-semibold text-foreground">
+                  The first date is free. What do you have to lose?
+                </span>
+              </p>
+              <JoinButton
+                label="Give It a Shot"
+                variant="outline"
+                className="h-12 px-8 text-sm border-foreground/20 hover:bg-foreground hover:text-background"
+              />
             </div>
           </div>
         </section>
 
-        {/* ================================================ */}
-        {/* FINAL CTA — Identity-based, movement-driven */}
-        {/* Visual: Dark bg, full viewport height, centered */}
-        {/* Font: text-7xl font-black headline */}
-        {/* CTA: Large secondary button, centered */}
-        {/* ================================================ */}
-        <section className="min-h-[70vh] flex items-center justify-center px-4 bg-foreground text-background relative overflow-hidden">
-          <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbHRlcj0idXJsKCNhKSIgb3BhY2l0eT0iMC4xNSIvPjwvc3ZnPg==')]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[150px]" />
-          <div className="relative max-w-3xl mx-auto text-center py-20">
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-[1.1]">
-              For people who
+        {/* ── 8. FINAL CTA ────────────────────────────────────────────── */}
+        <section className="relative min-h-[80vh] flex items-center justify-center px-4 py-24 bg-foreground text-background overflow-hidden">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.022] [background-image:repeating-linear-gradient(0deg,transparent,transparent_39px,rgba(255,255,255,0.3)_39px,rgba(255,255,255,0.3)_40px),repeating-linear-gradient(90deg,transparent,transparent_39px,rgba(255,255,255,0.3)_39px,rgba(255,255,255,0.3)_40px)]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary/8 rounded-full blur-[200px]"
+          />
+
+          <div className="relative max-w-3xl mx-auto text-center">
+            <h2 className="text-[clamp(2.5rem,8vw,5.5rem)] font-black tracking-tighter uppercase leading-[1.0] mb-6">
+              Stop swiping.
               <br />
-              actually show up.
+              Start showing up.
             </h2>
-            <p className="text-lg md:text-xl text-white/60 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
-              Dublin&apos;s dating app with standards. One match. One coffee.
-              And the kind of accountability that makes the whole thing actually
-              work.
+            <p className="text-white/50 text-lg md:text-xl leading-relaxed mb-10 max-w-lg mx-auto">
+              Dublin&apos;s strict dating app. Real matches, real dates, real
+              standards.
             </p>
             <SignInButton mode="modal" forceRedirectUrl="/dashboard">
               <Button
                 size="lg"
                 variant="secondary"
-                className="h-14 px-12 text-lg rounded-xl shadow-lg font-semibold"
+                className="h-14 px-14 text-lg font-bold rounded-xl shadow-2xl hover:scale-[1.02] transition-all duration-300"
               >
-                Apply to Join
+                Join MeetOnce
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </SignInButton>
-            <p className="text-sm text-white/50 mt-8">
-              Free during Dublin launch. Verified profiles only. Founding member
+            <p className="text-white/30 text-sm mt-8">
+              Free during Dublin launch · Verified profiles only · Founding
               spots are limited.
             </p>
           </div>
         </section>
       </main>
 
-      {/* Footer — Minimal, clean */}
+      {/* ── FOOTER ──────────────────────────────────────────────────── */}
       <footer className="py-12 px-4 border-t border-border">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-3">
-              <span className="text-xl font-bold">MeetOnce</span>
+            <span className="text-xl font-black tracking-tight">MeetOnce</span>
+            <div className="flex items-center gap-8 text-sm text-muted-foreground">
+              {(["Terms", "Privacy", "Contact"] as const).map((l) => (
+                <a key={l} href="#" className="hover:text-foreground transition-colors">
+                  {l}
+                </a>
+              ))}
             </div>
-
-            <div className="flex items-center gap-8">
-              <a
-                href="#"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Terms
-              </a>
-              <a
-                href="#"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Privacy
-              </a>
-              <a
-                href="#"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Contact
-              </a>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <a
-                href="#"
-                className="p-2.5 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-              >
-                <Instagram className="w-4 h-4" />
-              </a>
-              <a
-                href="#"
-                className="p-2.5 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-              >
-                <Twitter className="w-4 h-4" />
-              </a>
-              <a
-                href="#"
-                className="p-2.5 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-              >
-                <Linkedin className="w-4 h-4" />
-              </a>
+            <div className="flex items-center gap-2.5">
+              {([Instagram, Twitter, Linkedin] as const).map((Icon, i) => (
+                <a
+                  key={i}
+                  href="#"
+                  className="p-2.5 rounded-lg bg-muted hover:bg-muted/70 transition-colors"
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
             </div>
           </div>
-          <div className="mt-8 pt-8 text-center text-sm text-muted-foreground border-t border-border/50">
-            <p>Built in Dublin, for Dublin.</p>
+          <div className="mt-8 pt-8 border-t border-border/50 text-center text-xs text-muted-foreground">
+            Built in Dublin, for Dublin.
           </div>
         </div>
       </footer>
+
+      {/* ── STICKY MOBILE CTA BAR (highest-impact mobile conversion) ── */}
+      <div
+        className={`fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background/95 backdrop-blur-md border-t border-border px-4 py-3 transition-all duration-300 ${
+          mobileCTA
+            ? "translate-y-0 opacity-100 pointer-events-auto"
+            : "translate-y-full opacity-0 pointer-events-none"
+        }`}
+      >
+        <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+          <Button
+            size="lg"
+            className="w-full h-12 font-bold rounded-xl text-sm"
+          >
+            Join the Founding Members
+            <ArrowRight className="ml-2 w-4 h-4" />
+          </Button>
+        </SignInButton>
+        <p className="text-center text-[11px] text-muted-foreground mt-1.5">
+          50 spots left · Free to join · Dublin only
+        </p>
+      </div>
     </div>
   );
 }
