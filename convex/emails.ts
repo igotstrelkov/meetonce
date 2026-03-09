@@ -64,7 +64,7 @@ export const sendUserApprovedEmail = internalAction({
 
       Great news! Your photo has been approved and your profile is now live.
 
-      You'll start receiving weekly matches every Monday morning.
+      You'll start receiving weekly matches every Thursday morning.
 
       Dashboard: ${args.dashboardUrl}
       ==================================

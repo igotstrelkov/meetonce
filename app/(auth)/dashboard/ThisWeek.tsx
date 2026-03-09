@@ -132,7 +132,7 @@ export const ThisWeek = () => {
         <h2 className="text-2xl font-bold">No Match This Week</h2>
         <p className="text-muted-foreground max-w-md">
           We're still looking for your perfect match. New matches are released
-          every Monday morning!
+          every Thursday morning!
         </p>
       </div>
     );
@@ -147,7 +147,7 @@ export const ThisWeek = () => {
         </div>
         <h2 className="text-2xl font-bold">Match Expired</h2>
         <p className="text-muted-foreground max-w-md">
-          This match expired — a new one arrives Monday.
+          This match expired — a new one arrives Thursday.
         </p>
       </div>
     );
@@ -427,7 +427,7 @@ export const ThisWeek = () => {
         <p className="text-muted-foreground max-w-sm">
           {theirResponse === "interested"
             ? `${matchUser.firstName} had said yes — ${theirPronoun} won't be notified.`
-            : "Check back next Monday for your next match."}
+            : "Check back next Thursday for your next match."}
         </p>
       </div>
     );

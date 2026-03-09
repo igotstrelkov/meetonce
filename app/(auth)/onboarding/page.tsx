@@ -1,8 +1,10 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useAction, useMutation } from "convex/react";
+import { Clock, Mic, Volume2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import BioVoiceStep from "./BioVoiceStep";
@@ -17,7 +19,8 @@ export default function OnboardingPage() {
   const createUser = useAction(api.users.createUserProfile);
   const generateUploadUrl = useMutation(api.users.generateUploadUrl);
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 5;
+  const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -103,19 +106,59 @@ export default function OnboardingPage() {
     }
   }, [user, formData, generateUploadUrl, createUser, router]);
 
+  // Step 0 = welcome/voice heads-up (not counted in progress)
+  // Steps 1–5 = actual onboarding steps
+  if (currentStep === 0) {
+    return (
+      <div className="max-w-xl mx-auto px-4 flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8">
+        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+          <Mic className="w-8 h-8 text-primary" />
+        </div>
+
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold">Before we start</h1>
+          <p className="text-muted-foreground max-w-sm">
+            This onboarding includes two short voice interviews so we can get
+            to know the real you.
+          </p>
+        </div>
+
+        <div className="w-full max-w-xs space-y-3 text-left">
+          <div className="flex items-start gap-3 text-sm">
+            <Volume2 className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+            <span className="text-muted-foreground">
+              One about <span className="text-foreground font-medium">your bio</span>, one about{" "}
+              <span className="text-foreground font-medium">your preferences</span>
+            </span>
+          </div>
+          <div className="flex items-start gap-3 text-sm">
+            <Clock className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+            <span className="text-muted-foreground">
+              About <span className="text-foreground font-medium">2 minutes each</span> — find a quiet spot
+            </span>
+          </div>
+        </div>
+
+        <Button onClick={nextStep} className="w-full max-w-xs h-12 text-base">
+          I&apos;m ready, let&apos;s go
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-xl mx-auto space-y-8 px-4">
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
           <h1 className="text-3xl font-bold">Create Your Profile</h1>
-          <div className="text-sm text-gray-600">Step {currentStep} of 5</div>
+          <div className="text-sm text-gray-600">Step {currentStep} of {totalSteps}</div>
         </div>
 
         {/* Progress Bar */}
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-primary h-2 rounded-full transition-all"
-            style={{ width: `${(currentStep / 5) * 100}%` }}
+            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
           />
         </div>
       </div>

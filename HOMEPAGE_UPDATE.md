@@ -29,7 +29,7 @@ Updated `app/page.tsx` to:
 
 ### 4. Authenticated + Profile Approved
 - **Show**: Welcome message + Green success alert
-- **Message**: "Your profile is live! You'll receive your first match on Monday morning at 9am."
+- **Message**: "Your profile is live! You'll receive your first match on Thursday morning at 9am."
 - **Status**: `accountStatus === "approved"`
 
 ### 5. Authenticated + Profile Rejected

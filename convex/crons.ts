@@ -3,21 +3,21 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
-// Run every Sunday at 11 PM UTC
+// Run every Wednesday at 11 PM UTC
 crons.weekly(
   "weekly-match-generation",
   {
-    dayOfWeek: "sunday",
+    dayOfWeek: "wednesday",
     hourUTC: 23,
     minuteUTC: 0,
   },
   internal.matching.weeklyMatchGeneration,
 );
 
-// Run Monday at 11 PM UTC — 24 hours (+1) after Sunday match generation
+// Run Friday at midnight UTC — ~25 hours after Wednesday match generation
 crons.weekly(
   "expire-stale-matches",
-  { dayOfWeek: "tuesday", hourUTC: 0, minuteUTC: 0 },
+  { dayOfWeek: "friday", hourUTC: 0, minuteUTC: 0 },
   internal.matching.expireStaleMatches,
 );
 

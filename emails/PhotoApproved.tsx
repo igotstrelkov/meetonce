@@ -46,7 +46,7 @@ export default function PhotoApproved({
               <Text style={statusLabel}>Profile status</Text>
               <Text style={statusValue}>Active</Text>
               <Text style={statusSub}>
-                Your first match arrives Monday morning.
+                Your first match arrives Thursday morning.
               </Text>
             </Section>
 
