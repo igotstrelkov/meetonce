@@ -165,7 +165,7 @@ export function LandingPage() {
               <SignInButton mode="modal" forceRedirectUrl="/dashboard">
                 <Button
                   size="lg"
-                  className="h-14 px-12 text-lg font-bold rounded-xl shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-[1.02]"
+                  className="h-14 px-6 text-lg font-bold rounded-xl shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-[1.02]"
                 >
                   Join the Founding Members
                   <ArrowRight className="ml-2 w-5 h-5" />
