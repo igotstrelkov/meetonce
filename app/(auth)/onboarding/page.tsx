@@ -10,7 +10,8 @@ import { useCallback, useEffect, useState } from "react";
 import PhotoStep from "./PhotoStep";
 import PreferencesStep from "./PreferencesStep";
 import ProfileStep from "./ProfileStep";
-import VoiceStep from "./VoiceStep";
+import BioVoiceStep from "./BioVoiceStep";
+import PreferencesVoiceStep from "./PreferencesVoiceStep";
 
 export default function OnboardingPage() {
   const { user } = useUser();
@@ -20,7 +21,7 @@ export default function OnboardingPage() {
 
   const STORAGE_KEY = "meetonce_onboarding_progress";
 
-  const totalSteps = 4;
+  const totalSteps = 5;
   const [currentStep, setCurrentStep] = useState<number>(() => {
     if (typeof window === "undefined") return 0;
     try {
@@ -46,7 +47,9 @@ export default function OnboardingPage() {
     bio: string;
     lookingFor: string;
     bioTranscript: string;
-    voiceCompleted: boolean;
+    preferencesTranscript: string;
+    bioVoiceCompleted: boolean;
+    preferencesVoiceCompleted: boolean;
     interests: string[];
     photo: File | null;
   };
@@ -65,7 +68,9 @@ export default function OnboardingPage() {
       bio: "",
       lookingFor: "",
       bioTranscript: "",
-      voiceCompleted: false,
+      preferencesTranscript: "",
+      bioVoiceCompleted: false,
+      preferencesVoiceCompleted: false,
       interests: [] as string[],
       photo: null as File | null,
     };
@@ -141,7 +146,7 @@ export default function OnboardingPage() {
   }, [user, formData, generateUploadUrl, createUser, router, STORAGE_KEY]);
 
   // Step 0 = welcome/voice heads-up (not counted in progress)
-  // Steps 1–4 = actual onboarding steps (Profile, Preferences, Voice Interview, Photo)
+  // Steps 1–5 = actual onboarding steps (Profile, Preferences, Bio Voice, Preferences Voice, Photo)
   if (currentStep === 0) {
     return (
       <div className="max-w-xl mx-auto px-4 flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8">
@@ -152,8 +157,8 @@ export default function OnboardingPage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">Before we start</h1>
           <p className="text-muted-foreground max-w-sm">
-            This onboarding includes a short voice interview so we can get
-            to know the real you.
+            This onboarding includes two short voice interviews so we can
+            get to know the real you.
           </p>
         </div>
 
@@ -168,7 +173,7 @@ export default function OnboardingPage() {
           <div className="flex items-start gap-3 text-sm">
             <Clock className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
             <span className="text-muted-foreground">
-              About <span className="text-foreground font-medium">3-5 minutes</span> — find a quiet spot
+              About <span className="text-foreground font-medium">2 minutes each</span> — find a quiet spot
             </span>
           </div>
         </div>
@@ -216,7 +221,7 @@ export default function OnboardingPage() {
         )}
 
         {currentStep === 3 && (
-          <VoiceStep
+          <BioVoiceStep
             data={formData}
             updateData={updateFormData}
             onNext={nextStep}
@@ -225,6 +230,15 @@ export default function OnboardingPage() {
         )}
 
         {currentStep === 4 && (
+          <PreferencesVoiceStep
+            data={formData}
+            updateData={updateFormData}
+            onNext={nextStep}
+            onBack={prevStep}
+          />
+        )}
+
+        {currentStep === 5 && (
           <PhotoStep
             data={formData}
             updateData={updateFormData}

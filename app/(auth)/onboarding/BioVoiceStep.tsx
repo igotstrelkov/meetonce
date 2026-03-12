@@ -61,11 +61,11 @@ export default function BioVoiceStep({
           canProceed={canProceed}
         />
 
-        <div className="flex justify-between">
-          <Button onClick={onBack} variant="outline">
+        <div className="flex gap-3">
+          <Button onClick={onBack} variant="outline" size="lg" className="flex-1">
             ← Back
           </Button>
-          <Button onClick={handleNext} size="lg" disabled={!canProceed}>
+          <Button onClick={handleNext} size="lg" className="flex-2" disabled={!canProceed}>
             Continue →
           </Button>
         </div>
