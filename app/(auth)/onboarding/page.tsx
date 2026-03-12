@@ -6,10 +6,10 @@ import { useUser } from "@clerk/nextjs";
 import { useAction, useMutation } from "convex/react";
 import { Clock, Mic, Volume2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import BioVoiceStep from "./BioVoiceStep";
-import DocumentStep from "./DocumentStep";
 import PhotoStep from "./PhotoStep";
+import PreferencesStep from "./PreferencesStep";
 import PreferencesVoiceStep from "./PreferencesVoiceStep";
 import ProfileStep from "./ProfileStep";
 
@@ -19,28 +19,79 @@ export default function OnboardingPage() {
   const createUser = useAction(api.users.createUserProfile);
   const generateUploadUrl = useMutation(api.users.generateUploadUrl);
 
+  const STORAGE_KEY = "meetonce_onboarding_progress";
+
   const totalSteps = 5;
-  const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    age: 0,
-    gender: "",
-    location: "",
-    jobTitle: "",
-    interestedIn: "",
-    minAge: 21,
-    maxAge: 35,
-    bio: "",
-    lookingFor: "",
-    bioTranscript: "",
-    preferencesTranscript: "",
-    bioVoiceCompleted: false,
-    preferencesVoiceCompleted: false,
-    interests: [] as string[],
-    photo: null as File | null,
-    verificationDoc: null as File | null,
+  const [currentStep, setCurrentStep] = useState<number>(() => {
+    if (typeof window === "undefined") return 0;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.step ?? 0;
+      }
+    } catch {}
+    return 0;
   });
+  type FormData = {
+    firstName: string;
+    lastName: string;
+    age: number;
+    gender: string;
+    location: string;
+    jobTitle: string;
+    interestedIn: string;
+    minAge: number;
+    maxAge: number;
+    bio: string;
+    lookingFor: string;
+    bioTranscript: string;
+    preferencesTranscript: string;
+    bioVoiceCompleted: boolean;
+    preferencesVoiceCompleted: boolean;
+    interests: string[];
+    photo: File | null;
+  };
+
+  const [formData, setFormData] = useState<FormData>(() => {
+    const defaults: FormData = {
+      firstName: "",
+      lastName: "",
+      age: 0,
+      gender: "",
+      location: "",
+      jobTitle: "",
+      interestedIn: "",
+      minAge: 21,
+      maxAge: 35,
+      bio: "",
+      lookingFor: "",
+      bioTranscript: "",
+      preferencesTranscript: "",
+      bioVoiceCompleted: false,
+      preferencesVoiceCompleted: false,
+      interests: [] as string[],
+      photo: null as File | null,
+    };
+    if (typeof window === "undefined") return defaults;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...defaults, ...parsed.formData };
+      }
+    } catch {}
+    return defaults;
+  });
+
+  // Persist progress to localStorage on every change
+  useEffect(() => {
+    const { photo, ...serializable } = formData;
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ step: currentStep, formData: serializable }),
+    );
+  }, [formData, currentStep]);
 
   const updateFormData = useCallback((data: Partial<typeof formData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -66,19 +117,6 @@ export default function OnboardingPage() {
         photoStorageId = storageId;
       }
 
-      // Upload verification document to Convex storage
-      let verificationDocStorageId = "";
-      if (formData.verificationDoc) {
-        const uploadUrl = await generateUploadUrl();
-        const result = await fetch(uploadUrl, {
-          method: "POST",
-          headers: { "Content-Type": formData.verificationDoc.type },
-          body: formData.verificationDoc,
-        });
-        const { storageId } = await result.json();
-        verificationDocStorageId = storageId;
-      }
-
       // Create user profile
       await createUser({
         clerkId: user.id,
@@ -96,18 +134,18 @@ export default function OnboardingPage() {
         minAge: formData.minAge,
         maxAge: formData.maxAge,
         photoStorageId,
-        verificationDocStorageId,
       });
 
+      localStorage.removeItem(STORAGE_KEY);
       router.push("/dashboard");
     } catch (error) {
       console.error("Error creating profile:", error);
       throw error;
     }
-  }, [user, formData, generateUploadUrl, createUser, router]);
+  }, [user, formData, generateUploadUrl, createUser, router, STORAGE_KEY]);
 
   // Step 0 = welcome/voice heads-up (not counted in progress)
-  // Steps 1–5 = actual onboarding steps
+  // Steps 1–5 = actual onboarding steps (Profile, Preferences, Bio Voice, Preferences Voice, Photo)
   if (currentStep === 0) {
     return (
       <div className="max-w-xl mx-auto px-4 flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8">
@@ -173,7 +211,7 @@ export default function OnboardingPage() {
         )}
 
         {currentStep === 2 && (
-          <BioVoiceStep
+          <PreferencesStep
             data={formData}
             updateData={updateFormData}
             onNext={nextStep}
@@ -182,7 +220,7 @@ export default function OnboardingPage() {
         )}
 
         {currentStep === 3 && (
-          <PreferencesVoiceStep
+          <BioVoiceStep
             data={formData}
             updateData={updateFormData}
             onNext={nextStep}
@@ -191,16 +229,16 @@ export default function OnboardingPage() {
         )}
 
         {currentStep === 4 && (
-          <PhotoStep
+          <PreferencesVoiceStep
             data={formData}
             updateData={updateFormData}
-            onBack={prevStep}
             onNext={nextStep}
+            onBack={prevStep}
           />
         )}
 
         {currentStep === 5 && (
-          <DocumentStep
+          <PhotoStep
             data={formData}
             updateData={updateFormData}
             onBack={prevStep}

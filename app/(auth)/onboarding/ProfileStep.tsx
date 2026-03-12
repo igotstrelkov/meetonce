@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { COUNTIES, GENDERS } from "@/lib/constants";
 import { useState } from "react";
 
@@ -21,10 +20,6 @@ interface ProfileStepProps {
     age: number;
     gender: string;
     location: string;
-    jobTitle: string;
-    interestedIn: string;
-    minAge: number;
-    maxAge: number;
   };
   updateData: (data: any) => void;
   onNext: () => void;
@@ -52,20 +47,12 @@ export default function ProfileStep({
       newErrors.age = "Age must be between 18 and 100";
     }
 
+    if (!data.gender) {
+      newErrors.gender = "Gender is required";
+    }
+
     if (!data.location) {
       newErrors.location = "Location is required";
-    }
-
-    if (!data.jobTitle || data.jobTitle.length < 2) {
-      newErrors.jobTitle = "Job title is required";
-    }
-
-    if (!data.interestedIn) {
-      newErrors.interestedIn = "Please select who you are interested in";
-    }
-
-    if (!data.minAge || !data.maxAge) {
-      newErrors.ageRange = "Age preference is required";
     }
 
     setErrors(newErrors);
@@ -81,8 +68,8 @@ export default function ProfileStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Let's start with the basics</h2>
-        <p className="text-gray-600">Tell us about yourself</p>
+        <h2 className="text-2xl font-bold mb-2">About you</h2>
+        <p className="text-gray-600">Let's start with the basics</p>
       </div>
 
       <div className="space-y-4">
@@ -117,6 +104,7 @@ export default function ProfileStep({
             )}
           </div>
         </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="age" className="mb-2 block">
@@ -133,28 +121,6 @@ export default function ProfileStep({
               <p className="text-sm text-red-500 mt-1">{errors.age}</p>
             )}
           </div>
-          <div>
-            <Label htmlFor="location" className="mb-2 block">
-              County *
-            </Label>
-            <Select
-              value={data.location}
-              onValueChange={(value) => updateData({ location: value })}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {COUNTIES.map((county) => (
-                  <SelectItem key={county.value} value={county.label}>
-                    {county.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="gender" className="mb-2 block">
               Gender *
@@ -174,66 +140,33 @@ export default function ProfileStep({
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="interestedIn" className="mb-2 block">
-              Interested In *
-            </Label>
-            <Select
-              value={data.interestedIn}
-              onValueChange={(value) => updateData({ interestedIn: value })}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {GENDERS.map((gender) => (
-                  <SelectItem key={gender.value} value={gender.label}>
-                    {gender.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.interestedIn && (
-              <p className="text-sm text-red-500 mt-1">{errors.interestedIn}</p>
+            {errors.gender && (
+              <p className="text-sm text-red-500 mt-1">{errors.gender}</p>
             )}
           </div>
         </div>
 
         <div>
-          <Label className="mb-2 block">
-            Age Range ({data.minAge || 18} - {data.maxAge || 50})
+          <Label htmlFor="location" className="mb-2 block">
+            County *
           </Label>
-          <Slider
-            value={[data.minAge || 18, data.maxAge || 50]}
-            min={18}
-            max={50}
-            step={1}
-            onValueChange={(value) => {
-              const [min, max] = value as number[];
-              updateData({ minAge: min, maxAge: max });
-            }}
-            className="py-4"
-          />
-          {errors.ageRange && (
-            <p className="text-sm text-red-500 mt-1">{errors.ageRange}</p>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="jobTitle" className="mb-2 block">
-            Job Title *
-          </Label>
-          <Input
-            id="jobTitle"
-            value={data.jobTitle}
-            onChange={(e) => updateData({ jobTitle: e.target.value })}
-            placeholder="e.g., Software Engineer, Teacher, Designer"
-            className="w-full"
-          />
-          {errors.jobTitle && (
-            <p className="text-sm text-red-500 mt-1">{errors.jobTitle}</p>
+          <Select
+            value={data.location}
+            onValueChange={(value) => updateData({ location: value })}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {COUNTIES.map((county) => (
+                <SelectItem key={county.value} value={county.label}>
+                  {county.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.location && (
+            <p className="text-sm text-red-500 mt-1">{errors.location}</p>
           )}
         </div>
       </div>

@@ -13,7 +13,8 @@ interface PhotoStepProps {
   };
   updateData: (data: any) => void;
   onBack: () => void;
-  onNext: () => void;
+  onNext?: () => void;
+  onSubmit?: () => Promise<void>;
 }
 
 export default function PhotoStep({
@@ -21,6 +22,7 @@ export default function PhotoStep({
   updateData,
   onBack,
   onNext,
+  onSubmit,
 }: PhotoStepProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -155,13 +157,25 @@ export default function PhotoStep({
     fileInputRef.current?.click();
   };
 
-  const handleNext = () => {
+  const isFinalStep = !!onSubmit;
+
+  const handleNext = async () => {
     if (!data.photo) {
       setError("Please upload a photo");
       return;
     }
 
-    onNext();
+    if (isFinalStep) {
+      setIsSubmitting(true);
+      try {
+        await onSubmit!();
+      } catch {
+        setError("Failed to submit. Please try again.");
+        setIsSubmitting(false);
+      }
+    } else {
+      onNext?.();
+    }
   };
 
   return (
@@ -291,7 +305,7 @@ export default function PhotoStep({
           variant="outline"
           size="lg"
           className="flex-1"
-          disabled={isValidating}
+          disabled={isValidating || isSubmitting}
         >
           Back
         </Button>
@@ -299,9 +313,15 @@ export default function PhotoStep({
           onClick={handleNext}
           size="lg"
           className="flex-[2]"
-          disabled={isValidating || !data.photo}
+          disabled={isValidating || isSubmitting || !data.photo}
         >
-          {isValidating ? "Validating..." : "Next"}
+          {isSubmitting
+            ? "Submitting..."
+            : isValidating
+              ? "Validating..."
+              : isFinalStep
+                ? "Complete Profile"
+                : "Next"}
         </Button>
       </div>
     </StepWrapper>

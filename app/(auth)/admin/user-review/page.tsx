@@ -110,13 +110,9 @@ export default function UserReviewPage() {
         // </div>
         <>
           <div>
-            {/* Display both selfie and verification document */}
-            <div className="flex gap-6 justify-center mb-6">
-              {/* Selfie */}
-              <div className="flex-1 max-w-md">
-                <h3 className="text-sm font-semibold mb-2 text-center">
-                  Profile Photo
-                </h3>
+            <div className={`flex ${currentUser.verificationDocUrl ? "gap-4" : "justify-center"} mb-6`}>
+              <div className={currentUser.verificationDocUrl ? "flex-1" : "max-w-md w-full"}>
+                <p className="text-xs font-medium text-gray-500 mb-1 text-center">Profile Photo</p>
                 {currentUser.photoUrl ? (
                   <Image
                     src={currentUser.photoUrl}
@@ -131,26 +127,18 @@ export default function UserReviewPage() {
                   </div>
                 )}
               </div>
-
-              {/* Verification Document */}
-              <div className="flex-1 max-w-md">
-                <h3 className="text-sm font-semibold mb-2 text-center">
-                  Verification Document
-                </h3>
-                {currentUser.verificationDocUrl ? (
+              {currentUser.verificationDocUrl && (
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-gray-500 mb-1 text-center">Verification ID</p>
                   <Image
                     src={currentUser.verificationDocUrl}
                     alt="Verification document"
-                    className="w-full h-96 object-contain rounded-lg bg-gray-50"
+                    className="w-full h-96 object-contain rounded-lg bg-gray-50 border"
                     width={400}
                     height={400}
                   />
-                ) : (
-                  <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-500">No document uploaded</p>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             <div className="text-center mb-6">
