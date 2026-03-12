@@ -10,12 +10,13 @@ import { VoiceStateIndicator } from "./VoiceStateIndicator";
 import { VoiceWaveform } from "./VoiceWaveform";
 
 interface VoiceInterviewCardProps {
-  type: "bio" | "preferences";
+  type: "bio" | "preferences" | "combined";
   onComplete: (
     transcript: string,
     result:
       | { success: true; bio: string; interests: string[] }
       | { success: true; preferences: string; interests: string[] }
+      | { success: true; bio: string; preferences: string; interests: string[] }
   ) => void;
   assistantId?: string;
   canProceed?: boolean;

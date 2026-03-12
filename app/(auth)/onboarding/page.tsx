@@ -7,11 +7,10 @@ import { useAction, useMutation } from "convex/react";
 import { Clock, Mic, Volume2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import BioVoiceStep from "./BioVoiceStep";
 import PhotoStep from "./PhotoStep";
 import PreferencesStep from "./PreferencesStep";
-import PreferencesVoiceStep from "./PreferencesVoiceStep";
 import ProfileStep from "./ProfileStep";
+import VoiceStep from "./VoiceStep";
 
 export default function OnboardingPage() {
   const { user } = useUser();
@@ -21,14 +20,15 @@ export default function OnboardingPage() {
 
   const STORAGE_KEY = "meetonce_onboarding_progress";
 
-  const totalSteps = 5;
+  const totalSteps = 4;
   const [currentStep, setCurrentStep] = useState<number>(() => {
     if (typeof window === "undefined") return 0;
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        return parsed.step ?? 0;
+        const step = parsed.step ?? 0;
+        return Math.min(Math.max(step, 0), totalSteps);
       }
     } catch {}
     return 0;
@@ -46,9 +46,7 @@ export default function OnboardingPage() {
     bio: string;
     lookingFor: string;
     bioTranscript: string;
-    preferencesTranscript: string;
-    bioVoiceCompleted: boolean;
-    preferencesVoiceCompleted: boolean;
+    voiceCompleted: boolean;
     interests: string[];
     photo: File | null;
   };
@@ -67,9 +65,7 @@ export default function OnboardingPage() {
       bio: "",
       lookingFor: "",
       bioTranscript: "",
-      preferencesTranscript: "",
-      bioVoiceCompleted: false,
-      preferencesVoiceCompleted: false,
+      voiceCompleted: false,
       interests: [] as string[],
       photo: null as File | null,
     };
@@ -145,7 +141,7 @@ export default function OnboardingPage() {
   }, [user, formData, generateUploadUrl, createUser, router, STORAGE_KEY]);
 
   // Step 0 = welcome/voice heads-up (not counted in progress)
-  // Steps 1–5 = actual onboarding steps (Profile, Preferences, Bio Voice, Preferences Voice, Photo)
+  // Steps 1–4 = actual onboarding steps (Profile, Preferences, Voice Interview, Photo)
   if (currentStep === 0) {
     return (
       <div className="max-w-xl mx-auto px-4 flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8">
@@ -156,7 +152,7 @@ export default function OnboardingPage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">Before we start</h1>
           <p className="text-muted-foreground max-w-sm">
-            This onboarding includes two short voice interviews so we can get
+            This onboarding includes a short voice interview so we can get
             to know the real you.
           </p>
         </div>
@@ -165,14 +161,14 @@ export default function OnboardingPage() {
           <div className="flex items-start gap-3 text-sm">
             <Volume2 className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
             <span className="text-muted-foreground">
-              One about <span className="text-foreground font-medium">your bio</span>, one about{" "}
-              <span className="text-foreground font-medium">your preferences</span>
+              We&apos;ll ask about <span className="text-foreground font-medium">you</span> and{" "}
+              <span className="text-foreground font-medium">what you&apos;re looking for</span>
             </span>
           </div>
           <div className="flex items-start gap-3 text-sm">
             <Clock className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
             <span className="text-muted-foreground">
-              About <span className="text-foreground font-medium">2 minutes each</span> — find a quiet spot
+              About <span className="text-foreground font-medium">3-5 minutes</span> — find a quiet spot
             </span>
           </div>
         </div>
@@ -220,7 +216,7 @@ export default function OnboardingPage() {
         )}
 
         {currentStep === 3 && (
-          <BioVoiceStep
+          <VoiceStep
             data={formData}
             updateData={updateFormData}
             onNext={nextStep}
@@ -229,15 +225,6 @@ export default function OnboardingPage() {
         )}
 
         {currentStep === 4 && (
-          <PreferencesVoiceStep
-            data={formData}
-            updateData={updateFormData}
-            onNext={nextStep}
-            onBack={prevStep}
-          />
-        )}
-
-        {currentStep === 5 && (
           <PhotoStep
             data={formData}
             updateData={updateFormData}

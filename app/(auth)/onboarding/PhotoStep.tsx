@@ -254,7 +254,7 @@ export default function PhotoStep({
               </div>
               <div className="inline-flex items-center text-xs text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
                 <ImageIcon size={12} className="mr-1.5" />
-                JPG, PNG up to 5MB
+                JPG, PNG up to 10MB
               </div>
             </div>
           )}
@@ -307,12 +307,12 @@ export default function PhotoStep({
           className="flex-1"
           disabled={isValidating || isSubmitting}
         >
-          Back
+          ← Back
         </Button>
         <Button
           onClick={handleNext}
           size="lg"
-          className="flex-[2]"
+          className="flex-2"
           disabled={isValidating || isSubmitting || !data.photo}
         >
           {isSubmitting

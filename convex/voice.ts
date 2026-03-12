@@ -32,7 +32,7 @@ export const getPreferencesAssistant = action({
 export const processTranscript = action({
   args: {
     transcript: v.string(),
-    type: v.union(v.literal("bio"), v.literal("preferences")),
+    type: v.union(v.literal("bio"), v.literal("preferences"), v.literal("combined")),
   },
   returns: v.union(
     v.object({
@@ -42,6 +42,12 @@ export const processTranscript = action({
     }),
     v.object({
       success: v.literal(true),
+      preferences: v.string(),
+      interests: v.array(v.string()),
+    }),
+    v.object({
+      success: v.literal(true),
+      bio: v.string(),
       preferences: v.string(),
       interests: v.array(v.string()),
     }),

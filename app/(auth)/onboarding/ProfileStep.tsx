@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { COUNTIES, GENDERS } from "@/lib/constants";
 import { useState } from "react";
+import StepWrapper from "./StepWrapper";
 
 interface ProfileStepProps {
   data: {
@@ -20,6 +21,7 @@ interface ProfileStepProps {
     age: number;
     gender: string;
     location: string;
+    jobTitle: string;
   };
   updateData: (data: any) => void;
   onNext: () => void;
@@ -55,6 +57,10 @@ export default function ProfileStep({
       newErrors.location = "Location is required";
     }
 
+    if (!data.jobTitle || data.jobTitle.length < 2) {
+      newErrors.jobTitle = "Job title is required";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -66,12 +72,10 @@ export default function ProfileStep({
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">About you</h2>
-        <p className="text-gray-600">Let's start with the basics</p>
-      </div>
-
+    <StepWrapper
+      title="About you"
+      description="Let's start with the basics"
+    >
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -82,6 +86,7 @@ export default function ProfileStep({
               id="firstName"
               value={data.firstName}
               onChange={(e) => updateData({ firstName: e.target.value })}
+              placeholder="Jane"
               className="w-full"
             />
             {errors.firstName && (
@@ -97,6 +102,7 @@ export default function ProfileStep({
               id="lastName"
               value={data.lastName}
               onChange={(e) => updateData({ lastName: e.target.value })}
+              placeholder="Murphy"
               className="w-full"
             />
             {errors.lastName && (
@@ -114,7 +120,11 @@ export default function ProfileStep({
               id="age"
               type="number"
               value={data.age || ""}
-              onChange={(e) => updateData({ age: parseInt(e.target.value) })}
+              onChange={(e) => {
+                const parsed = parseInt(e.target.value);
+                updateData({ age: isNaN(parsed) ? 0 : parsed });
+              }}
+              placeholder="25"
               className="w-full"
             />
             {errors.age && (
@@ -130,7 +140,7 @@ export default function ProfileStep({
               onValueChange={(value) => updateData({ gender: value })}
             >
               <SelectTrigger className="w-full">
-                <SelectValue />
+                {data.gender ? <SelectValue /> : <span className="text-muted-foreground">Select gender</span>}
               </SelectTrigger>
               <SelectContent>
                 {GENDERS.map((gender) => (
@@ -155,7 +165,7 @@ export default function ProfileStep({
             onValueChange={(value) => updateData({ location: value })}
           >
             <SelectTrigger className="w-full">
-              <SelectValue />
+              {data.location ? <SelectValue /> : <span className="text-muted-foreground">Select county</span>}
             </SelectTrigger>
             <SelectContent>
               {COUNTIES.map((county) => (
@@ -169,13 +179,29 @@ export default function ProfileStep({
             <p className="text-sm text-red-500 mt-1">{errors.location}</p>
           )}
         </div>
+
+        <div>
+          <Label htmlFor="jobTitle" className="mb-2 block">
+            Job Title *
+          </Label>
+          <Input
+            id="jobTitle"
+            value={data.jobTitle}
+            onChange={(e) => updateData({ jobTitle: e.target.value })}
+            placeholder="e.g., Software Engineer, Teacher, Designer"
+            className="w-full"
+          />
+          {errors.jobTitle && (
+            <p className="text-sm text-red-500 mt-1">{errors.jobTitle}</p>
+          )}
+        </div>
       </div>
 
-      <div className="flex justify-end">
-        <Button onClick={handleNext} size="lg">
+      <div className="flex justify-end pt-2">
+        <Button onClick={handleNext} size="lg" className="flex-2 max-w-[66%]">
           Continue →
         </Button>
       </div>
-    </div>
+    </StepWrapper>
   );
 }

@@ -110,6 +110,7 @@ export async function callWithRetry(
 export type ProcessVoiceTranscriptResult =
   | { success: true; bio: string; interests: string[] }
   | { success: true; preferences: string; interests: string[] }
+  | { success: true; bio: string; preferences: string; interests: string[] }
   | { success: false; reason: string };
 
 /**
@@ -119,9 +120,43 @@ export type ProcessVoiceTranscriptResult =
  */
 export async function processVoiceTranscript(
   transcript: string,
-  type: "bio" | "preferences"
+  type: "bio" | "preferences" | "combined"
 ): Promise<ProcessVoiceTranscriptResult> {
-  const systemPrompts = {
+  const systemPrompts: Record<string, string> = {
+    combined: `You are a professional dating profile writer specializing in semantic search optimization. This transcript is from a single voice interview covering BOTH the person's bio and their partner preferences. You must extract and generate TWO separate texts from this one transcript.
+
+VALIDATION (check FIRST before processing):
+Mark as INVALID (success: false) ONLY if:
+- Transcript is mostly filler words with no real content
+- Transcript is extremely short (under ~30 words of actual content)
+- Content is completely off-topic
+- Impossible to extract ANY meaningful information
+
+BE LENIENT: If there is ANY usable information, process it (success: true).
+
+TASK: From the transcript, generate:
+
+1. **bio** (100-500 words): A compelling "About You" narrative covering who they are — personality, lifestyle, interests, career, values. First person, warm, conversational. Rich in specific searchable nouns for vector embedding matching. Avoid generics like "fun", "nice", "good person".
+
+2. **preferences** (100-500 words): Clear relationship preferences covering what they want in a partner — values, lifestyle compatibility, communication style, relationship vision, deal-breakers. First person, warm but specific. Rich in semantic keywords for matching.
+
+3. **interests** (array of 5-15 items): Combined list of specific interests, hobbies, and activities from both the bio content and preferences content. Lowercase, singular form.
+
+VECTOR SEARCH OPTIMIZATION for both texts:
+- Use specific nouns (rock climbing, jazz, Thai food, golden retriever)
+- Replace vague with precise (not "active" → "marathon runner")
+- 2-3 semantic anchors per sentence
+- Never use "nice", "fun", "genuine", "down to earth"
+
+WRITING STYLE for both texts:
+- First person, natural flow
+- Remove all filler words ("um", "like", "you know")
+- Show, don't tell (examples over claims)
+
+OUTPUT FORMAT (JSON):
+If valid: { success: true, bio: "...", preferences: "...", interests: ["..."] }
+If invalid: { success: false, reason: "brief friendly explanation" }`,
+
     bio: `You are a professional dating profile writer specializing in semantic search optimization. Convert this voice interview transcript into a compelling, authentic "About You" bio (100-500 words) optimized for vector embedding matching.
 
 VALIDATION (check FIRST before processing):
@@ -289,6 +324,29 @@ If transcript is invalid (truly inadequate):
 - reason: Brief, friendly 1-sentence explanation of what's needed (e.g., "Please share more about what you're looking for in a partner")`,
   };
 
+  const schemaName = type === "combined"
+    ? "combined_validation_result"
+    : type === "bio"
+      ? "bio_validation_result"
+      : "preferences_validation_result";
+
+  const schemaProperties: Record<string, any> = {
+    success: { type: "boolean" },
+    reason: { type: "string" },
+    interests: { type: "array", items: { type: "string" } },
+  };
+
+  if (type === "combined") {
+    schemaProperties.bio = { type: "string" };
+    schemaProperties.preferences = { type: "string" };
+  } else {
+    schemaProperties[type] = { type: "string" };
+  }
+
+  const userContent = type === "combined"
+    ? `TRANSCRIPT:\n${transcript}\n\nFirst validate the transcript, then generate BOTH the optimized bio AND preferences texts, and extract interests following all requirements above. Return JSON with success field.`
+    : `TRANSCRIPT:\n${transcript}\n\nFirst validate the transcript, then generate the optimized ${type} and extract interests following all requirements above. Return JSON with success field.`;
+
   const response = await callOpenRouter({
     model: process.env.ANALYSIS_MODEL!,
     messages: [
@@ -298,30 +356,19 @@ If transcript is invalid (truly inadequate):
       },
       {
         role: "user",
-        content: `TRANSCRIPT:\n${transcript}\n\nFirst validate the transcript, then generate the optimized ${type} and extract interests following all requirements above. Return JSON with success field.`,
+        content: userContent,
       },
     ],
     temperature: 0.7,
-    max_tokens: 1000,
+    max_tokens: type === "combined" ? 2000 : 1000,
     response_format: {
       type: "json_schema",
       json_schema: {
-        name:
-          type === "bio"
-            ? "bio_validation_result"
-            : "preferences_validation_result",
+        name: schemaName,
         strict: true,
         schema: {
           type: "object",
-          properties: {
-            success: { type: "boolean" },
-            [type]: { type: "string" },
-            interests: {
-              type: "array",
-              items: { type: "string" },
-            },
-            reason: { type: "string" },
-          },
+          properties: schemaProperties,
           required: ["success"],
           additionalProperties: false,
         },
@@ -333,7 +380,14 @@ If transcript is invalid (truly inadequate):
 
   // Return properly typed result based on success status
   if (result.success) {
-    if (type === "bio") {
+    if (type === "combined") {
+      return {
+        success: true as const,
+        bio: result.bio || "",
+        preferences: result.preferences || "",
+        interests: result.interests || [],
+      };
+    } else if (type === "bio") {
       return {
         success: true as const,
         bio: result.bio || "",
