@@ -157,7 +157,7 @@ export default function OnboardingPage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">Before we start</h1>
           <p className="text-muted-foreground max-w-sm">
-            This onboarding includes two short voice interviews so we can
+            This onboarding includes two short AI voice chats so we can
             get to know the real you.
           </p>
         </div>
@@ -166,7 +166,7 @@ export default function OnboardingPage() {
           <div className="flex items-start gap-3 text-sm">
             <Volume2 className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
             <span className="text-muted-foreground">
-              We&apos;ll ask about <span className="text-foreground font-medium">you</span> and{" "}
+              Our AI will chat with you about <span className="text-foreground font-medium">you</span> and{" "}
               <span className="text-foreground font-medium">what you&apos;re looking for</span>
             </span>
           </div>

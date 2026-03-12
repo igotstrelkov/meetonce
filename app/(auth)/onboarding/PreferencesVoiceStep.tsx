@@ -64,7 +64,7 @@ export default function PreferencesVoiceStep({
   return (
     <StepWrapper
       title="Your Ideal Match"
-      description="Describe the qualities and values you're seeking"
+      description="A short AI voice chat about the qualities and values you're seeking"
     >
       <div className="space-y-6">
         <VoiceInterviewCard

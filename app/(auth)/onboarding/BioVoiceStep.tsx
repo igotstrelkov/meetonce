@@ -51,7 +51,7 @@ export default function BioVoiceStep({
   return (
     <StepWrapper
       title="About You"
-      description="Tell us about yourself, your passions, what makes you unique"
+      description="A short AI voice chat about yourself, your passions, and what makes you unique"
     >
       <div className="space-y-6">
         <VoiceInterviewCard

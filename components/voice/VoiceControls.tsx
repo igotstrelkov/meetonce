@@ -22,7 +22,7 @@ export function VoiceControls({
       <div className="flex justify-center">
         <Button onClick={onRetry} variant="outline" size="sm" className="gap-2">
           <RotateCcw className="w-4 h-4" />
-          Redo Interview
+          Redo Chat
         </Button>
       </div>
     );
@@ -38,7 +38,7 @@ export function VoiceControls({
           className="gap-2"
         >
           <Phone className="w-4 h-4" />
-          Start Interview
+          Start Chat
         </Button>
       </div>
     );

@@ -44,7 +44,7 @@ export function VoiceStateIndicator({
       <div className="text-center">
         <div className="flex items-center justify-center gap-2 text-green-600">
           <CheckCircle2 className="w-5 h-5" />
-          <span className="font-medium">Interview complete!</span>
+          <span className="font-medium">Chat complete!</span>
         </div>
         <p className="text-sm text-gray-600 mt-1">Ready to continue</p>
       </div>
@@ -54,7 +54,7 @@ export function VoiceStateIndicator({
   if (state === "idle") {
     return (
       <div className="text-center text-gray-600">
-        <p className="text-sm">Ready to start the interview?</p>
+        <p className="text-sm">Ready to start the voice chat?</p>
       </div>
     );
   }
@@ -66,12 +66,12 @@ export function VoiceStateIndicator({
           <Loader2 className="w-5 h-5 animate-spin" />
           <span className="font-medium">Connecting...</span>
         </div>
-        <p className="text-sm text-gray-600 mt-1">Starting the interview</p>
+        <p className="text-sm text-gray-600 mt-1">Starting the voice chat</p>
       </div>
     );
   }
 
-  // Interview in progress
+  // Chat in progress
 
   if (state === "recording") {
     return (
@@ -90,7 +90,7 @@ export function VoiceStateIndicator({
       <div className="text-center">
         <div className="flex items-center justify-center gap-2 text-primary">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="font-medium">Processing your interview...</span>
+          <span className="font-medium">Processing your responses...</span>
         </div>
         <p className="text-sm text-gray-600 mt-1">
           This will just take a moment
