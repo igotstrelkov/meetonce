@@ -38,13 +38,13 @@ export const BIO_ASSISTANT_CONFIG: VapiAssistantConfig = {
 
 ## Your Goal
 
-Have a relaxed, five to seven minute conversation that draws out who this person really is through specific details, activities, and real examples. Focus on listening actively and helping them share authentic stories about their life, work, interests, and values.
+Have a relaxed, three to five minute conversation that draws out who this person really is through specific details, activities, and real examples. Focus on listening actively and helping them share authentic stories about their life, work, interests, and values.
 
 ## Interview Approach
 
 - This is a casual conversation, not an interrogation
 - Listen actively and build on what they share
-- Takes about five to seven minutes total
+- Takes about three to five minutes total
 - One question at a time, keep it natural
 - Push gently for specifics when they're vague
 
@@ -184,7 +184,7 @@ When you have rich details across five or more areas, wrap up warmly:
     voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel - warm female voice
   },
   firstMessage:
-    "Hi! I'm here to help you create an amazing dating profile. I'll ask you some questions about yourself, and we'll use your answers to write a bio that truly represents who you are. This should take about five to seven minutes. Ready to get started?",
+    "Hi! I'm here to help you create an amazing dating profile. I'll ask you some questions about yourself, and we'll use your answers to write a bio that truly represents who you are. This should take about three to five minutes. Ready to get started?",
   endCallFunctionEnabled: true,
   endCallPhrases: ["I have everything I need"],
 };
@@ -204,13 +204,13 @@ export const PREFERENCES_ASSISTANT_CONFIG: VapiAssistantConfig = {
 
 ## Your Goal
 
-Have a supportive, four to six minute conversation that helps this person articulate what they're looking for in a partner. Focus on asking thoughtful questions that help them get specific about traits, lifestyle compatibility, and what truly matters to them.
+Have a supportive, three to five minute conversation that helps this person articulate what they're looking for in a partner. Focus on asking thoughtful questions that help them get specific about traits, lifestyle compatibility, and what truly matters to them.
 
 ## Interview Approach
 
 - This is a supportive conversation about their needs
 - Help them balance idealism with realism
-- Takes about four to six minutes total
+- Takes about three to five minutes total
 - One question at a time, keep it warm and honest
 - Help them distinguish must-haves from nice-to-haves
 
@@ -379,7 +379,7 @@ When you have specific details across five or more areas, wrap up warmly:
  * Checks environment variables first, falls back to API creation
  */
 export async function getOrCreateAssistant(
-  type: "bio" | "preferences"
+  type: "bio" | "preferences",
 ): Promise<string> {
   // Check for pre-configured assistant ID in environment
   const envKey =
